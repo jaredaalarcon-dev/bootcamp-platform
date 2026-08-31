@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "@nestjs/config": "^4.0.4",
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/passport": "^11.0.5",
+    "@nestjs/swagger": "^11.4.7",
+    "@supabase/supabase-js": "^2.112.4",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/passport-jwt": "^4.0.1"
+  }
+}
