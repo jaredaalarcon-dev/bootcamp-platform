@@ -7,6 +7,7 @@ interface LoginResponse {
   user: {
     id: string;
     email: string;
+    role: string; // ← Agrega esta línea
   };
 }
 

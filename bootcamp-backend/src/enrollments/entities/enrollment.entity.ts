@@ -1,21 +1,42 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { BaseEntity } from '../../common/entities/base.entity';
-import { Profile } from '../../users/entities/profile.entity';
+// src/enrollments/entities/enrollment.entity.ts
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Unique,
+} from 'typeorm';
 import { Course } from '../../courses/entities/course.entity';
 
+// Un usuario no puede inscribirse dos veces al mismo curso.
+// La base de datos lo impide aunque lleguen dos peticiones a la vez.
 @Entity('enrollments')
-export class Enrollment extends BaseEntity {
-  @Column({ type: 'varchar', length: 50, default: 'pending' })
+@Unique('UQ_enrollment_user_course', ['userId', 'courseId'])
+export class Enrollment {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ default: 'in_progress' })
   status: string;
 
-  @Column({ type: 'timestamp', nullable: true })
-  completedAt: Date;
+  @CreateDateColumn()
+  enrolledAt: Date;
 
-  @ManyToOne(() => Profile)
-  @JoinColumn({ name: 'userId' })
-  user: Profile;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-  @ManyToOne(() => Course)
+  @Column('uuid')
+  userId: string;
+
+  @Column('uuid')
+  courseId: string;
+
+  @ManyToOne(() => Course, (course) => course.enrollments, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'courseId' })
   course: Course;
 }

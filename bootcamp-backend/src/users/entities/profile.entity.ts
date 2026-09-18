@@ -28,4 +28,7 @@ export class Profile extends BaseEntity {
   @ManyToOne(() => Role)
   @JoinColumn({ name: 'roleId' })
   role: Role;
+
+  @Column({ type: 'varchar', length: 20, default: 'student', nullable: true })
+  userRole: 'admin' | 'teacher' | 'student';
 }

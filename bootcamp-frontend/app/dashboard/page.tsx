@@ -4,11 +4,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { useProgressApi, ProgressSummary } from "@/hooks/useProgressApi";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const router = useRouter();
   const { getUser, getToken, logout } = useAuth();
+  const { getSummary } = useProgressApi();
   const [user, setUser] = useState<any>(null);
+  const [resumen, setResumen] = useState<ProgressSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,7 +25,15 @@ export default function DashboardPage() {
     const userData = getUser();
     setUser(userData);
     setLoading(false);
+    cargarResumen();
   }, []);
+
+  const cargarResumen = async () => {
+    const resultado = await getSummary();
+    if (resultado.success && resultado.data) {
+      setResumen(resultado.data);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -83,40 +95,76 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Stats Card */}
+          {/* Stats Cards */}
           <div className="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
             <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600">0</div>
+              <div className="text-4xl font-bold text-blue-600">
+                {resumen?.activeCourses ?? 0}
+              </div>
               <p className="mt-2 text-sm text-gray-600">Cursos Activos</p>
             </div>
           </div>
 
           <div className="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
             <div className="text-center">
-              <div className="text-4xl font-bold text-green-600">0%</div>
+              <div className="text-4xl font-bold text-green-600">
+                {resumen?.overallPercentage ?? 0}%
+              </div>
               <p className="mt-2 text-sm text-gray-600">Progreso General</p>
             </div>
           </div>
 
           <div className="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
             <div className="text-center">
-              <div className="text-4xl font-bold text-purple-600">0</div>
+              <div className="text-4xl font-bold text-purple-600">
+                {resumen?.completedLessons ?? 0}
+              </div>
               <p className="mt-2 text-sm text-gray-600">
                 Lecciones Completadas
+                {resumen && resumen.totalLessons > 0
+                  ? ` de ${resumen.totalLessons}`
+                  : ""}
               </p>
             </div>
           </div>
 
-          {/* Info Card */}
+          {/* Quick Actions */}
+          <div className="rounded-lg bg-blue-50 p-6 ring-1 ring-blue-200 md:col-span-3">
+            <h3 className="font-semibold text-blue-900">🚀 Acciones Rápidas</h3>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/courses"
+                className="inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              >
+                Explorar Cursos
+              </Link>
+              <Link
+                href="/my-courses"
+                className="inline-block rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+              >
+                Mis Cursos
+              </Link>
+              <Link
+                href="/dashboard"
+                className="inline-block rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
+              >
+                Mi Progreso
+              </Link>
+            </div>
+          </div>
+
+          {/* Features Card */}
           <div className="rounded-lg bg-blue-50 p-6 ring-1 ring-blue-200 md:col-span-3">
             <h3 className="font-semibold text-blue-900">
               ✨ Próximas Características
             </h3>
             <ul className="mt-4 space-y-2 text-sm text-blue-800">
-              <li>📚 Acceso a cursos y módulos</li>
-              <li>📹 Reproductor de videos integrado</li>
-              <li>📊 Seguimiento de progreso en tiempo real</li>
-              <li>🎯 Evaluaciones y certificados</li>
+              <li>✓ 📚 Acceso a cursos y módulos</li>
+              <li>✓ 📹 Reproductor de videos integrado</li>
+              <li>✓ 📊 Seguimiento de progreso en tiempo real</li>
+              <li>✓ 🎯 Evaluaciones y certificados</li>
+              <li>✓ 💬 Foro de estudiantes</li>
+              <li>✓ 🏆 Sistema de badges y logros</li>
             </ul>
           </div>
         </div>

@@ -13,7 +13,9 @@ export class Video extends BaseEntity {
   @Column({ type: 'int', nullable: true })
   duration: number;
 
-  @OneToOne(() => Lesson)
+  @OneToOne(() => Lesson, (lesson) => lesson.video, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'lessonId' })
   lesson: Lesson;
 }

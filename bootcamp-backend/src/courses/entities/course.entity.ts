@@ -1,6 +1,8 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { Category } from './category.entity';
+import { Module as ModuleEntity } from './module.entity';
+import { Enrollment } from '../../enrollments/entities/enrollment.entity';
 
 @Entity('courses')
 export class Course extends BaseEntity {
@@ -19,4 +21,15 @@ export class Course extends BaseEntity {
   @ManyToOne(() => Category)
   @JoinColumn({ name: 'categoryId' })
   category: Category;
+
+  @OneToMany(() => ModuleEntity, (module) => module.course, {
+    cascade: true,
+  })
+  modules: ModuleEntity[];
+
+  @OneToMany(() => Enrollment, (enrollment) => enrollment.course, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  enrollments: Enrollment[];
 }
