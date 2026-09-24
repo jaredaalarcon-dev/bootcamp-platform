@@ -1,7 +1,6 @@
 // src/hooks/useContentApi.ts
 import { useState } from "react";
-import axios from "axios";
-import { useAuth } from "./useAuth";
+import { api } from "@/lib/api";
 
 export interface Video {
   id: string;
@@ -44,22 +43,8 @@ interface DatosLeccion {
 }
 
 export function useContentApi() {
-  const { getToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const apiClient = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL,
-    headers: { "Content-Type": "application/json" },
-  });
-
-  apiClient.interceptors.request.use((config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  });
 
   // Estos endpoints lanzan errores HTTP de verdad (404, 400...),
   // así que axios entra al catch cuando algo sale mal.
@@ -70,7 +55,7 @@ export function useContentApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await apiClient.get(`/modules/course/${courseId}`);
+      const { data } = await api.get(`/modules/course/${courseId}`);
       return { success: true, data: (data ?? []) as CourseModule[] };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "No se pudo cargar el contenido");
@@ -85,7 +70,7 @@ export function useContentApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await apiClient.post("/modules", datos);
+      const { data } = await api.post("/modules", datos);
       return { success: true, data: data as CourseModule };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "No se pudo crear el módulo");
@@ -100,7 +85,7 @@ export function useContentApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await apiClient.patch(`/modules/${id}`, datos);
+      const { data } = await api.patch(`/modules/${id}`, datos);
       return { success: true, data: data as CourseModule };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "No se pudo actualizar el módulo");
@@ -115,7 +100,7 @@ export function useContentApi() {
     setLoading(true);
     setError(null);
     try {
-      await apiClient.delete(`/modules/${id}`);
+      await api.delete(`/modules/${id}`);
       return { success: true };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "No se pudo eliminar el módulo");
@@ -130,7 +115,7 @@ export function useContentApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await apiClient.post("/lessons", datos);
+      const { data } = await api.post("/lessons", datos);
       return { success: true, data: data as Lesson };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "No se pudo crear la lección");
@@ -145,7 +130,7 @@ export function useContentApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await apiClient.patch(`/lessons/${id}`, datos);
+      const { data } = await api.patch(`/lessons/${id}`, datos);
       return { success: true, data: data as Lesson };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "No se pudo actualizar la lección");
@@ -160,7 +145,7 @@ export function useContentApi() {
     setLoading(true);
     setError(null);
     try {
-      await apiClient.delete(`/lessons/${id}`);
+      await api.delete(`/lessons/${id}`);
       return { success: true };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "No se pudo eliminar la lección");

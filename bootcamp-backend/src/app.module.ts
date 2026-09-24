@@ -24,25 +24,31 @@ import { Progress } from './progress/entities/progress.entity';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        url:
-          configService.get<string>('DATABASE_URL') || process.env.DATABASE_URL,
-        entities: [
-          Category,
-          Course,
-          ModuleEntity,
-          Lesson,
-          Video,
-          Enrollment,
-          Progress,
-        ],
-        synchronize: true,
-        logging: true,
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const isProduction =
+          configService.get<string>('app.environment') === 'production';
+
+        return {
+          type: 'postgres' as const,
+          url:
+            configService.get<string>('DATABASE_URL') || process.env.DATABASE_URL,
+          entities: [
+            Category,
+            Course,
+            ModuleEntity,
+            Lesson,
+            Video,
+            Enrollment,
+            Progress,
+          ],
+          // Nunca sincronizar el esquema automáticamente en producción.
+          synchronize: !isProduction,
+          logging: !isProduction,
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        };
+      },
     }),
     AuthModule,
     CoursesModule,

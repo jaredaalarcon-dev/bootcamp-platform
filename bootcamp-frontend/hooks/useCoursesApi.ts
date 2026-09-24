@@ -1,7 +1,6 @@
 // src/hooks/useCoursesApi.ts
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { useAuth } from "./useAuth";
+import { useState } from "react";
+import { api } from "@/lib/api";
 
 interface Category {
   id: string;
@@ -51,25 +50,8 @@ interface Enrollment {
 }
 
 export function useCoursesApi() {
-  const { getToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const apiClient = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  // Agregar token a las requests
-  apiClient.interceptors.request.use((config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  });
 
   // ✅ OBTENER TODOS LOS CURSOS DEL BACKEND REAL
   const getCourses = async () => {
@@ -77,7 +59,7 @@ export function useCoursesApi() {
     setError(null);
     try {
       // 📡 LLAMAR AL BACKEND REAL
-      const { data } = await apiClient.get("/courses");
+      const { data } = await api.get("/courses");
 
       setLoading(false);
       return { success: true, data: data.data || data };
@@ -96,7 +78,7 @@ export function useCoursesApi() {
     setError(null);
     try {
       // 📡 LLAMAR AL BACKEND REAL
-      const { data } = await apiClient.get(`/courses/${courseId}`);
+      const { data } = await api.get(`/courses/${courseId}`);
 
       setLoading(false);
       return { success: true, data: data.data || data };
@@ -115,7 +97,7 @@ export function useCoursesApi() {
     setError(null);
     try {
       // 📡 LLAMAR AL BACKEND REAL
-      const { data } = await apiClient.post("/enrollments", {
+      const { data } = await api.post("/enrollments", {
         courseId: courseId,
       });
 
@@ -136,7 +118,7 @@ export function useCoursesApi() {
     setError(null);
     try {
       // 📡 LLAMAR AL BACKEND REAL
-      const { data } = await apiClient.get("/enrollments/my-enrollments");
+      const { data } = await api.get("/enrollments/my-enrollments");
 
       setLoading(false);
       return { success: true, data: data.data || data };
@@ -152,7 +134,7 @@ export function useCoursesApi() {
   // ¿El usuario ya está inscrito en este curso?
   const checkEnrollment = async (courseId: string) => {
     try {
-      const { data } = await apiClient.get(`/enrollments/check/${courseId}`);
+      const { data } = await api.get(`/enrollments/check/${courseId}`);
       const resultado = data.data || data;
       return { success: true, enrolled: Boolean(resultado?.enrolled) };
     } catch (err: any) {

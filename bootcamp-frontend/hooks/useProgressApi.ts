@@ -1,7 +1,6 @@
 // src/hooks/useProgressApi.ts
 import { useState } from "react";
-import axios from "axios";
-import { useAuth } from "./useAuth";
+import { api } from "@/lib/api";
 
 export interface CourseProgress {
   courseId: string;
@@ -39,22 +38,8 @@ export interface MyCourse {
 }
 
 export function useProgressApi() {
-  const { getToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const apiClient = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL,
-    headers: { "Content-Type": "application/json" },
-  });
-
-  apiClient.interceptors.request.use((config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  });
 
   const mensajeDeError = (err: any, porDefecto: string) =>
     err?.response?.data?.message || porDefecto;
@@ -63,7 +48,7 @@ export function useProgressApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await apiClient.get(`/progress/course/${courseId}`);
+      const { data } = await api.get(`/progress/course/${courseId}`);
       return { success: true, data: (data.data || data) as CourseProgress };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "Error al obtener el progreso");
@@ -78,7 +63,7 @@ export function useProgressApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await apiClient.post(`/progress/lesson/${lessonId}`, {
+      const { data } = await api.post(`/progress/lesson/${lessonId}`, {
         completed,
       });
       return { success: true, data: data.data || data };
@@ -95,7 +80,7 @@ export function useProgressApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await apiClient.get("/progress/summary");
+      const { data } = await api.get("/progress/summary");
       return { success: true, data: (data.data || data) as ProgressSummary };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "Error al obtener el resumen");
@@ -110,7 +95,7 @@ export function useProgressApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await apiClient.get("/progress/my-courses");
+      const { data } = await api.get("/progress/my-courses");
       return { success: true, data: (data.data || data) as MyCourse[] };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "Error al obtener tus cursos");

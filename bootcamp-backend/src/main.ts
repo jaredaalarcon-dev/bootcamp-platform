@@ -3,9 +3,11 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
 
   // Configurar validación global
   app.useGlobalPipes(
@@ -22,13 +24,9 @@ async function bootstrap() {
     defaultVersion: '1',
   });
 
-  // Habilitar CORS
+  // Habilitar CORS usando la lista validada por configuración.
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      process.env.FRONTEND_URL || 'http://localhost:3000',
-    ],
+    origin: configService.get<string[]>('cors.origin') || [],
     credentials: true,
   });
 
