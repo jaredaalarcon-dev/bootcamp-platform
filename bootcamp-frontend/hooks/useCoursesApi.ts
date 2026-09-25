@@ -1,6 +1,6 @@
 // src/hooks/useCoursesApi.ts
-import { useState } from "react";
-import { api } from "@/lib/api";
+import { apiClient } from "@/lib/api-client";
+import { useState, useEffect } from "react";
 
 interface Category {
   id: string;
@@ -53,13 +53,14 @@ export function useCoursesApi() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+
   // ✅ OBTENER TODOS LOS CURSOS DEL BACKEND REAL
   const getCourses = async () => {
     setLoading(true);
     setError(null);
     try {
       // 📡 LLAMAR AL BACKEND REAL
-      const { data } = await api.get("/courses");
+      const { data } = await apiClient.get("/courses");
 
       setLoading(false);
       return { success: true, data: data.data || data };
@@ -78,7 +79,7 @@ export function useCoursesApi() {
     setError(null);
     try {
       // 📡 LLAMAR AL BACKEND REAL
-      const { data } = await api.get(`/courses/${courseId}`);
+      const { data } = await apiClient.get(`/courses/${courseId}`);
 
       setLoading(false);
       return { success: true, data: data.data || data };
@@ -97,7 +98,7 @@ export function useCoursesApi() {
     setError(null);
     try {
       // 📡 LLAMAR AL BACKEND REAL
-      const { data } = await api.post("/enrollments", {
+      const { data } = await apiClient.post("/enrollments", {
         courseId: courseId,
       });
 
@@ -118,7 +119,7 @@ export function useCoursesApi() {
     setError(null);
     try {
       // 📡 LLAMAR AL BACKEND REAL
-      const { data } = await api.get("/enrollments/my-enrollments");
+      const { data } = await apiClient.get("/enrollments/my-enrollments");
 
       setLoading(false);
       return { success: true, data: data.data || data };
@@ -134,7 +135,7 @@ export function useCoursesApi() {
   // ¿El usuario ya está inscrito en este curso?
   const checkEnrollment = async (courseId: string) => {
     try {
-      const { data } = await api.get(`/enrollments/check/${courseId}`);
+      const { data } = await apiClient.get(`/enrollments/check/${courseId}`);
       const resultado = data.data || data;
       return { success: true, enrolled: Boolean(resultado?.enrolled) };
     } catch (err: any) {

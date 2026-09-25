@@ -1,6 +1,6 @@
 // src/hooks/useContentApi.ts
+import { apiClient } from "@/lib/api-client";
 import { useState } from "react";
-import { api } from "@/lib/api";
 
 export interface Video {
   id: string;
@@ -46,6 +46,7 @@ export function useContentApi() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+
   // Estos endpoints lanzan errores HTTP de verdad (404, 400...),
   // así que axios entra al catch cuando algo sale mal.
   const mensajeDeError = (err: any, porDefecto: string) =>
@@ -55,7 +56,7 @@ export function useContentApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.get(`/modules/course/${courseId}`);
+      const { data } = await apiClient.get(`/modules/course/${courseId}`);
       return { success: true, data: (data ?? []) as CourseModule[] };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "No se pudo cargar el contenido");
@@ -70,7 +71,7 @@ export function useContentApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.post("/modules", datos);
+      const { data } = await apiClient.post("/modules", datos);
       return { success: true, data: data as CourseModule };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "No se pudo crear el módulo");
@@ -85,7 +86,7 @@ export function useContentApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.patch(`/modules/${id}`, datos);
+      const { data } = await apiClient.patch(`/modules/${id}`, datos);
       return { success: true, data: data as CourseModule };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "No se pudo actualizar el módulo");
@@ -100,7 +101,7 @@ export function useContentApi() {
     setLoading(true);
     setError(null);
     try {
-      await api.delete(`/modules/${id}`);
+      await apiClient.delete(`/modules/${id}`);
       return { success: true };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "No se pudo eliminar el módulo");
@@ -115,7 +116,7 @@ export function useContentApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.post("/lessons", datos);
+      const { data } = await apiClient.post("/lessons", datos);
       return { success: true, data: data as Lesson };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "No se pudo crear la lección");
@@ -130,7 +131,7 @@ export function useContentApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.patch(`/lessons/${id}`, datos);
+      const { data } = await apiClient.patch(`/lessons/${id}`, datos);
       return { success: true, data: data as Lesson };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "No se pudo actualizar la lección");
@@ -145,7 +146,7 @@ export function useContentApi() {
     setLoading(true);
     setError(null);
     try {
-      await api.delete(`/lessons/${id}`);
+      await apiClient.delete(`/lessons/${id}`);
       return { success: true };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "No se pudo eliminar la lección");

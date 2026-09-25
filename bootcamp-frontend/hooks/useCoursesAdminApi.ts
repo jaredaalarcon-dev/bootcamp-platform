@@ -1,5 +1,5 @@
 // src/hooks/useCoursesAdminApi.ts
-import { api } from "@/lib/api";
+import { apiClient } from "@/lib/api-client";
 
 export interface Course {
   id: string;
@@ -22,10 +22,11 @@ export interface Category {
 
 export function useCoursesAdminApi() {
 
+
   // CRUD Cursos
   const getCourses = async () => {
     try {
-      const { data } = await api.get("/courses");
+      const { data } = await apiClient.get("/courses");
       return { success: true, data: data.data || data };
     } catch (error: any) {
       return {
@@ -37,7 +38,7 @@ export function useCoursesAdminApi() {
 
   const getCourseById = async (id: string) => {
     try {
-      const { data } = await api.get(`/courses/${id}`);
+      const { data } = await apiClient.get(`/courses/${id}`);
       return { success: true, data: data.data || data };
     } catch (error: any) {
       return {
@@ -49,7 +50,7 @@ export function useCoursesAdminApi() {
 
   const createCourse = async (courseData: any) => {
     try {
-      const { data } = await api.post("/courses", courseData);
+      const { data } = await apiClient.post("/courses", courseData);
       return { success: true, data: data.data || data };
     } catch (error: any) {
       const msg = error.response?.data?.message;
@@ -64,7 +65,7 @@ export function useCoursesAdminApi() {
 
   const updateCourse = async (id: string, courseData: any) => {
     try {
-      const { data } = await api.patch(`/courses/${id}`, courseData);
+      const { data } = await apiClient.patch(`/courses/${id}`, courseData);
       return { success: true, data: data.data || data };
     } catch (error: any) {
       const msg = error.response?.data?.message;
@@ -79,7 +80,7 @@ export function useCoursesAdminApi() {
 
   const deleteCourse = async (id: string) => {
     try {
-      await api.delete(`/courses/${id}`);
+      await apiClient.delete(`/courses/${id}`);
       return { success: true };
     } catch (error: any) {
       return {
@@ -92,7 +93,7 @@ export function useCoursesAdminApi() {
   // CRUD Categorías
   const getCategories = async () => {
     try {
-      const { data } = await api.get("/categories");
+      const { data } = await apiClient.get("/categories");
       return { success: true, data: data.data || data };
     } catch (error: any) {
       return {
@@ -113,7 +114,7 @@ export function useCoursesAdminApi() {
         description: categoryData.description || "",
       };
 
-      const { data } = await api.post("/categories", payload);
+      const { data } = await apiClient.post("/categories", payload);
       return { success: true, data: data.data || data };
     } catch (error: any) {
       const msg = error.response?.data?.message;
@@ -136,7 +137,7 @@ export function useCoursesAdminApi() {
         description: categoryData.description || "",
       };
 
-      const { data } = await api.patch(`/categories/${id}`, payload);
+      const { data } = await apiClient.patch(`/categories/${id}`, payload);
       return { success: true, data: data.data || data };
     } catch (error: any) {
       const msg = error.response?.data?.message;
@@ -151,7 +152,7 @@ export function useCoursesAdminApi() {
 
   const deleteCategory = async (id: string) => {
     try {
-      await api.delete(`/categories/${id}`);
+      await apiClient.delete(`/categories/${id}`);
       return { success: true };
     } catch (error: any) {
       return {

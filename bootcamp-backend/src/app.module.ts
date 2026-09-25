@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { CoursesModule } from './courses/courses.module';
 import { EnrollmentsModule } from './enrollments/enrollments.module';
 import { ProgressModule } from './progress/progress.module';
+import { UploadModule } from './upload/upload.module';
 import configuration from './config/configuration';
 
 import { Category } from './courses/entities/category.entity';
@@ -24,36 +25,31 @@ import { Progress } from './progress/entities/progress.entity';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const isProduction =
-          configService.get<string>('app.environment') === 'production';
-
-        return {
-          type: 'postgres' as const,
-          url:
-            configService.get<string>('DATABASE_URL') || process.env.DATABASE_URL,
-          entities: [
-            Category,
-            Course,
-            ModuleEntity,
-            Lesson,
-            Video,
-            Enrollment,
-            Progress,
-          ],
-          // Nunca sincronizar el esquema automáticamente en producción.
-          synchronize: !isProduction,
-          logging: !isProduction,
-          ssl: {
-            rejectUnauthorized: false,
-          },
-        };
-      },
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        url:
+          configService.get<string>('DATABASE_URL') || process.env.DATABASE_URL,
+        entities: [
+          Category,
+          Course,
+          ModuleEntity,
+          Lesson,
+          Video,
+          Enrollment,
+          Progress,
+        ],
+        synchronize: process.env.NODE_ENV !== 'production',
+        logging: true,
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      }),
     }),
     AuthModule,
     CoursesModule,
     EnrollmentsModule,
     ProgressModule,
+    UploadModule,
   ],
   controllers: [],
   providers: [],

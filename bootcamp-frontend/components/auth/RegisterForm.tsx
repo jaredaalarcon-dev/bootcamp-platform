@@ -73,7 +73,7 @@ export function RegisterForm() {
       <div>
         <label
           htmlFor="firstName"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm text-gray-400 mb-1"
         >
           Nombre
         </label>
@@ -84,7 +84,7 @@ export function RegisterForm() {
           value={formData.firstName}
           onChange={handleChange}
           placeholder="Juan"
-          className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="input-brand"
           disabled={loading}
         />
       </div>
@@ -93,7 +93,7 @@ export function RegisterForm() {
       <div>
         <label
           htmlFor="lastName"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm text-gray-400 mb-1"
         >
           Apellido
         </label>
@@ -104,7 +104,7 @@ export function RegisterForm() {
           value={formData.lastName}
           onChange={handleChange}
           placeholder="Pérez"
-          className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="input-brand"
           disabled={loading}
         />
       </div>
@@ -113,7 +113,7 @@ export function RegisterForm() {
       <div>
         <label
           htmlFor="email"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm text-gray-400 mb-1"
         >
           Correo Electrónico
         </label>
@@ -124,7 +124,7 @@ export function RegisterForm() {
           value={formData.email}
           onChange={handleChange}
           placeholder="tu@email.com"
-          className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="input-brand"
           disabled={loading}
         />
       </div>
@@ -133,7 +133,7 @@ export function RegisterForm() {
       <div>
         <label
           htmlFor="password"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm text-gray-400 mb-1"
         >
           Contraseña (mín. 8 caracteres)
         </label>
@@ -144,7 +144,7 @@ export function RegisterForm() {
           value={formData.password}
           onChange={handleChange}
           placeholder="••••••••"
-          className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="input-brand"
           disabled={loading}
         />
       </div>
@@ -153,7 +153,7 @@ export function RegisterForm() {
       <div>
         <label
           htmlFor="confirmPassword"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm text-gray-400 mb-1"
         >
           Confirmar Contraseña
         </label>
@@ -164,7 +164,7 @@ export function RegisterForm() {
           value={formData.confirmPassword}
           onChange={handleChange}
           placeholder="••••••••"
-          className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="input-brand"
           disabled={loading}
         />
       </div>

@@ -1,6 +1,6 @@
 // src/hooks/useProgressApi.ts
+import { apiClient } from "@/lib/api-client";
 import { useState } from "react";
-import { api } from "@/lib/api";
 
 export interface CourseProgress {
   courseId: string;
@@ -41,6 +41,7 @@ export function useProgressApi() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+
   const mensajeDeError = (err: any, porDefecto: string) =>
     err?.response?.data?.message || porDefecto;
 
@@ -48,7 +49,7 @@ export function useProgressApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.get(`/progress/course/${courseId}`);
+      const { data } = await apiClient.get(`/progress/course/${courseId}`);
       return { success: true, data: (data.data || data) as CourseProgress };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "Error al obtener el progreso");
@@ -63,7 +64,7 @@ export function useProgressApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.post(`/progress/lesson/${lessonId}`, {
+      const { data } = await apiClient.post(`/progress/lesson/${lessonId}`, {
         completed,
       });
       return { success: true, data: data.data || data };
@@ -80,7 +81,7 @@ export function useProgressApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.get("/progress/summary");
+      const { data } = await apiClient.get("/progress/summary");
       return { success: true, data: (data.data || data) as ProgressSummary };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "Error al obtener el resumen");
@@ -95,7 +96,7 @@ export function useProgressApi() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.get("/progress/my-courses");
+      const { data } = await apiClient.get("/progress/my-courses");
       return { success: true, data: (data.data || data) as MyCourse[] };
     } catch (err: any) {
       const mensaje = mensajeDeError(err, "Error al obtener tus cursos");

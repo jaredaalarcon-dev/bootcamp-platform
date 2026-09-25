@@ -46,7 +46,7 @@ export function LoginForm() {
       <div>
         <label
           htmlFor="email"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm text-gray-400 mb-1"
         >
           Correo Electrónico
         </label>
@@ -57,7 +57,7 @@ export function LoginForm() {
           value={formData.email}
           onChange={handleChange}
           placeholder="tu@email.com"
-          className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="input-brand"
           disabled={loading}
         />
       </div>
@@ -66,7 +66,7 @@ export function LoginForm() {
       <div>
         <label
           htmlFor="password"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm text-gray-400 mb-1"
         >
           Contraseña
         </label>
@@ -77,7 +77,7 @@ export function LoginForm() {
           value={formData.password}
           onChange={handleChange}
           placeholder="••••••••"
-          className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="input-brand"
           disabled={loading}
         />
       </div>
