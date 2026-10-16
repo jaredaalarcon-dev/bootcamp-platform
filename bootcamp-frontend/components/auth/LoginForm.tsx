@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import toast from "react-hot-toast";
+import { AuthInput, AuthLabel, PasswordInput, BottomGradient } from "@/components/ui/AnimatedAuth";
 
 export function LoginForm() {
   const router = useRouter();
@@ -41,70 +42,53 @@ export function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* Email */}
       <div>
-        <label
-          htmlFor="email"
-          className="block text-sm text-gray-400 mb-1"
-        >
-          Correo Electrónico
-        </label>
-        <input
+        <AuthLabel htmlFor="email">Correo electrónico</AuthLabel>
+        <AuthInput
           type="email"
           id="email"
           name="email"
+          autoComplete="email"
           value={formData.email}
           onChange={handleChange}
           placeholder="tu@email.com"
-          className="input-brand"
           disabled={loading}
         />
       </div>
 
       {/* Password */}
       <div>
-        <label
-          htmlFor="password"
-          className="block text-sm text-gray-400 mb-1"
-        >
-          Contraseña
-        </label>
-        <input
-          type="password"
+        <AuthLabel htmlFor="password">Contraseña</AuthLabel>
+        <PasswordInput
           id="password"
           name="password"
+          autoComplete="current-password"
           value={formData.password}
           onChange={handleChange}
-          placeholder="••••••••"
-          className="input-brand"
+          placeholder="Ingresa tu contraseña"
           disabled={loading}
         />
       </div>
 
       {/* Error */}
       {error && (
-        <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800">
+        <div className="rounded-lg border border-[rgba(231,30,36,0.4)] bg-[rgba(231,30,36,0.1)] px-3 py-2.5 text-sm text-[#E31E24]">
           {error}
         </div>
       )}
 
       {/* Submit Button */}
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:bg-blue-400"
-      >
-        {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
+      <button type="submit" disabled={loading} className="group/btn relative btn-red w-full h-11">
+        {loading ? "Iniciando sesión..." : <>Iniciar sesión <span aria-hidden>→</span></>}
+        <BottomGradient />
       </button>
 
       {/* Register Link */}
-      <p className="text-center text-sm text-gray-600">
+      <p className="text-center text-sm text-gray-500">
         ¿No tienes cuenta?{" "}
-        <a
-          href="/register"
-          className="font-medium text-blue-600 hover:text-blue-700"
-        >
+        <a href="/register" className="font-semibold text-[#00C0E7] hover:underline">
           Regístrate aquí
         </a>
       </p>

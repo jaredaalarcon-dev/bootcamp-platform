@@ -7,6 +7,15 @@
     "@supabase/supabase-js": "^2.112.4",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1"
+
+
+    "scripts": {
+    "build": "nest build",
+    "start": "node dist/main",
+    "start:prod": "node dist/main"
+  },
+
+
   },
   "devDependencies": {
     "@types/passport-jwt": "^4.0.1"

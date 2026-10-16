@@ -37,9 +37,9 @@ export default function MyCoursesPage() {
             {enrollments.map((e) => {
               const pct = e.progress.percentage;
               return (
-                <Link key={e.enrollmentId} href={`/courses/${e.course.id}`}>
-                  <div className="bg-[#111827] border border-[rgba(0,192,231,0.15)] rounded-xl overflow-hidden hover:border-[#00C0E7]/50 transition-colors cursor-pointer group">
-                    <div className="relative h-44 bg-gray-800 overflow-hidden">
+                <Link key={e.enrollmentId} href={pct === 100 ? `/certificates/${e.course.id}` : `/courses/${e.course.id}`} className="block h-full">
+                  <div className="h-full flex flex-col bg-[#111827] border border-[rgba(0,192,231,0.15)] rounded-xl overflow-hidden hover:border-[#00C0E7]/50 transition-colors cursor-pointer group">
+                    <div className="relative h-44 shrink-0 bg-gray-800 overflow-hidden">
                       {e.course.image ? (
                         <img src={e.course.image} alt={e.course.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
@@ -52,11 +52,11 @@ export default function MyCoursesPage() {
                         {pct === 100 ? "✓ Completado" : pct > 0 ? "En progreso" : "Pendiente"}
                       </span>
                     </div>
-                    <div className="p-4">
+                    <div className="p-4 flex flex-col flex-1">
                       {e.course.category?.name && (
                         <p className="text-[#00C0E7] text-xs font-bold uppercase tracking-wide mb-1">{e.course.category.name}</p>
                       )}
-                      <h3 className="text-white font-semibold text-sm line-clamp-2 group-hover:text-[#00C0E7] transition-colors">{e.course.title}</h3>
+                      <h3 className="text-white font-semibold text-sm line-clamp-2 min-h-[2.5rem] group-hover:text-[#00C0E7] transition-colors">{e.course.title}</h3>
                       <div className="mt-3">
                         <div className="flex justify-between text-xs mb-1">
                           <span className="text-gray-500">Progreso</span>
@@ -67,8 +67,8 @@ export default function MyCoursesPage() {
                         </div>
                         <p className="text-xs text-gray-600 mt-1">{e.progress.completedLessons} de {e.progress.totalLessons} lecciones</p>
                       </div>
-                      <p className="mt-3 text-sm font-semibold text-[#00C0E7]">
-                        {pct === 100 ? "Ver certificado →" : pct > 0 ? "Continuar →" : "Comenzar →"}
+                      <p className="mt-auto pt-3 text-sm font-semibold text-[#00C0E7]">
+                        {pct === 100 ? "🏆 Ver certificado →" : pct > 0 ? "Continuar →" : "Comenzar →"}
                       </p>
                     </div>
                   </div>

@@ -4,7 +4,6 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { api } from "@/lib/api";
 
 type Status = "checking" | "authorized";
 
@@ -17,7 +16,7 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
 
-    // Guarda a dónde quería entrar, para volver ahí después del login.
+    // Guarda a dónde quería entrar, para volver ahí después del login
     const rememberTarget = () => {
       if (pathname && pathname !== "/admin/login") {
         sessionStorage.setItem("adminRedirect", pathname);
@@ -40,10 +39,20 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        // El cliente compartido adjunta el JWT y, si expiró, intenta renovarlo
-        // una sola vez antes de considerar la sesión vencida.
-        const { data: user } = await api.get("/auth/me");
+        // El backend decide: el rol viene firmado dentro del JWT,
+        // no de localStorage (que el usuario sí puede editar).
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
+        if (cancelled) return;
+
+        if (!res.ok) {
+          sendToLogin("expirada");
+          return;
+        }
+
+        const user = await res.json();
         if (cancelled) return;
 
         if (user?.role !== "admin") {
@@ -55,14 +64,8 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
         }
 
         setStatus("authorized");
-      } catch (error: unknown) {
-        if (cancelled) return;
-
-        const statusCode = (
-          error as { response?: { status?: number } }
-        )?.response?.status;
-
-        sendToLogin(statusCode === 401 ? "expirada" : "conexion");
+      } catch {
+        if (!cancelled) sendToLogin("conexion");
       }
     };
 
@@ -78,10 +81,10 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
   // en el que se alcanzaba a ver el panel antes del redirect.
   if (status === "checking") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-900">
+      <div className="flex min-h-screen items-center justify-center bg-[#0d0d0d]">
         <div className="text-center">
-          <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-slate-700 border-t-emerald-400"></div>
-          <p className="text-sm text-slate-400">Verificando tu sesión...</p>
+          <div className="spinner-cyan mx-auto mb-4"></div>
+          <p className="text-sm text-gray-400">Verificando tu sesión...</p>
         </div>
       </div>
     );

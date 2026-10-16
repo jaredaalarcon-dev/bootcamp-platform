@@ -69,8 +69,8 @@ export function CourseForm({ course, categories, onSuccess, onCancel }: CourseFo
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Título */}
       <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Título <span className="text-red-500">*</span>
+        <label className="label-dark">
+          Título <span className="text-[#E31E24]">*</span>
         </label>
         <input
           type="text"
@@ -79,14 +79,14 @@ export function CourseForm({ course, categories, onSuccess, onCancel }: CourseFo
           onChange={handleChange}
           placeholder="Título del curso"
           disabled={loading}
-          className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+          className="input-dark"
         />
       </div>
 
       {/* Descripción */}
       <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Descripción <span className="text-red-500">*</span>
+        <label className="label-dark">
+          Descripción <span className="text-[#E31E24]">*</span>
         </label>
         <textarea
           name="description"
@@ -95,13 +95,13 @@ export function CourseForm({ course, categories, onSuccess, onCancel }: CourseFo
           rows={4}
           placeholder="Descripción del curso"
           disabled={loading}
-          className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+          className="input-dark"
         />
       </div>
 
       {/* Imagen — ahora es un uploader, no un input de texto */}
       <div>
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="label-dark">
           Imagen de portada
         </label>
         <div className="mt-1">
@@ -117,15 +117,15 @@ export function CourseForm({ course, categories, onSuccess, onCancel }: CourseFo
 
       {/* Categoría */}
       <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Categoría <span className="text-red-500">*</span>
+        <label className="label-dark">
+          Categoría <span className="text-[#E31E24]">*</span>
         </label>
         <select
           name="categoryId"
           value={formData.categoryId}
           onChange={handleChange}
           disabled={loading}
-          className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+          className="input-dark"
         >
           <option value="">Selecciona una categoría</option>
           {categories.map((cat) => (
@@ -136,13 +136,13 @@ export function CourseForm({ course, categories, onSuccess, onCancel }: CourseFo
 
       {/* Estado */}
       <div>
-        <label className="block text-sm font-medium text-gray-700">Estado</label>
+        <label className="label-dark">Estado</label>
         <select
           name="status"
           value={formData.status}
           onChange={handleChange}
           disabled={loading}
-          className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+          className="input-dark"
         >
           <option value="draft">Borrador</option>
           <option value="preparing">En Preparación</option>
@@ -156,7 +156,7 @@ export function CourseForm({ course, categories, onSuccess, onCancel }: CourseFo
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:bg-blue-400"
+          className="btn-red flex-1 py-2"
         >
           {loading ? "Guardando..." : course ? "Actualizar curso" : "Crear curso"}
         </button>
@@ -164,7 +164,7 @@ export function CourseForm({ course, categories, onSuccess, onCancel }: CourseFo
           type="button"
           onClick={onCancel}
           disabled={loading}
-          className="rounded-lg bg-gray-200 px-4 py-2 font-medium text-gray-900 hover:bg-gray-300 disabled:opacity-60"
+          className="btn-cyan py-2"
         >
           Cancelar
         </button>

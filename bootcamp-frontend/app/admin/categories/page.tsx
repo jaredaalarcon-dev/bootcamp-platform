@@ -1,44 +1,35 @@
+// src/app/admin/categories/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
 import { useCoursesAdminApi, Category } from "@/hooks/useCoursesAdminApi";
-import Link from "next/link";
 import toast from "react-hot-toast";
 
+const FORM_VACIO = { name: "", description: "" };
+
 export default function AdminCategoriesPage() {
-  const router = useRouter();
-  const { getToken } = useAuth();
   const { getCategories, createCategory, updateCategory, deleteCategory } =
     useCoursesAdminApi();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null,
-  );
-  const [formData, setFormData] = useState({ name: "", description: "" });
+  const [selected, setSelected] = useState<Category | null>(null);
+  const [formData, setFormData] = useState(FORM_VACIO);
+  const [guardando, setGuardando] = useState(false);
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-
     loadCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadCategories = async () => {
     setLoading(true);
     const result = await getCategories();
     if (result.success) {
-      // Garantizamos que siempre se guarde un arreglo
       const data = Array.isArray(result.data)
         ? result.data
-        : result.data?.data && Array.isArray(result.data.data)
+        : Array.isArray(result.data?.data)
           ? result.data.data
           : [];
       setCategories(data);
@@ -48,178 +39,151 @@ export default function AdminCategoriesPage() {
     setLoading(false);
   };
 
-  const handleEdit = (category: Category) => {
-    setSelectedCategory(category);
-    setFormData({
-      name: category.name,
-      description: category.description || "",
-    });
+  const abrirNueva = () => {
+    setSelected(null);
+    setFormData(FORM_VACIO);
     setShowForm(true);
+  };
+
+  const handleEdit = (category: Category) => {
+    setSelected(category);
+    setFormData({ name: category.name, description: category.description || "" });
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const cerrar = () => {
+    setShowForm(false);
+    setSelected(null);
+    setFormData(FORM_VACIO);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!formData.name) {
+    if (!formData.name.trim()) {
       toast.error("El nombre es requerido");
       return;
     }
-
-    const result = selectedCategory
-      ? await updateCategory(selectedCategory.id, formData)
+    setGuardando(true);
+    const result = selected
+      ? await updateCategory(selected.id, formData)
       : await createCategory(formData);
+    setGuardando(false);
 
     if (result.success) {
-      toast.success(
-        selectedCategory ? "Categoría actualizada" : "Categoría creada",
-      );
-      setShowForm(false);
-      setSelectedCategory(null);
-      setFormData({ name: "", description: "" });
+      toast.success(selected ? "Categoría actualizada" : "Categoría creada");
+      cerrar();
       loadCategories();
     } else {
       toast.error(result.error || "Error al guardar");
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Eliminar esta categoría?")) return;
-
-    const result = await deleteCategory(id);
+  const handleDelete = async (category: Category) => {
+    if (!confirm(`¿Eliminar la categoría "${category.name}"?`)) return;
+    const result = await deleteCategory(category.id);
     if (result.success) {
       toast.success("Categoría eliminada");
       loadCategories();
     } else {
-      toast.error(result.error || "Error al eliminar");
+      toast.error(result.error || "No se pudo eliminar. ¿Tiene cursos asignados?");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
-      <nav className="border-b border-gray-200 bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <Link href="/admin" className="text-2xl font-bold text-gray-900">
-              ← Administración
-            </Link>
-            <div className="text-sm font-medium text-gray-600">
-              Gestionar Categorías
-            </div>
-          </div>
+    <div className="p-6 space-y-6">
+      {/* Encabezado */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="font-brand text-[#00C0E7] text-2xl uppercase tracking-wide">Categorías</h1>
+          <p className="text-gray-500 text-sm mt-1">
+            {categories.length} categorías para organizar tus cursos
+          </p>
         </div>
-      </nav>
+        <button
+          onClick={() => (showForm ? cerrar() : abrirNueva())}
+          className={showForm ? "btn-cyan text-sm py-2" : "btn-red text-sm py-2"}
+        >
+          {showForm ? "Cancelar" : "+ Nueva Categoría"}
+        </button>
+      </div>
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
+      {/* Formulario */}
+      {showForm && (
+        <form onSubmit={handleSubmit} className="card-dark p-6 space-y-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Categorías</h1>
-            <p className="mt-2 text-gray-600">
-              Organiza tus cursos en categorías
-            </p>
+            <h2 className="text-white font-semibold text-lg">
+              {selected ? "Editar categoría" : "Nueva categoría"}
+            </h2>
+            <div className="h-[2px] w-12 bg-[#E31E24] rounded mt-1" />
           </div>
-          <button
-            onClick={() => {
-              setSelectedCategory(null);
-              setFormData({ name: "", description: "" });
-              setShowForm(!showForm);
-            }}
-            className="rounded-lg bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700"
-          >
-            {showForm ? "Cancelar" : "+ Nueva Categoría"}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="label-dark">Nombre *</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Ej: Desarrollo Web"
+                className="input-dark"
+              />
+            </div>
+            <div>
+              <label className="label-dark">Descripción</label>
+              <input
+                type="text"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Breve descripción de la categoría"
+                className="input-dark"
+              />
+            </div>
+          </div>
+          <button type="submit" disabled={guardando} className="btn-red text-sm py-2">
+            {guardando ? "Guardando..." : selected ? "Actualizar categoría" : "Crear categoría"}
           </button>
-        </div>
+        </form>
+      )}
 
-        {/* Form */}
-        {showForm && (
-          <div className="mb-8 rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Nombre
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
-                  placeholder="Ej: Frontend"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Descripción
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  rows={3}
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
-                  placeholder="Descripción de la categoría"
-                />
-              </div>
-              <div className="flex gap-2">
-                <button
-                  type="submit"
-                  className="flex-1 rounded-lg bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700"
-                >
-                  {selectedCategory ? "Actualizar" : "Crear"}
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* Table */}
-        <div className="overflow-x-auto rounded-lg bg-white shadow-sm ring-1 ring-gray-200">
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <p className="text-gray-600">Cargando categorías...</p>
-            </div>
-          ) : !categories || categories.length === 0 ? (
-            <div className="flex items-center justify-center py-12">
-              <p className="text-gray-600">No hay categorías</p>
-            </div>
-          ) : (
-            <table className="w-full">
-              <thead className="border-b border-gray-200 bg-gray-50">
+      {/* Tabla */}
+      <div className="card-dark overflow-hidden">
+        {loading ? (
+          <div className="flex justify-center py-16"><div className="spinner-cyan" /></div>
+        ) : categories.length === 0 ? (
+          <p className="py-16 text-center text-gray-500 text-sm">No hay categorías todavía</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b border-gray-800">
                 <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                    Nombre
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                    Descripción
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                    Acciones
-                  </th>
+                  <th className="th-brand">Nombre</th>
+                  <th className="th-brand hidden sm:table-cell">Descripción</th>
+                  <th className="th-brand text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody>
                 {categories.map((category) => (
-                  <tr key={category.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      {category.name}
+                  <tr key={category.id} className="border-b border-gray-800/60 hover:bg-[rgba(0,192,231,0.04)] transition-colors">
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-3">
+                        <span className="w-2 h-2 rounded-full bg-[#00C0E7] shrink-0" />
+                        <span className="text-white font-medium">{category.name}</span>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">
-                      {category.description?.substring(0, 50) || "-"}
+                    <td className="px-5 py-3 text-gray-400 hidden sm:table-cell">
+                      <span className="line-clamp-1">{category.description || "—"}</span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex gap-2">
+                    <td className="px-5 py-3">
+                      <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleEdit(category)}
-                          className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                          className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:border-[#00C0E7] hover:text-[#00C0E7] transition-colors"
                         >
                           Editar
                         </button>
                         <button
-                          onClick={() => handleDelete(category.id)}
-                          className="text-sm font-medium text-red-600 hover:text-red-700"
+                          onClick={() => handleDelete(category)}
+                          className="rounded-lg border border-[rgba(231,30,36,0.4)] px-3 py-1.5 text-xs font-semibold text-[#E31E24] hover:bg-[rgba(231,30,36,0.1)] transition-colors"
                         >
                           Eliminar
                         </button>
@@ -229,9 +193,9 @@ export default function AdminCategoriesPage() {
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
-      </main>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

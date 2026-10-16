@@ -36,7 +36,7 @@ export default function CoursesPage() {
     if (selectedCat !== "all") f = f.filter((c) => c.category?.name === selectedCat);
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
-      f = f.filter((c) => c.title.toLowerCase().includes(q) || c.description.toLowerCase().includes(q));
+      f = f.filter((c) => c.title.toLowerCase().includes(q) || (c.description ?? "").toLowerCase().includes(q));
     }
     setFilteredCourses(f);
   }, [searchTerm, selectedCat, courses]);
@@ -84,9 +84,9 @@ export default function CoursesPage() {
         ) : filteredCourses.length > 0 ? (
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {filteredCourses.map((course) => (
-              <Link key={course.id} href={`/courses/${course.id}`}>
-                <div className="bg-[#111827] border border-[rgba(0,192,231,0.15)] rounded-xl overflow-hidden hover:border-[#00C0E7]/50 transition-colors cursor-pointer group">
-                  <div className="relative h-44 bg-gray-800 overflow-hidden">
+              <Link key={course.id} href={`/courses/${course.id}`} className="block h-full">
+                <div className="h-full flex flex-col bg-[#111827] border border-[rgba(0,192,231,0.15)] rounded-xl overflow-hidden hover:border-[#00C0E7]/50 transition-colors cursor-pointer group">
+                  <div className="relative h-44 shrink-0 bg-gray-800 overflow-hidden">
                     {course.image ? (
                       <img src={course.image} alt={course.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     ) : (
@@ -98,10 +98,11 @@ export default function CoursesPage() {
                       <span className="absolute top-2 left-2 bg-[#00C0E7] text-[#0d0d0d] text-xs font-bold px-2 py-0.5 rounded">{course.category.name}</span>
                     )}
                   </div>
-                  <div className="p-4">
-                    <h3 className="text-white font-semibold text-sm line-clamp-2 group-hover:text-[#00C0E7] transition-colors">{course.title}</h3>
-                    <p className="text-gray-500 text-xs mt-1 line-clamp-2">{course.description}</p>
-                    <p className="mt-3 text-sm font-semibold text-[#00C0E7]">Ver curso →</p>
+                  {/* Altura fija para título y descripción: todas las tarjetas miden igual */}
+                  <div className="p-4 flex flex-col flex-1">
+                    <h3 className="text-white font-semibold text-sm line-clamp-2 min-h-[2.5rem] group-hover:text-[#00C0E7] transition-colors">{course.title}</h3>
+                    <p className="text-gray-500 text-xs mt-1 line-clamp-2 min-h-[2rem]">{course.description || "Curso de Soluciones Integrales JB."}</p>
+                    <p className="mt-auto pt-3 text-sm font-semibold text-[#00C0E7]">Ver curso →</p>
                   </div>
                 </div>
               </Link>

@@ -47,6 +47,13 @@ apiClient.interceptors.request.use((config) => {
     const token = localStorage.getItem("accessToken");
     if (token) config.headers.Authorization = `Bearer ${token}`;
   }
+  // Subida de archivos: con el Content-Type "application/json" por defecto,
+  // axios convierte el FormData en JSON y el archivo nunca llega al servidor
+  // ("No se recibió ningún archivo"). Se quita para que el navegador ponga
+  // "multipart/form-data" con su boundary.
+  if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+    config.headers.delete("Content-Type");
+  }
   return config;
 });
 

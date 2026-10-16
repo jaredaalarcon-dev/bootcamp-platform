@@ -13,6 +13,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes } from '@nestjs/swagg
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../auth/guards/admin-auth.guard';
 import { UploadService } from './upload.service';
+import type { ArchivoSubido } from './upload.service';
 
 @ApiTags('Upload')
 @ApiBearerAuth()
@@ -40,7 +41,7 @@ export class UploadController {
       },
     }),
   )
-  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+  async uploadImage(@UploadedFile() file: ArchivoSubido) {
     return this.uploadService.uploadImage(file);
   }
 }

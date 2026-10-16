@@ -109,8 +109,10 @@ export class AuthService {
       const user = data.user;
       const session = data.session;
 
-      // PASO 1: Obtener perfil del usuario
-      const { data: profileData, error: profileError } = await this.supabase
+      // PASO 1: Obtener perfil del usuario.
+      // Se usa el cliente admin (service_role): las tablas tienen RLS activado
+      // y solo el backend puede leerlas.
+      const { data: profileData, error: profileError } = await this.supabaseAdmin
         .from('profiles')
         .select('id, first_name, last_name, email, role_id')
         .eq('supabase_id', user.id)
@@ -126,7 +128,7 @@ export class AuthService {
       let roleName = 'student'; // rol por defecto
 
       if (profileData.role_id) {
-        const { data: roleData } = await this.supabase
+        const { data: roleData } = await this.supabaseAdmin
           .from('roles')
           .select('name')
           .eq('id', profileData.role_id)
@@ -190,14 +192,14 @@ export class AuthService {
       // el usuario pierde sus permisos al refrescar la sesión.
       let roleName = 'student';
 
-      const { data: profileData } = await this.supabase
+      const { data: profileData } = await this.supabaseAdmin
         .from('profiles')
         .select('role_id')
         .eq('supabase_id', data.user.id)
         .maybeSingle();
 
       if (profileData?.role_id) {
-        const { data: roleData } = await this.supabase
+        const { data: roleData } = await this.supabaseAdmin
           .from('roles')
           .select('name')
           .eq('id', profileData.role_id)

@@ -6,8 +6,16 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import * as path from 'path';
+
+// Tipo mínimo del archivo que entrega Multer (evita depender de @types/multer)
+export interface ArchivoSubido {
+  originalname: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+}
 
 const BUCKET = 'course-images';
 const MAX_SIZE_MB = 5;
@@ -29,7 +37,7 @@ export class UploadService {
     });
   }
 
-  async uploadImage(file: Express.Multer.File): Promise<{ url: string }> {
+  async uploadImage(file: ArchivoSubido): Promise<{ url: string }> {
     // Validaciones básicas (la mayoría ya las hace Multer, pero doble chequeo)
     if (!file) {
       throw new BadRequestException('No se recibió ningún archivo');
@@ -49,7 +57,7 @@ export class UploadService {
 
     // Nombre único para evitar colisiones
     const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
-    const fileName = `courses/${uuidv4()}${ext}`;
+    const fileName = `courses/${randomUUID()}${ext}`;
 
     // Crear el bucket si no existe todavía
     await this.ensureBucket();

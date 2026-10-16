@@ -2,21 +2,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
-import {
-  useCoursesAdminApi,
-  Course,
-  Category,
-} from "@/hooks/useCoursesAdminApi";
+import { useCoursesAdminApi, Course, Category } from "@/hooks/useCoursesAdminApi";
 import { CourseForm } from "@/components/admin/CourseForm";
 import { CoursesTable } from "@/components/admin/CoursesTable";
-import Link from "next/link";
 import toast from "react-hot-toast";
 
 export default function AdminCoursesPage() {
-  const router = useRouter();
-  const { getToken } = useAuth();
   const { getCourses, getCategories, deleteCourse } = useCoursesAdminApi();
 
   const [courses, setCourses] = useState<Course[]>([]);
@@ -24,130 +15,108 @@ export default function AdminCoursesPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadData = async () => {
     setLoading(true);
-    const coursesResult = await getCourses();
-    const categoriesResult = await getCategories();
-
-    if (coursesResult.success) {
-      setCourses(coursesResult.data);
-    }
-    if (categoriesResult.success) {
-      setCategories(categoriesResult.data);
-    }
-
+    const [coursesResult, categoriesResult] = await Promise.all([
+      getCourses(),
+      getCategories(),
+    ]);
+    if (coursesResult.success) setCourses(coursesResult.data ?? []);
+    if (categoriesResult.success) setCategories(categoriesResult.data ?? []);
     setLoading(false);
   };
 
   const handleEdit = (course: Course) => {
     setSelectedCourse(course);
     setShowForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("¿Estás seguro de que deseas eliminar este curso?")) {
-      return;
-    }
-
+    if (!confirm("¿Estás seguro de que deseas eliminar este curso? Se borrarán también sus módulos y lecciones.")) return;
     const result = await deleteCourse(id);
     if (result.success) {
-      toast.success("Curso eliminado exitosamente");
+      toast.success("Curso eliminado");
       loadData();
     } else {
       toast.error(result.error || "Error al eliminar el curso");
     }
   };
 
-  const handleFormSuccess = () => {
+  const cerrarFormulario = () => {
     setShowForm(false);
     setSelectedCourse(null);
-    loadData();
   };
 
-  const handleFormCancel = () => {
-    setShowForm(false);
-    setSelectedCourse(null);
-  };
+  const filtrados = courses.filter((c) =>
+    !search ||
+    c.title.toLowerCase().includes(search.toLowerCase()) ||
+    c.category?.name?.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const publicados = courses.filter((c) => c.status === "published").length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
-      <nav className="border-b border-gray-200 bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <Link
-              href="/dashboard"
-              className="text-2xl font-bold text-gray-900"
-            >
-              Bootcamp
-            </Link>
-            <div className="text-sm font-medium text-gray-600">
-              Panel de Administración
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Gestionar Cursos
-            </h1>
-            <p className="mt-2 text-gray-600">Crea, edita y elimina cursos</p>
-          </div>
-          <button
-            onClick={() => {
-              setSelectedCourse(null);
-              setShowForm(!showForm);
-            }}
-            className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
-          >
-            {showForm ? "Cancelar" : "+ Nuevo Curso"}
-          </button>
-        </div>
-
-        {/* Form Section */}
-        {showForm && (
-          <div className="mb-8 rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
-            <h2 className="mb-4 text-xl font-semibold text-gray-900">
-              {selectedCourse ? "Editar Curso" : "Crear Nuevo Curso"}
-            </h2>
-            <CourseForm
-              course={selectedCourse}
-              categories={categories}
-              onSuccess={handleFormSuccess}
-              onCancel={handleFormCancel}
-            />
-          </div>
-        )}
-
-        {/* Table Section */}
+    <div className="p-6 space-y-6">
+      {/* Encabezado */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="mb-4 text-xl font-semibold text-gray-900">
-            Todos los Cursos ({courses.length})
+          <h1 className="font-brand text-[#00C0E7] text-2xl uppercase tracking-wide">
+            Gestionar Cursos
+          </h1>
+          <p className="text-gray-500 text-sm mt-1">
+            {courses.length} cursos · {publicados} publicados
+          </p>
+        </div>
+        <button
+          onClick={() => (showForm ? cerrarFormulario() : setShowForm(true))}
+          className={showForm ? "btn-cyan text-sm py-2" : "btn-red text-sm py-2"}
+        >
+          {showForm ? "Cancelar" : "+ Nuevo Curso"}
+        </button>
+      </div>
+
+      {/* Formulario */}
+      {showForm && (
+        <div className="card-dark p-6">
+          <h2 className="text-white font-semibold text-lg mb-1">
+            {selectedCourse ? "Editar curso" : "Crear nuevo curso"}
           </h2>
-          <CoursesTable
-            courses={courses}
-            loading={loading}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
+          <div className="h-[2px] w-12 bg-[#E31E24] rounded mb-5" />
+          <CourseForm
+            course={selectedCourse}
+            categories={categories}
+            onSuccess={() => { cerrarFormulario(); loadData(); }}
+            onCancel={cerrarFormulario}
           />
         </div>
-      </main>
+      )}
+
+      {/* Buscador */}
+      <div className="card-dark p-4">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar por título o categoría..."
+          className="input-dark"
+        />
+      </div>
+
+      {/* Tabla */}
+      <CoursesTable
+        courses={filtrados}
+        loading={loading}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
     </div>
   );
 }

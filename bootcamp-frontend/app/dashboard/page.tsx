@@ -74,7 +74,7 @@ export default function DashboardPage() {
 
         {/* Hero banner */}
         <div
-          className="rounded-2xl overflow-hidden relative min-h-[140px] flex items-center"
+          className="keep-theme rounded-2xl overflow-hidden relative min-h-[140px] flex items-center"
           style={{
             background: "linear-gradient(120deg, #0f2a3f 0%, #0d1b2e 50%, #1a0d1f 100%)",
             backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&auto=format&fit=crop&q=60')",
@@ -158,10 +158,10 @@ export default function DashboardPage() {
 
                     {/* Contenido */}
                     <div className="p-4 flex flex-col flex-1">
-                      <h4 className="text-white font-semibold text-sm line-clamp-2 leading-snug">
+                      <h4 className="text-white font-semibold text-sm line-clamp-2 leading-snug min-h-[2.5rem]">
                         {e.course.title}
                       </h4>
-                      <p className="text-gray-500 text-xs mt-1 line-clamp-2">{e.course.description}</p>
+                      <p className="text-gray-500 text-xs mt-1 line-clamp-2 min-h-[2rem]">{e.course.description}</p>
 
                       {/* Barra de progreso */}
                       <div className="mt-3">
@@ -175,8 +175,8 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Botón */}
-                      <div className="mt-3">
-                        <Link href={`/courses/${e.course.id}`}>
+                      <div className="mt-auto pt-3">
+                        <Link href={completado ? `/certificates/${e.course.id}` : `/courses/${e.course.id}`}>
                           {completado ? (
                             <button className="w-full btn-cyan text-sm py-2">Ver certificado</button>
                           ) : enProgreso ? (

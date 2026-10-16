@@ -5,6 +5,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { BrandLogo } from "@/components/ui/BrandLogo";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const NAV = [
   {
@@ -35,7 +37,7 @@ const NAV = [
     ),
   },
   {
-    href: "/dashboard#progreso",
+    href: "/my-progress",
     label: "Mi progreso",
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -44,11 +46,20 @@ const NAV = [
     ),
   },
   {
-    href: "/dashboard#certificados",
+    href: "/certificates",
     label: "Certificados",
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/blog",
+    label: "Blog",
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
       </svg>
     ),
   },
@@ -65,27 +76,15 @@ export function StudentLayout({ children, topbar }: Props) {
 
   const handleLogout = () => { logout(); router.push("/login"); };
 
+  // Activo en la ruta exacta y en sus subpáginas (ej. /certificates/123)
   const isActive = (href: string) =>
-    href.includes("#") ? pathname === href.split("#")[0] : pathname === href;
+    pathname === href || (href !== "/dashboard" && pathname.startsWith(href + "/"));
 
   const Sidebar = () => (
     <aside className="flex flex-col h-full bg-[#111827] border-r border-[rgba(0,192,231,0.12)]">
       {/* Logo */}
       <div className="px-5 pt-6 pb-4">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-8 h-8 rounded-lg bg-[#00C0E7] flex items-center justify-center shrink-0">
-            <svg className="w-5 h-5 text-[#0d0d0d]" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-            </svg>
-          </div>
-          <div className="leading-none">
-            <p className="font-brand text-[#00C0E7] text-sm uppercase tracking-wide leading-tight">
-              SIJB
-            </p>
-            <p className="text-white text-xs font-bold">Bootcamp</p>
-          </div>
-        </div>
-        <div className="mt-3 h-[2px] bg-[#E31E24] rounded-full" />
+        <BrandLogo width={196} />
       </div>
 
       {/* Nav */}
@@ -175,12 +174,8 @@ export function StudentLayout({ children, topbar }: Props) {
           {/* Spacer */}
           <div className="flex-1" />
 
-          {/* Bell */}
-          <button className="relative text-gray-400 hover:text-[#00C0E7] transition-colors">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-          </button>
+          {/* Modo claro / oscuro */}
+          <ThemeToggle />
 
           {/* Avatar */}
           <div className="w-8 h-8 rounded-full bg-[#00C0E7] flex items-center justify-center cursor-pointer">

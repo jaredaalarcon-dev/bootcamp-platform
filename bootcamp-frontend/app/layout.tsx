@@ -2,21 +2,28 @@
 import type { Metadata } from "next";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
+import { ThemeSync } from "@/components/ui/ThemeSync";
 
 export const metadata: Metadata = {
-  title: "Soluciones Integrales JB — Bootcamp",
-  description: "Plataforma educativa de Soluciones Integrales JB",
+  title: "Soluciones Integrales JB — Plataforma de Cursos",
+  description: "Plataforma educativa de Soluciones Integrales JB — Tu mejor opción tecnológica",
 };
+
+// Aplica el tema guardado ANTES de pintar (evita el parpadeo claro/oscuro).
+// Por defecto: oscuro, que es la identidad de la marca.
+const temaInicial = `(function(){try{var t=localStorage.getItem('sijb-theme');if(t!=='light'&&t!=='dark'){t='dark';}var h=document.documentElement;h.classList.add(t);h.style.colorScheme=t;}catch(e){document.documentElement.classList.add('dark');}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: temaInicial }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Anton&family=Great+Vibes&family=Playfair+Display:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet" />
       </head>
       <body>
+        <ThemeSync />
         {children}
         <Toaster
           position="top-right"

@@ -7,6 +7,8 @@ import { useCoursesApi } from "@/hooks/useCoursesApi";
 import { useProgressApi } from "@/hooks/useProgressApi";
 import { useAuth } from "@/hooks/useAuth";
 import { StudentLayout } from "@/components/ui/StudentLayout";
+import { SecureVideoPlayer } from "@/components/ui/SecureVideoPlayer";
+import { CourseResourcesPanel } from "@/components/ui/CourseResourcesPanel";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
@@ -317,18 +319,12 @@ export default function CourseDetailPage() {
 
                   {/* Video */}
                   {selectedLesson.video?.videoUrl ? (
-                    <div className="bg-black rounded-2xl overflow-hidden border border-[rgba(0,192,231,0.15)]">
-                      <iframe
-                        width="100%"
-                        height="400"
-                        src={selectedLesson.video.videoUrl}
-                        title={selectedLesson.video.title}
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        className="block"
-                      />
-                    </div>
+                    <SecureVideoPlayer
+                      key={selectedLesson.id}
+                      url={selectedLesson.video.videoUrl}
+                      title={selectedLesson.title}
+                      onNext={nextLesson ? () => setSelectedLesson(nextLesson) : undefined}
+                    />
                   ) : (
                     <div className="bg-[#111827] border border-[rgba(0,192,231,0.15)] rounded-2xl h-48 flex items-center justify-center">
                       <p className="text-gray-600 text-sm">Esta lección no tiene video asignado.</p>
@@ -370,6 +366,15 @@ export default function CourseDetailPage() {
                           ? "Desmarcar lección"
                           : "Marcar como completada"}
                     </button>
+                  )}
+
+                  {enrolled && porcentaje === 100 && (
+                    <Link
+                      href={`/certificates/${courseId}`}
+                      className="btn-red w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm"
+                    >
+                      🏆 Ver mi certificado
+                    </Link>
                   )}
 
                   {!enrolled && (
@@ -415,14 +420,7 @@ export default function CourseDetailPage() {
         )}
 
         {/* ── Pestaña: Recursos ──────────────────────────────────────────── */}
-        {activeTab === "recursos" && (
-          <div className="bg-[#111827] border border-[rgba(0,192,231,0.15)] rounded-2xl p-7 text-center">
-            <svg className="w-12 h-12 text-gray-700 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <p className="text-gray-500 text-sm">Los recursos de este curso estarán disponibles próximamente.</p>
-          </div>
-        )}
+        {activeTab === "recursos" && <CourseResourcesPanel courseId={courseId} enrolled={enrolled} />}
 
       </div>
     </StudentLayout>

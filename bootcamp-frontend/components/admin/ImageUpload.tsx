@@ -70,7 +70,7 @@ export function ImageUpload({ currentUrl, onUpload, disabled }: ImageUploadProps
     <div className="space-y-3">
       {/* Preview */}
       {displayUrl ? (
-        <div className="relative overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+        <div className="relative overflow-hidden rounded-lg border border-[rgba(0,192,231,0.25)] bg-[#0d0d0d]">
           <img
             src={displayUrl}
             alt="Portada del curso"
@@ -89,7 +89,7 @@ export function ImageUpload({ currentUrl, onUpload, disabled }: ImageUploadProps
               type="button"
               onClick={() => inputRef.current?.click()}
               disabled={isDisabled}
-              className="absolute bottom-2 right-2 rounded-lg bg-white/90 px-3 py-1.5 text-xs font-medium text-gray-900 shadow hover:bg-white disabled:opacity-60"
+              className="absolute bottom-2 right-2 rounded-lg bg-[#E31E24] px-3 py-1.5 text-xs font-semibold text-white shadow hover:brightness-110 disabled:opacity-60"
             >
               ✏️ Cambiar imagen
             </button>
@@ -103,24 +103,24 @@ export function ImageUpload({ currentUrl, onUpload, disabled }: ImageUploadProps
           onClick={() => !isDisabled && inputRef.current?.click()}
           className={`flex h-48 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
             isDisabled
-              ? "cursor-not-allowed border-gray-200 bg-gray-50"
-              : "border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50"
+              ? "cursor-not-allowed border-gray-700 bg-[#0d0d0d] opacity-60"
+              : "border-[rgba(0,192,231,0.35)] bg-[#0d0d0d] hover:border-[#00C0E7] hover:bg-[rgba(0,192,231,0.06)]"
           }`}
         >
           {uploading ? (
             <>
-              <div className="mb-2 h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
-              <p className="text-sm text-gray-600">Subiendo imagen...</p>
+              <div className="spinner-cyan mb-2" />
+              <p className="text-sm text-gray-400">Subiendo imagen...</p>
             </>
           ) : (
             <>
-              <svg className="mb-3 h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="mb-3 h-10 w-10 text-[#00C0E7]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                   d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <p className="text-sm font-medium text-gray-700">
+              <p className="text-sm font-medium text-gray-300">
                 Arrastra una imagen o{" "}
-                <span className="text-blue-600">haz clic para seleccionar</span>
+                <span className="text-[#00C0E7]">haz clic para seleccionar</span>
               </p>
               <p className="mt-1 text-xs text-gray-500">
                 JPG, PNG, WEBP o GIF · máx. {MAX_MB} MB
