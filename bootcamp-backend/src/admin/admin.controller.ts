@@ -7,8 +7,10 @@ import {
   Body,
   UseGuards,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
+import { AnalyticsService } from './analytics.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../auth/guards/admin-auth.guard';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -18,7 +20,10 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 @Controller('admin')
 @UseGuards(JwtAuthGuard, AdminAuthGuard)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly analyticsService: AnalyticsService,
+  ) {}
 
   @Get('stats')
   @ApiOperation({ summary: 'Estadísticas generales del panel admin' })
@@ -51,6 +56,13 @@ export class AdminController {
   @ApiOperation({ summary: 'Inscripciones y progreso por curso' })
   async getReports() {
     const data = await this.adminService.getReports();
+    return { success: true, data };
+  }
+
+  @Get('analytics')
+  @ApiOperation({ summary: 'Métricas avanzadas (días: 7, 30, 90 o 365)' })
+  async getAnalytics(@Query('days') days?: string) {
+    const data = await this.analyticsService.getAnalytics(Number(days) || 30);
     return { success: true, data };
   }
 }

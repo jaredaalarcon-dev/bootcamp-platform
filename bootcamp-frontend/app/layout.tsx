@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import { ThemeSync } from "@/components/ui/ThemeSync";
+import { JBAssist } from "@/components/assistant/JBAssist";
 
 export const metadata: Metadata = {
   title: "Soluciones Integrales JB — Plataforma de Cursos",
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ThemeSync />
         {children}
+        <JBAssist />
         <Toaster
           position="top-right"
           toastOptions={{
