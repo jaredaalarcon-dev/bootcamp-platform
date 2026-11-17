@@ -7,6 +7,9 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useProgressApi, MyCourse } from "@/hooks/useProgressApi";
 import { StudentLayout } from "@/components/ui/StudentLayout";
+import { SocialIcon } from "@/components/ui/SocialIcon";
+import { certificatesApi, CertSummary } from "@/hooks/useCertificatesApi";
+import { enlaceWhatsApp } from "@/lib/social";
 
 const IconMedalla = ({ className = "w-6 h-6" }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -22,19 +25,33 @@ const IconCandado = ({ className = "w-5 h-5" }) => (
 
 export default function CertificatesPage() {
   const router = useRouter();
-  const { getToken } = useAuth();
+  const { getToken, getUser } = useAuth();
   const { getMyCourses } = useProgressApi();
   const [cursos, setCursos] = useState<MyCourse[]>([]);
   const [cargando, setCargando] = useState(true);
+  const [resumen, setResumen] = useState<CertSummary | null>(null);
+  const [correo, setCorreo] = useState("");
 
   useEffect(() => {
     if (!getToken()) { router.push("/login"); return; }
-    getMyCourses().then((r) => {
+    setCorreo(getUser()?.email ?? "");
+    Promise.all([
+      getMyCourses(),
+      certificatesApi.mySummary().catch(() => null),
+    ]).then(([r, s]) => {
       if (r.success && r.data) setCursos(r.data);
+      setResumen(s);
       setCargando(false);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const pagado = (courseId: string) => resumen?.courses.find((c) => c.courseId === courseId)?.paid ?? false;
+  const perfilListo = resumen?.profileComplete ?? false;
+  const pedirCertificado = (curso: string) =>
+    enlaceWhatsApp(
+      `Hola, terminé el curso "${curso}" en el Bootcamp SIJB y quiero solicitar mi certificado oficial.${correo ? ` Mi correo de la plataforma es ${correo}.` : ""}`,
+    );
 
   const obtenidos = cursos.filter((c) => c.progress.percentage === 100);
   const pendientes = cursos
@@ -47,7 +64,7 @@ export default function CertificatesPage() {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
           <div>
             <h1 className="font-brand text-[#00C0E7] text-2xl uppercase tracking-wide">Mis Certificados</h1>
-            <p className="text-gray-500 text-sm mt-1">Completa el 100% de un curso para desbloquear su certificado</p>
+            <p className="text-gray-500 text-sm mt-1">Completa el 100% de un curso: la constancia es gratis y el certificado oficial se solicita por WhatsApp</p>
           </div>
           {!cargando && cursos.length > 0 && (
             <p className="text-sm text-gray-400">
@@ -55,6 +72,16 @@ export default function CertificatesPage() {
             </p>
           )}
         </div>
+
+        {!cargando && resumen && !perfilListo && (
+          <div className="card-dark p-4 flex flex-col sm:flex-row sm:items-center gap-3 border-l-4 border-l-[#E31E24]">
+            <div className="flex-1">
+              <p className="text-white text-sm font-semibold">Completa tus datos para el certificado oficial</p>
+              <p className="text-gray-500 text-xs mt-0.5">Nombre como en tu documento, número de documento y foto formal. Las constancias gratuitas no los necesitan.</p>
+            </div>
+            <Link href="/profile" className="btn-cyan text-sm px-4 py-2 text-center">Ir a Mi perfil</Link>
+          </div>
+        )}
 
         {cargando ? (
           <div className="flex justify-center py-20"><div className="spinner-cyan" /></div>
@@ -74,7 +101,7 @@ export default function CertificatesPage() {
               {obtenidos.length === 0 ? (
                 <div className="card-dark p-8 text-center">
                   <p className="text-gray-500 text-sm">
-                    Aún no tienes certificados. ¡Termina tu primer curso para conseguirlo!
+                    Aún no terminas ningún curso. ¡Completa el primero para obtener tu constancia!
                   </p>
                 </div>
               ) : (
@@ -90,7 +117,9 @@ export default function CertificatesPage() {
                         <div className="w-14 h-14 mx-auto rounded-full border-2 border-[#00C0E7] flex items-center justify-center text-[#00C0E7] shadow-[0_0_20px_rgba(0,192,231,0.3)]">
                           <IconMedalla className="w-7 h-7" />
                         </div>
-                        <p className="text-gray-400 text-[10px] uppercase tracking-widest mt-3">Certificado de finalización</p>
+                        <p className="text-gray-400 text-[10px] uppercase tracking-widest mt-3">
+                          {pagado(e.course.id) ? "Certificado habilitado" : "Constancia disponible"}
+                        </p>
                         <h3 className="font-brand text-[#00C0E7] text-base uppercase tracking-wide mt-1 line-clamp-2">
                           {e.course.title}
                         </h3>
@@ -103,12 +132,38 @@ export default function CertificatesPage() {
                         )}
                         <p className="text-gray-500 text-xs mt-1">{e.progress.totalLessons} lecciones completadas</p>
                         <div className="flex-1" />
-                        <Link
-                          href={`/certificates/${e.course.id}`}
-                          className="btn-red text-sm py-2 mt-4 flex items-center justify-center gap-2"
-                        >
-                          Ver y descargar
-                        </Link>
+                        <div className="mt-4 space-y-2">
+                          <Link
+                            href={`/certificates/${e.course.id}?tipo=constancia`}
+                            className="btn-cyan text-sm py-2 flex items-center justify-center gap-2"
+                          >
+                            Constancia <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">· gratis</span>
+                          </Link>
+                          {pagado(e.course.id) ? (
+                            perfilListo ? (
+                              <Link
+                                href={`/certificates/${e.course.id}?tipo=certificado`}
+                                className="btn-red text-sm py-2 flex items-center justify-center gap-2"
+                              >
+                                Certificado oficial
+                              </Link>
+                            ) : (
+                              <Link href="/profile" className="btn-red text-sm py-2 flex items-center justify-center gap-2">
+                                Completa tus datos para el certificado
+                              </Link>
+                            )
+                          ) : (
+                            <a
+                              href={pedirCertificado(e.course.title)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="keep-theme flex items-center justify-center gap-2 rounded-lg border border-[#25D366]/50 py-2 text-sm font-semibold text-[#25D366] hover:bg-[#25D366]/10"
+                            >
+                              <SocialIcon red="whatsapp" className="w-4 h-4" />
+                              Solicitar certificado oficial
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}

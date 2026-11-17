@@ -1,0 +1,149 @@
+{
+  "_ayuda": "Material que el script 'npm run material:cargar' sube a cada curso. Un curso recibe el material del primer grupo cuyo título contenga alguna de las 'claves' (si una clave tiene varias palabras, deben estar todas). Si el curso ya tiene un archivo con el mismo nombre, no se duplica.",
+  "grupos": [
+    {
+      "nombre": "App móvil con IA · Intermedio",
+      "claves": [
+        "movil intermedio",
+        "moviles intermedio"
+      ],
+      "archivos": [
+        {
+          "archivo": "Guia-del-curso-App-Movil-con-IA-Intermedio.pdf",
+          "titulo": "Guía del curso (PDF)",
+          "tipo": "guia",
+          "descripcion": "Objetivos, entorno de trabajo, ruta de módulos, glosario, buenas prácticas, ejercicios, rúbrica del proyecto y bibliografía."
+        },
+        {
+          "archivo": "Kit-de-practica-App-Movil-con-IA-Intermedio.zip",
+          "titulo": "Kit de práctica: código Flutter (ZIP)",
+          "tipo": "plantilla",
+          "descripcion": "App de ejemplo con arquitectura por capas, Provider, Firebase (login y Firestore), ML Kit para leer texto sin internet y Gemini con streaming, imágenes y JSON estructurado."
+        }
+      ]
+    },
+    {
+      "nombre": "App móvil con IA · Básico",
+      "claves": [
+        "movil basico",
+        "moviles basico"
+      ],
+      "archivos": [
+        {
+          "archivo": "Guia-del-curso-App-Movil-con-IA-Basico.pdf",
+          "titulo": "Guía del curso (PDF)",
+          "tipo": "guia",
+          "descripcion": "Objetivos, entorno de trabajo, ruta de módulos, glosario, buenas prácticas, ejercicios, rúbrica del proyecto y bibliografía."
+        },
+        {
+          "archivo": "Kit-de-practica-App-Movil-con-IA-Basico.zip",
+          "titulo": "Kit de práctica: código Flutter (ZIP)",
+          "tipo": "plantilla",
+          "descripcion": "Código de los 4 ejercicios: tarjeta de presentación, lista de tareas guardada, consumo de API del clima y asistente con IA (Gemini vía Firebase AI Logic)."
+        }
+      ]
+    },
+    {
+      "nombre": "Automatización con n8n",
+      "claves": [
+        "n8n"
+      ],
+      "archivos": [
+        {
+          "archivo": "Guia-del-curso-Automatizacion-con-n8n.pdf",
+          "titulo": "Guía del curso (PDF)",
+          "tipo": "guia",
+          "descripcion": "Objetivos, entorno de trabajo, ruta de módulos, glosario, buenas prácticas, ejercicios, rúbrica del proyecto y bibliografía."
+        },
+        {
+          "archivo": "Kit-de-practica-n8n.zip",
+          "titulo": "Kit de práctica: flujos de ejemplo (ZIP)",
+          "tipo": "plantilla",
+          "descripcion": "4 workflows listos para importar en n8n (formulario a hoja, recordatorio semanal, consumo de API y clasificador) y datos de prueba."
+        }
+      ]
+    },
+    {
+      "nombre": "Laravel",
+      "claves": [
+        "laravel"
+      ],
+      "archivos": [
+        {
+          "archivo": "Guia-del-curso-Laravel.pdf",
+          "titulo": "Guía del curso (PDF)",
+          "tipo": "guia",
+          "descripcion": "Objetivos, entorno de trabajo, ruta de módulos, glosario, buenas prácticas, ejercicios, rúbrica del proyecto y bibliografía."
+        },
+        {
+          "archivo": "Kit-de-practica-Laravel.zip",
+          "titulo": "Kit de práctica: CRUD de tareas (ZIP)",
+          "tipo": "plantilla",
+          "descripcion": "Modelo, migración, controlador, validación, seeder, vistas Blade y rutas de un CRUD completo, con ejercicios."
+        }
+      ]
+    },
+    {
+      "nombre": "React",
+      "claves": [
+        "react"
+      ],
+      "archivos": [
+        {
+          "archivo": "Guia-del-curso-React.pdf",
+          "titulo": "Guía del curso (PDF)",
+          "tipo": "guia",
+          "descripcion": "Objetivos, entorno de trabajo, ruta de módulos, glosario, buenas prácticas, ejercicios, rúbrica del proyecto y bibliografía."
+        },
+        {
+          "archivo": "Kit-de-practica-React.zip",
+          "titulo": "Kit de práctica: proyecto Vite + React (ZIP)",
+          "tipo": "plantilla",
+          "descripcion": "Proyecto listo para npm install con los componentes de los ejercicios: props, estado, lista de tareas, consumo de API y hook personalizado."
+        }
+      ]
+    },
+    {
+      "nombre": "Python para Data Science",
+      "claves": [
+        "python",
+        "data science"
+      ],
+      "archivos": [
+        {
+          "archivo": "Guia-del-curso-Python-Data-Science.pdf",
+          "titulo": "Guía del curso (PDF)",
+          "tipo": "guia",
+          "descripcion": "Objetivos, entorno de trabajo, ruta de módulos, glosario, buenas prácticas, ejercicios, rúbrica del proyecto y bibliografía."
+        },
+        {
+          "archivo": "Kit-de-practica-Python-Data-Science.zip",
+          "titulo": "Kit de práctica: notebooks y datos (ZIP)",
+          "tipo": "ejercicio",
+          "descripcion": "4 notebooks (Python desde cero, limpieza con Pandas, gráficos y primer modelo) con datos de ventas y viviendas para practicar."
+        }
+      ]
+    },
+    {
+      "nombre": "Ciberseguridad",
+      "claves": [
+        "ciberseguridad",
+        "seguridad"
+      ],
+      "archivos": [
+        {
+          "archivo": "Guia-del-curso-Ciberseguridad.pdf",
+          "titulo": "Guía del curso (PDF)",
+          "tipo": "guia",
+          "descripcion": "Objetivos, entorno de trabajo, ruta de módulos, glosario, buenas prácticas, ejercicios, rúbrica del proyecto y bibliografía."
+        },
+        {
+          "archivo": "Kit-de-practica-Ciberseguridad.zip",
+          "titulo": "Kit de práctica: código seguro y plantillas (ZIP)",
+          "tipo": "plantilla",
+          "descripcion": "Checklist OWASP Top 10, ejemplos de código inseguro vs. seguro, plantilla de informe y plan de respuesta a incidentes."
+        }
+      ]
+    }
+  ]
+}

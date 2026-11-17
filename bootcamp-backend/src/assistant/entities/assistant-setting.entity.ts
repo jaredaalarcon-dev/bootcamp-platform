@@ -10,6 +10,10 @@ export class AssistantSetting {
   @Column({ type: 'boolean', default: true })
   enabled: boolean;
 
+  // Si está apagado, el chatbot responde solo con sus temas y preguntas frecuentes
+  @Column({ type: 'boolean', default: true })
+  aiEnabled: boolean;
+
   // Preguntas frecuentes e información del negocio que la IA debe conocer
   @Column({ type: 'text' })
   knowledge: string;

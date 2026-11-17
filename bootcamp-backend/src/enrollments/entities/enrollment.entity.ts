@@ -28,6 +28,17 @@ export class Enrollment {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  // Pago del certificado. Se coordina por WhatsApp y el admin lo marca aquí.
+  // Sin pago el alumno recibe una constancia gratuita; con pago, el certificado.
+  @Column({ type: 'boolean', default: false })
+  paid: boolean;
+
+  @Column({ type: 'timestamp with time zone', nullable: true })
+  paidAt: Date | null;
+
+  @Column({ type: 'varchar', length: 200, nullable: true })
+  paymentNote: string | null;
+
   @Column('uuid')
   userId: string;
 

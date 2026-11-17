@@ -1,10 +1,10 @@
 // src/assistant/assistant.controller.ts
-import { Body, Controller, Get, HttpCode, Ip, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Ip, Param, ParseUUIDPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../auth/guards/admin-auth.guard';
 import { AssistantService } from './assistant.service';
-import { ChatDto, UpdateAssistantSettingsDto } from './dto/assistant.dto';
+import { ChatDto, FaqDto, TestMessageDto, UpdateAssistantSettingsDto } from './dto/assistant.dto';
 
 @ApiTags('Assistant')
 @Controller('assistant')
@@ -26,10 +26,17 @@ export class AssistantController {
       conversationId: dto.conversationId,
       channel: 'web',
       message: dto.message,
+      intent: dto.intent,
       userName: dto.userName,
       ip,
     });
     return { success: true, data };
+  }
+
+  @Get('menu')
+  @ApiOperation({ summary: 'Temas de la "Ayuda rápida" (botones)' })
+  async menu() {
+    return { success: true, data: await this.assistant.menu() };
   }
 
   @Get('history/:conversationId')
@@ -66,5 +73,50 @@ export class AssistantController {
   @UseGuards(JwtAuthGuard, AdminAuthGuard)
   async conversation(@Param('conversationId') id: string) {
     return { success: true, data: await this.assistant.conversation(id) };
+  }
+
+  @Get('stats')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, AdminAuthGuard)
+  @ApiOperation({ summary: 'Métricas del chatbot (días: 7, 30 o 90)' })
+  async stats(@Query('days') days?: string) {
+    return { success: true, data: await this.assistant.stats(Number(days) || 30) };
+  }
+
+  @Get('faqs')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, AdminAuthGuard)
+  async listFaqs() {
+    return { success: true, data: await this.assistant.listFaqs() };
+  }
+
+  @Post('faqs')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, AdminAuthGuard)
+  async createFaq(@Body() dto: FaqDto) {
+    return { success: true, data: await this.assistant.createFaq(dto) };
+  }
+
+  @Put('faqs/:id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, AdminAuthGuard)
+  async updateFaq(@Param('id', ParseUUIDPipe) id: string, @Body() dto: FaqDto) {
+    return { success: true, data: await this.assistant.updateFaq(id, dto) };
+  }
+
+  @Delete('faqs/:id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, AdminAuthGuard)
+  async deleteFaq(@Param('id', ParseUUIDPipe) id: string) {
+    return { success: true, data: await this.assistant.deleteFaq(id) };
+  }
+
+  @Post('test')
+  @HttpCode(200)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, AdminAuthGuard)
+  @ApiOperation({ summary: 'Probar cómo entiende el chatbot un mensaje (sin IA, no se guarda)' })
+  async test(@Body() dto: TestMessageDto) {
+    return { success: true, data: await this.assistant.test(dto.message) };
   }
 }

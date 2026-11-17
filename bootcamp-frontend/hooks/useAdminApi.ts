@@ -24,6 +24,23 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export interface PaymentRow {
+  enrollmentId: string;
+  userId: string;
+  studentName: string;
+  email: string;
+  courseId: string;
+  courseTitle: string;
+  enrolledAt: string;
+  percentage: number;
+  paid: boolean;
+  paidAt: string | null;
+  paymentNote: string | null;
+  profileComplete: boolean;
+  certificateIssued: boolean;
+  constanciaIssued: boolean;
+}
+
 export interface CourseReport {
   id: string;
   title: string;
@@ -110,5 +127,17 @@ export function useAdminApi() {
       return (data.data ?? data) as Analytics;
     });
 
-  return { loading, getStats, getUsers, updateUserRole, getReports, getAnalytics };
+  const getPayments = () =>
+    req(async () => {
+      const { data } = await apiClient.get("/admin/payments");
+      return (data.data ?? data) as PaymentRow[];
+    });
+
+  const setPayment = (enrollmentId: string, paid: boolean, note?: string | null) =>
+    req(async () => {
+      const { data } = await apiClient.patch(`/admin/enrollments/${enrollmentId}/payment`, { paid, note });
+      return (data.data ?? data) as Pick<PaymentRow, "enrollmentId" | "paid" | "paidAt" | "paymentNote">;
+    });
+
+  return { loading, getStats, getUsers, updateUserRole, getReports, getAnalytics, getPayments, setPayment };
 }

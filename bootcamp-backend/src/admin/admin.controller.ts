@@ -8,9 +8,11 @@ import {
   UseGuards,
   BadRequestException,
   Query,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AnalyticsService } from './analytics.service';
+import { PaymentsService } from './payments.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../auth/guards/admin-auth.guard';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -23,6 +25,7 @@ export class AdminController {
   constructor(
     private readonly adminService: AdminService,
     private readonly analyticsService: AnalyticsService,
+    private readonly paymentsService: PaymentsService,
   ) {}
 
   @Get('stats')
@@ -63,6 +66,29 @@ export class AdminController {
   @ApiOperation({ summary: 'Métricas avanzadas (días: 7, 30, 90 o 365)' })
   async getAnalytics(@Query('days') days?: string) {
     const data = await this.analyticsService.getAnalytics(Number(days) || 30);
+    return { success: true, data };
+  }
+
+  @Get('payments')
+  @ApiOperation({ summary: 'Inscripciones con su estado de pago y de certificado' })
+  async getPayments() {
+    const data = await this.paymentsService.list();
+    return { success: true, data };
+  }
+
+  @Patch('enrollments/:id/payment')
+  @ApiOperation({ summary: 'Marcar o desmarcar el pago del certificado de una inscripción' })
+  async setPayment(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: { paid: boolean; note?: string | null },
+  ) {
+    if (typeof body?.paid !== 'boolean') {
+      throw new BadRequestException('Indica "paid": true o false');
+    }
+    if (body.note != null && typeof body.note !== 'string') {
+      throw new BadRequestException('La nota debe ser texto');
+    }
+    const data = await this.paymentsService.setPayment(id, body.paid, body.note);
     return { success: true, data };
   }
 }

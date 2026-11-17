@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
-import { apiClient } from "@/lib/api-client";
+import { certificatesApi, CertData, TipoEmitido } from "@/hooks/useCertificatesApi";
+import { enlaceWhatsApp } from "@/lib/social";
+import { SocialIcon } from "@/components/ui/SocialIcon";
 import { BrandLogo, LOGO_SRC, ICONO_SRC } from "@/components/ui/BrandLogo";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
@@ -17,19 +19,29 @@ const FIRMA = {
   imagen: "/brand/firma-gerente.png",
   nombre: "", // Ej: "Juan Pérez Gómez" — déjalo vacío si no quieres mostrarlo
   cargo: "Gerente General",
-  empresa: "Soluciones Integrales JB S.A.C.",
+  empresa: "Soluciones Integrales JB",
 };
 
-interface CertData {
-  certificateId: string;
-  studentName: string;
-  courseName: string;
-  courseCategory: string;
-  completedAt: string;
-}
+// Textos de cada tipo de documento
+const TEXTOS: Record<TipoEmitido, { titulo: string; sub: string; intro: string; accion: string; sello: string }> = {
+  certificado: {
+    titulo: "Certificado",
+    sub: "de finalización",
+    intro: "Se otorga el presente certificado a:",
+    accion: "por haber culminado satisfactoriamente el curso",
+    sello: "SOLUCIONES INTEGRALES JB ★ CERTIFICADO OFICIAL ★",
+  },
+  constancia: {
+    titulo: "Constancia",
+    sub: "de culminación",
+    intro: "Se deja constancia de que:",
+    accion: "ha culminado satisfactoriamente el curso",
+    sello: "SOLUCIONES INTEGRALES JB ★ CONSTANCIA ★ BOOTCAMP ★",
+  },
+};
 
 // ── Sello circular con texto alrededor ────────────────────────────────────
-function Sello() {
+function Sello({ texto }: { texto: string }) {
   return (
     <svg viewBox="0 0 200 200" className="w-full h-full" aria-hidden>
       <defs>
@@ -41,7 +53,7 @@ function Sello() {
       {/* textLength reparte el texto exacto en la circunferencia (2π·74 ≈ 462) */}
       <text fill="#111111" fontSize="12.5" fontWeight="700" style={{ fontFamily: "Anton, Impact, sans-serif" }}>
         <textPath href="#arcoSello" startOffset="0" textLength="458" lengthAdjust="spacingAndGlyphs">
-          SOLUCIONES INTEGRALES JB ★ CERTIFICADO OFICIAL ★
+          {texto}
         </textPath>
       </text>
       <image href={ICONO_SRC} x="58" y="56" width="84" height="84" preserveAspectRatio="xMidYMid meet" />
@@ -77,16 +89,24 @@ export default function CertificatePage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [hayFirma, setHayFirma] = useState(true);
+  const [origen, setOrigen] = useState("");
 
   useEffect(() => {
     if (!getToken()) { router.push("/login"); return; }
-    apiClient
-      .get(`/certificates/course/${courseId}`)
-      .then(({ data }) => setCert(data.data ?? data))
-      .catch((err) => setError(err?.response?.data?.message ?? "No se pudo cargar el certificado"))
-      .finally(() => setLoading(false));
+    setOrigen(window.location.origin);
+    // ?tipo=constancia | certificado (si no viene, el servidor elige según el pago)
+    const pedido = new URLSearchParams(window.location.search).get("tipo");
+    const tipo = pedido === "constancia" || pedido === "certificado" ? pedido : undefined;
+    certificatesApi.get(courseId, tipo).then((r) => {
+      if (r.ok) setCert(r.data);
+      else setError(r.error);
+      setLoading(false);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId]);
+
+  const T = TEXTOS[cert?.type ?? "certificado"];
+  const esCertificado = cert?.type === "certificado";
 
   const fecha = cert?.completedAt
     ? new Date(cert.completedAt).toLocaleDateString("es-PE", { day: "numeric", month: "long", year: "numeric" })
@@ -95,7 +115,7 @@ export default function CertificatePage() {
   // El nombre del PDF guardado sale del título de la página
   const imprimir = () => {
     const anterior = document.title;
-    if (cert) document.title = `Certificado SIJB - ${cert.studentName} - ${cert.courseName}`;
+    if (cert) document.title = `${T.titulo} SIJB - ${cert.studentName} - ${cert.courseName}`;
     window.print();
     setTimeout(() => (document.title = anterior), 500);
   };
@@ -112,11 +132,29 @@ export default function CertificatePage() {
     <div className="flex min-h-screen items-center justify-center bg-[#0d0d0d] px-4">
       <div className="max-w-md text-center card-dark p-10">
         <div className="flex justify-center mb-6"><BrandLogo width={260} align="center" /></div>
-        <h2 className="font-brand text-[#E31E24] text-xl uppercase tracking-wide mb-3">Certificado no disponible</h2>
+        <h2 className="font-brand text-[#E31E24] text-xl uppercase tracking-wide mb-3">Documento no disponible</h2>
         <p className="text-gray-400 text-sm mb-6">
-          {error ?? "Necesitas completar el 100% del curso para obtener tu certificado."}
+          {error ?? "Necesitas completar el 100% del curso para obtener tu constancia."}
         </p>
-        <Link href={`/courses/${courseId}`} className="btn-red text-sm px-6 py-2.5">Continuar el curso</Link>
+        {error && /pago|WhatsApp/i.test(error) ? (
+          <div className="flex flex-col gap-3 items-center">
+            <a
+              href={enlaceWhatsApp("Hola, quiero solicitar mi certificado oficial del Bootcamp SIJB.")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="keep-theme inline-flex items-center gap-2 rounded-lg bg-[#25D366] px-5 py-2.5 text-sm font-semibold text-[#0d0d0d] hover:brightness-110"
+            >
+              <SocialIcon red="whatsapp" className="w-4 h-4" /> Solicitar por WhatsApp
+            </a>
+            <a href={`/certificates/${courseId}?tipo=constancia`} className="text-sm text-[#00C0E7] hover:underline">
+              Descargar mi constancia gratuita
+            </a>
+          </div>
+        ) : error && /Mi perfil/i.test(error) ? (
+          <Link href="/profile" className="btn-red text-sm px-6 py-2.5">Completar mis datos</Link>
+        ) : (
+          <Link href={`/courses/${courseId}`} className="btn-red text-sm px-6 py-2.5">Continuar el curso</Link>
+        )}
       </div>
     </div>
   );
@@ -157,7 +195,17 @@ export default function CertificatePage() {
 
         <div className="no-print text-center mt-6 mb-4 px-4">
           <p className="font-brand text-[#00C0E7] text-lg uppercase tracking-wide">¡Felicitaciones, {cert.studentName.split(" ")[0]}!</p>
-          <p className="text-gray-500 text-sm">Este es tu certificado oficial. Puedes descargarlo como PDF.</p>
+          <p className="text-gray-500 text-sm">
+            {esCertificado ? "Este es tu certificado oficial. Puedes descargarlo como PDF." : "Esta es tu constancia de culminación. Puedes descargarla como PDF."}
+            {!esCertificado && !cert.paid && (
+              <>
+                {" "}¿Quieres el certificado oficial?{" "}
+                <a href={enlaceWhatsApp(`Hola, terminé el curso "${cert.courseName}" en el Bootcamp SIJB y quiero solicitar mi certificado oficial.`)} target="_blank" rel="noopener noreferrer" className="text-[#25D366] font-semibold hover:underline">
+                  Solicítalo por WhatsApp
+                </a>
+              </>
+            )}
+          </p>
         </div>
 
         {/* ── Hoja del certificado (A4 horizontal, escala con el ancho) ── */}
@@ -184,6 +232,18 @@ export default function CertificatePage() {
             <div className="absolute" style={{ inset: "2.35cqw", border: "0.09cqw solid #111111" }} />
             <Esquina pos="tl" /><Esquina pos="tr" /><Esquina pos="bl" /><Esquina pos="br" />
 
+            {/* Foto formal (solo en el certificado oficial) */}
+            {esCertificado && cert.photoUrl && (
+              <div
+                className="absolute z-10 bg-white"
+                style={{ left: "6.2cqw", top: "18.5cqw", width: "10.4cqw", aspectRatio: "3 / 4", padding: "0.35cqw", border: "0.22cqw solid #00C0E7", boxShadow: "0 0.4cqw 1.2cqw rgba(0,0,0,0.12)" }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={cert.photoUrl} alt="" className="w-full h-full object-cover" />
+                <div className="absolute left-0 right-0 bg-[#E31E24]" style={{ bottom: "-0.9cqw", height: "0.45cqw" }} />
+              </div>
+            )}
+
             {/* Contenido */}
             <div className="absolute flex flex-col items-center text-center" style={{ inset: "2.35cqw" }}>
               {/* Franja con el logo */}
@@ -194,19 +254,19 @@ export default function CertificatePage() {
 
               {/* Título */}
               <h1 className="font-brand uppercase leading-none" style={{ fontSize: "5.4cqw", letterSpacing: "0.16em", marginTop: "2.4cqw" }}>
-                Certificado
+                {T.titulo}
               </h1>
               <div className="flex items-center" style={{ gap: "1.2cqw", marginTop: "0.7cqw" }}>
                 <span className="bg-[#E31E24]" style={{ height: "0.18cqw", width: "6cqw" }} />
                 <p className="font-brand uppercase text-[#00C0E7]" style={{ fontSize: "1.55cqw", letterSpacing: "0.45em" }}>
-                  de finalización
+                  {T.sub}
                 </p>
                 <span className="bg-[#E31E24]" style={{ height: "0.18cqw", width: "6cqw" }} />
               </div>
 
               {/* Alumno */}
               <p className="text-gray-600 italic" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.45cqw", marginTop: "2.2cqw" }}>
-                Se otorga el presente certificado a:
+                {T.intro}
               </p>
               <p
                 className="font-bold text-[#0d0d0d] leading-tight"
@@ -215,10 +275,15 @@ export default function CertificatePage() {
                 {cert.studentName}
               </p>
               <div style={{ height: "0.16cqw", width: "44cqw", marginTop: "0.6cqw", background: "linear-gradient(90deg, transparent, #00C0E7 20%, #00C0E7 80%, transparent)" }} />
+              {cert.document && (
+                <p className="text-gray-600" style={{ fontSize: "1.1cqw", marginTop: "0.5cqw", letterSpacing: "0.04em" }}>
+                  Identificado(a) con {cert.document}
+                </p>
+              )}
 
               {/* Curso */}
               <p className="text-gray-700" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.45cqw", marginTop: "1.6cqw" }}>
-                por haber culminado <span className="italic">satisfactoriamente</span> el curso
+                {T.accion}
               </p>
               <p className="font-brand uppercase text-[#00C0E7] leading-tight" style={{ fontSize: "2.6cqw", letterSpacing: "0.04em", marginTop: "0.7cqw", maxWidth: "78cqw" }}>
                 {cert.courseName}
@@ -231,14 +296,16 @@ export default function CertificatePage() {
               <div className="w-full mt-auto grid grid-cols-3 items-end" style={{ padding: "0 5cqw 2.2cqw" }}>
                 {/* Código */}
                 <div className="text-left">
-                  <p className="uppercase text-gray-500" style={{ fontSize: "0.85cqw", letterSpacing: "0.18em" }}>Código de certificado</p>
+                  <p className="uppercase text-gray-500" style={{ fontSize: "0.85cqw", letterSpacing: "0.18em" }}>Código de {T.titulo.toLowerCase()}</p>
                   <p className="font-mono font-bold text-[#111111]" style={{ fontSize: "1.35cqw", marginTop: "0.3cqw" }}>{cert.certificateId}</p>
-                  <p className="text-gray-400" style={{ fontSize: "0.8cqw", marginTop: "0.3cqw" }}>Emitido por Soluciones Integrales JB S.A.C.</p>
+                  <p className="text-gray-500" style={{ fontSize: "0.8cqw", marginTop: "0.3cqw" }}>
+                    Verifícalo en {(origen || "").replace(/^https?:\/\//, "")}/verificar
+                  </p>
                 </div>
 
                 {/* Sello */}
                 <div className="flex justify-center">
-                  <div style={{ width: "11cqw", height: "11cqw" }}><Sello /></div>
+                  <div style={{ width: "11cqw", height: "11cqw" }}><Sello texto={T.sello} /></div>
                 </div>
 
                 {/* Firma */}

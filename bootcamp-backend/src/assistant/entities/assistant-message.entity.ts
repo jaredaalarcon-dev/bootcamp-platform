@@ -23,7 +23,11 @@ export class AssistantMessage extends BaseEntity {
   @Column({ type: 'text' })
   content: string;
 
-  // Qué IA respondió (gemini / groq / respaldo). Útil para el reporte.
+  // Quién respondió: bot (tema fijo), faq, curso, cache, gemini, groq o fallback.
   @Column({ type: 'varchar', length: 30, nullable: true })
   provider: string | null;
+
+  // Tema que detectó el chatbot (para el reporte y las "preguntas sin respuesta")
+  @Column({ type: 'varchar', length: 60, nullable: true })
+  intent: string | null;
 }

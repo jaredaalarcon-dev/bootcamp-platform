@@ -25,7 +25,10 @@ import { BlogPost } from './blog/entities/blog-post.entity';
 import { BlogSubscriber } from './blog/entities/blog-subscriber.entity';
 import { AssistantMessage } from './assistant/entities/assistant-message.entity';
 import { AssistantSetting } from './assistant/entities/assistant-setting.entity';
+import { AssistantFaq } from './assistant/entities/assistant-faq.entity';
 import { TermsAcceptance } from './legal/entities/terms-acceptance.entity';
+import { CertificateProfile } from './certificates/entities/certificate-profile.entity';
+import { IssuedCertificate } from './certificates/entities/issued-certificate.entity';
 
 @Module({
   imports: [
@@ -53,7 +56,10 @@ import { TermsAcceptance } from './legal/entities/terms-acceptance.entity';
           BlogSubscriber,
           AssistantMessage,
           AssistantSetting,
+          AssistantFaq,
           TermsAcceptance,
+          CertificateProfile,
+          IssuedCertificate,
         ],
         synchronize: process.env.NODE_ENV !== 'production',
         logging: false,

@@ -4,6 +4,8 @@
 // Si cambias cualquier texto, sube TERMS_VERSION aquí y en el backend
 // (src/legal/legal.constants.ts): a todos se les volverá a pedir aceptar.
 
+import { WHATSAPP_VISIBLE, enlaceWhatsApp } from "./social";
+
 export const TERMS_VERSION = "2026-11-17";
 export const TERMS_FECHA = "17 de noviembre de 2026";
 
@@ -12,8 +14,8 @@ export const EMPRESA = {
   ruc: "10410697551",
   nombreComercial: "Soluciones Integrales JB",
   correo: "consultas@solucionesintegralesjb.com",
-  whatsapp: "+51 926 392 858",
-  whatsappLink: "https://wa.me/51926392858",
+  whatsapp: WHATSAPP_VISIBLE,
+  whatsappLink: enlaceWhatsApp(),
   plataforma: "Plataforma Bootcamp de Soluciones Integrales JB",
 };
 
@@ -79,8 +81,9 @@ export const TERMINOS: SeccionLegal[] = [
     id: "certificados",
     titulo: "Certificados y constancias",
     lista: [
-      "En los cursos de pago, al completar el 100 % del curso y con el pago confirmado, obtendrás un certificado.",
-      "En los cursos gratuitos, al completar el 100 % del curso, obtendrás una constancia de participación.",
+      "Al completar el 100 % de un curso puedes descargar gratis una constancia de culminación.",
+      `El certificado oficial tiene costo. Se solicita por WhatsApp (${E.whatsapp}) y se habilita en tu cuenta cuando la Empresa confirma el pago.`,
+      "Para emitir el certificado debes registrar en «Mi perfil» tu nombre completo tal como figura en tu documento de identidad, el número de ese documento y una foto formal. Eres responsable de que esos datos sean verdaderos.",
       "Cada documento incluye un código único que permite verificar su autenticidad.",
       "Está prohibido alterar, falsificar o presentar como propios certificados o constancias de otra persona. La Empresa podrá anular los documentos obtenidos de forma indebida.",
     ],
@@ -163,6 +166,8 @@ export const PRIVACIDAD: SeccionLegal[] = [
       "Datos de identificación y contacto: nombre, apellido y correo electrónico.",
       "Datos de acceso: tu contraseña, que se guarda cifrada y nadie de la Empresa puede ver.",
       "Datos académicos: cursos en los que te inscribes, avance, lecciones completadas, certificados y constancias.",
+      "Datos para tu certificado, solo si decides registrarlos: nombre completo, tipo y número de documento de identidad y una foto formal. La foto se guarda en un almacenamiento privado y solo se usa en tu certificado.",
+      "Estado de pago del certificado (pagado o pendiente). Los pagos se coordinan por WhatsApp; la Plataforma no guarda datos bancarios ni de tarjetas.",
       "Mensajes que escribes al asistente JB Assist.",
       "Datos técnicos: dirección IP, tipo de navegador y la fecha en que aceptaste estos documentos.",
     ],
@@ -173,7 +178,7 @@ export const PRIVACIDAD: SeccionLegal[] = [
     lista: [
       "Crear y administrar tu cuenta.",
       "Darte acceso a los cursos y registrar tu avance.",
-      "Emitir y verificar tus certificados o constancias.",
+      "Emitir y verificar tus certificados o constancias. En la verificación pública solo se muestran tu nombre, el curso, la fecha y los últimos 4 dígitos de tu documento.",
       "Responder tus consultas por correo, WhatsApp o mediante JB Assist.",
       "Enviarte comunicaciones necesarias del servicio, como el correo de bienvenida o avisos sobre tu cuenta.",
       "Proteger la seguridad de la Plataforma y prevenir fraudes.",

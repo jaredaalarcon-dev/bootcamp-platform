@@ -1,17 +1,18 @@
 // src/components/assistant/JBAssist.tsx
-// JB Assist — asistente con IA de la plataforma (botón flotante + chat).
-// El "cerebro" está en el backend (/v1/assistant/chat). Aquí solo la interfaz.
+// JB Assist — asistente de la plataforma (botón flotante + chat).
+// Tres pestañas: Chat (escribe libremente), Ayuda rápida (botones, sin IA)
+// y WhatsApp (pagos y consultas directas). El "cerebro" está en el backend.
 "use client";
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { DotOrb } from "@/components/assistant/DotOrb";
-import { useAssistantApi } from "@/hooks/useAssistantApi";
+import { useAssistantApi, Accion, MenuAyuda } from "@/hooks/useAssistantApi";
 import { useTheme } from "@/hooks/useTheme";
+import { enlaceWhatsApp as linkWhatsApp, WHATSAPP_VISIBLE } from "@/lib/social";
 
 export const ASSISTANT_NAME = "JB Assist";
 const AVATAR = "/brand/cubo-gorro.png";
-const WHATSAPP = "51926392858";
 const CLAVE_CONV = "jb-assist-conversacion";
 const CLAVE_SALUDO = "jb-assist-saludo-visto";
 const MAX = 1000;
@@ -20,7 +21,21 @@ const MAX = 1000;
 const OCULTO_EN = [/^\/admin/, /^\/login/, /^\/register/];
 
 const ETIQUETAS = ["Pensando", "Buscando en los cursos", "Analizando", "Redactando"];
-const SUGERENCIAS = ["¿Qué cursos tienen?", "¿Cómo me inscribo?", "¿Dan certificado?", "Quiero hablar con una persona"];
+const SUGERENCIAS: { texto: string; intent: string }[] = [
+  { texto: "¿Qué cursos tienen?", intent: "cursos_lista" },
+  { texto: "¿Cómo me inscribo?", intent: "inscripcion" },
+  { texto: "¿Dan certificado?", intent: "certificado_vs_constancia" },
+  { texto: "Quiero hablar con una persona", intent: "humano" },
+];
+type Pestana = "chat" | "ayuda" | "whatsapp";
+
+// Atajos de WhatsApp (mensaje ya escrito)
+const ATAJOS_WA = [
+  { titulo: "Pagar mi certificado", detalle: "Precio, medios de pago y comprobante", texto: "Hola, quiero coordinar el pago de mi certificado oficial del Bootcamp SIJB." },
+  { titulo: "Ya pagué", detalle: "Envía tu constancia de pago para habilitarlo", texto: "Hola, ya realicé el pago de mi certificado del Bootcamp SIJB. Les envío mi comprobante." },
+  { titulo: "Información de cursos", detalle: "Te asesoramos para elegir", texto: "Hola, quiero información sobre los cursos del Bootcamp SIJB." },
+  { titulo: "Otra consulta", detalle: "Te atiende una persona del equipo", texto: "Hola, vengo de la plataforma Bootcamp y tengo una consulta." },
+];
 
 interface Mensaje {
   id: string;
@@ -28,6 +43,8 @@ interface Mensaje {
   content: string;
   error?: boolean;
   nuevo?: boolean; // anima la aparición palabra por palabra
+  acciones?: Accion[];
+  fuente?: string; // bot, faq, curso, cache, gemini, groq, fallback
 }
 
 const uid = () =>
@@ -52,7 +69,13 @@ function guardarConversacion(id: string, mensajes: Mensaje[]) {
   try {
     localStorage.setItem(
       CLAVE_CONV,
-      JSON.stringify({ id, mensajes: mensajes.filter((m) => !m.error).slice(-30).map((m) => ({ id: m.id, role: m.role, content: m.content })) }),
+      JSON.stringify({
+        id,
+        mensajes: mensajes
+          .filter((m) => !m.error)
+          .slice(-30)
+          .map((m) => ({ id: m.id, role: m.role, content: m.content, acciones: m.acciones, fuente: m.fuente })),
+      }),
     );
   } catch {}
 }
@@ -121,6 +144,18 @@ const I = {
     </>
   ),
 };
+const ICONOS_MENU: Record<string, React.ReactNode> = {
+  cursos: <path d="M4 5.5A1.5 1.5 0 015.5 4H11v15H5.5A1.5 1.5 0 014 17.5v-12zM13 4h5.5A1.5 1.5 0 0120 5.5v12a1.5 1.5 0 01-1.5 1.5H13V4z" />,
+  certificado: <><circle cx="12" cy="9" r="5" /><path d="M9 13.5L8 20l4-2 4 2-1-6.5" /></>,
+  pago: <><rect x="3" y="6" width="18" height="12" rx="2" /><path d="M3 10h18M7 15h3" /></>,
+  cuenta: <><circle cx="12" cy="8" r="4" /><path d="M4 20a8 8 0 0116 0" /></>,
+  tecnico: <path d="M14.7 6.3a4 4 0 00-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 005.4-5.4l-2.5 2.5-2.4-.6-.6-2.4 2.5-2.5z" />,
+  contacto: <path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z" />,
+  faq: <><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 114 2c-.9.6-1.5 1.1-1.5 2.2M12 17h.01" /></>,
+  flecha: <path d="M9 6l6 6-6 6" />,
+  volver: <path d="M15 6l-6 6 6 6" />,
+};
+
 const Icono = ({ d, className = "h-4 w-4" }: { d: React.ReactNode; className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     {d}
@@ -135,7 +170,7 @@ const IconoWhatsApp = () => (
 /* ═════════════════════════════ Componente ═════════════════════════════ */
 export function JBAssist() {
   const pathname = usePathname();
-  const { status, chat } = useAssistantApi();
+  const { status, chat, menu } = useAssistantApi();
   const { esClaro } = useTheme();
   const [activo, setActivo] = useState(false);
   const [abierto, setAbierto] = useState(false);
@@ -147,6 +182,9 @@ export function JBAssist() {
   const [saludo, setSaludo] = useState(false);
   const [nombre, setNombre] = useState<string | undefined>();
   const [agitar, setAgitar] = useState(false);
+  const [pestana, setPestana] = useState<Pestana>("chat");
+  const [ayuda, setAyuda] = useState<MenuAyuda | null>(null);
+  const [grupo, setGrupo] = useState<string | null>(null);
   const listaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const oculto = OCULTO_EN.some((r) => r.test(pathname ?? ""));
@@ -164,6 +202,12 @@ export function JBAssist() {
     status().then((s) => setActivo(!!s?.enabled));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Temas de la "Ayuda rápida" (se cargan la primera vez que se abre la pestaña)
+  useEffect(() => {
+    if (pestana === "ayuda" && !ayuda) menu().then(setAyuda);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pestana]);
 
   // Burbuja de bienvenida una sola vez
   useEffect(() => {
@@ -211,8 +255,9 @@ export function JBAssist() {
     el.style.height = `${Math.min(120, el.scrollHeight)}px`;
   }, [texto]);
 
+  // intent: tema elegido con un botón (el servidor responde al instante, sin IA)
   const enviar = useCallback(
-    async (contenido?: string) => {
+    async (contenido?: string, intent?: string) => {
       const msg = (contenido ?? texto).trim();
       if (pensando) return;
       if (!msg) {
@@ -220,24 +265,31 @@ export function JBAssist() {
         setTimeout(() => setAgitar(false), 300);
         return;
       }
-      setTexto("");
+      setPestana("chat");
+      if (contenido === undefined) setTexto("");
       setMensajes((m) => [...m.map((x) => ({ ...x, nuevo: false })), { id: uid(), role: "user", content: msg }]);
       setPensando(true);
       const inicio = Date.now();
-      const r = await chat({ message: msg.slice(0, MAX), conversationId: convId, userName: nombre });
-      // Un mínimo de tiempo "pensando" para que la animación se lea
-      const espera = 900 - (Date.now() - inicio);
+      const r = await chat({ message: msg.slice(0, MAX), conversationId: convId, userName: nombre, intent });
+      // Un mínimo de tiempo "pensando" para que la animación se lea (las respuestas fijas son instantáneas)
+      const espera = 450 - (Date.now() - inicio);
       if (espera > 0) await new Promise((res) => setTimeout(res, espera));
       setPensando(false);
       setMensajes((m) => [
         ...m,
         r.success
-          ? { id: uid(), role: "assistant", content: r.reply || "…", nuevo: true }
+          ? { id: uid(), role: "assistant", content: r.reply || "…", nuevo: true, acciones: r.actions, fuente: r.provider }
           : { id: uid(), role: "assistant", content: r.error, error: true },
       ]);
     },
     [texto, pensando, chat, convId, nombre],
   );
+
+  const usarAccion = (a: Accion) => {
+    if (a.tipo === "respuesta") enviar(a.etiqueta, a.intent);
+    else if (a.tipo === "enlace") { setAbierto(false); window.location.href = a.url; }
+    else window.open(linkWhatsApp(a.texto), "_blank", "noopener,noreferrer");
+  };
 
   const reintentar = () => {
     const ultimoUsuario = [...mensajes].reverse().find((m) => m.role === "user");
@@ -257,7 +309,7 @@ export function JBAssist() {
 
   const enlaceWhatsApp = useMemo(() => {
     const t = `Hola, vengo de la plataforma Bootcamp${nombre ? `, soy ${nombre}` : ""}. Tengo una consulta.`;
-    return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(t)}`;
+    return linkWhatsApp(t);
   }, [nombre]);
 
   if (!activo || oculto) return null;
@@ -310,7 +362,94 @@ export function JBAssist() {
           </button>
         </header>
 
-        <div className="jb-body" ref={listaRef}>
+        <nav className="jb-tabs" role="tablist" aria-label="Secciones de JB Assist">
+          {([["chat", "Chat"], ["ayuda", "Ayuda rápida"], ["whatsapp", "WhatsApp"]] as [Pestana, string][]).map(([id, label]) => (
+            <button
+              key={id}
+              role="tab"
+              aria-selected={pestana === id}
+              className="jb-tab"
+              data-active={pestana === id || undefined}
+              onClick={() => { setPestana(id); if (id === "ayuda") setGrupo(null); }}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+
+        {pestana === "ayuda" && (
+          <div className="jb-body jb-pane">
+            {!ayuda ? (
+              <div className="jb-pane-load"><DotOrb size={44} state="thinking" light={esClaro} /></div>
+            ) : !grupo ? (
+              <>
+                <p className="jb-pane-title">¿Sobre qué necesitas ayuda?</p>
+                <p className="jb-pane-sub">Respuestas al instante. Elige un tema:</p>
+                <div className="jb-grid">
+                  {ayuda.groups.map((g, i) => (
+                    <button key={g.id} className="jb-tile" style={{ animationDelay: `${i * 45}ms` }} onClick={() => setGrupo(g.id)}>
+                      <span className="jb-tile-ico"><Icono d={ICONOS_MENU[g.icono] ?? ICONOS_MENU.faq} className="h-5 w-5" /></span>
+                      <span className="jb-tile-txt">{g.titulo}</span>
+                      <span className="jb-tile-n">{g.items.length}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              (() => {
+                const g = ayuda.groups.find((x) => x.id === grupo);
+                if (!g) return null;
+                return (
+                  <>
+                    <button className="jb-back" onClick={() => setGrupo(null)}><Icono d={ICONOS_MENU.volver} className="h-4 w-4" /> Temas</button>
+                    <p className="jb-pane-title">{g.titulo}</p>
+                    <div className="jb-list">
+                      {g.items.map((it, i) => (
+                        <button key={it.intent} className="jb-row" style={{ animationDelay: `${i * 40}ms` }} onClick={() => enviar(it.titulo, it.intent)}>
+                          <span>{it.titulo}</span>
+                          <Icono d={ICONOS_MENU.flecha} className="h-4 w-4 shrink-0" />
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                );
+              })()
+            )}
+          </div>
+        )}
+
+        {pestana === "whatsapp" && (
+          <div className="jb-body jb-pane">
+            <div className="jb-wa-card">
+              <span className="jb-wa-ico"><IconoWhatsApp /></span>
+              <div>
+                <p className="jb-pane-title">Habla con una persona</p>
+                <p className="jb-pane-sub">Pagos, certificados y consultas directas · {WHATSAPP_VISIBLE}</p>
+              </div>
+            </div>
+            <div className="jb-list">
+              {ATAJOS_WA.map((a, i) => (
+                <a
+                  key={a.titulo}
+                  className="jb-row jb-row-wa"
+                  style={{ animationDelay: `${i * 40}ms` }}
+                  href={linkWhatsApp(nombre ? `${a.texto} Soy ${nombre}.` : a.texto)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span>
+                    <b>{a.titulo}</b>
+                    <small>{a.detalle}</small>
+                  </span>
+                  <Icono d={ICONOS_MENU.flecha} className="h-4 w-4 shrink-0" />
+                </a>
+              ))}
+            </div>
+            <p className="jb-pane-note">Por seguridad, nunca envíes datos de tarjetas ni contraseñas por chat.</p>
+          </div>
+        )}
+
+        <div className="jb-body" ref={listaRef} hidden={pestana !== "chat"}>
           {mensajes.length === 0 && !pensando ? (
             <div className="jb-empty">
               <div className="jb-empty-orb">
@@ -318,18 +457,18 @@ export function JBAssist() {
                 <img src={AVATAR} alt="" className="jb-empty-cube" />
               </div>
               <h3>Hola{nombre ? `, ${nombre}` : ""} 👋</h3>
-              <p>Soy <b>{ASSISTANT_NAME}</b>, el asistente con IA de la plataforma. Pregúntame por cursos, inscripciones, certificados o cualquier duda.</p>
+              <p>Soy <b>{ASSISTANT_NAME}</b>, el asistente de la plataforma. Pregúntame por cursos, inscripciones, certificados o cualquier duda.</p>
               <div className="jb-chips">
                 {SUGERENCIAS.map((s, i) => (
-                  <button key={s} className="jb-chip" style={{ animationDelay: `${200 + i * 70}ms` }} onClick={() => enviar(s)}>
-                    {s}
+                  <button key={s.intent} className="jb-chip" style={{ animationDelay: `${200 + i * 70}ms` }} onClick={() => enviar(s.texto, s.intent)}>
+                    {s.texto}
                   </button>
                 ))}
               </div>
             </div>
           ) : (
             <div className="jb-thread">
-              {mensajes.map((m) =>
+              {mensajes.map((m, idx) =>
                 m.role === "user" ? (
                   <div key={m.id} className="jb-msg jb-msg-user">{m.content}</div>
                 ) : (
@@ -338,6 +477,26 @@ export function JBAssist() {
                     <div className="jb-msg-text">
                       <TextoRico texto={m.content} animar={!!m.nuevo} />
                       {m.error && <button className="jb-retry" onClick={reintentar}>Reintentar</button>}
+                      {/* Botones solo en la última respuesta, para no llenar el chat */}
+                      {idx === mensajes.length - 1 && !pensando && m.acciones && m.acciones.length > 0 && (
+                        <div className="jb-actions">
+                          {m.acciones.map((a, i) => (
+                            <button
+                              key={`${a.tipo}-${a.etiqueta}-${i}`}
+                              className={`jb-action jb-action-${a.tipo}`}
+                              style={{ animationDelay: `${250 + i * 60}ms` }}
+                              onClick={() => usarAccion(a)}
+                            >
+                              {a.tipo === "whatsapp" && <IconoWhatsApp />}
+                              {a.etiqueta}
+                              {a.tipo === "enlace" && <span aria-hidden="true">→</span>}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {(m.fuente === "gemini" || m.fuente === "groq" || m.fuente === "cache") && (
+                        <span className="jb-src">Generado con IA</span>
+                      )}
                     </div>
                   </div>
                 ),
@@ -354,7 +513,7 @@ export function JBAssist() {
           )}
         </div>
 
-        <footer className="jb-foot">
+        <footer className="jb-foot" hidden={pestana !== "chat"}>
           <form
             className={`jb-input ${agitar ? "jb-shake" : ""}`}
             data-ready={listo || undefined}
@@ -380,7 +539,7 @@ export function JBAssist() {
           </form>
           <div className="jb-foot-row">
             <a href={enlaceWhatsApp} target="_blank" rel="noopener noreferrer" className="jb-wa"><IconoWhatsApp /> Continuar en WhatsApp</a>
-            <span>Respuestas generadas con IA</span>
+            <span>Respuestas al instante</span>
           </div>
         </footer>
       </section>
