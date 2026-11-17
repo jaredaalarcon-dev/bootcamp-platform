@@ -6,6 +6,8 @@ import {
   UseGuards,
   Get,
   Request,
+  Ip,
+  Headers,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -21,8 +23,8 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({ summary: 'Registrar nuevo usuario' })
-  async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+  async register(@Body() registerDto: RegisterDto, @Ip() ip: string, @Headers('user-agent') userAgent?: string) {
+    return this.authService.register(registerDto, { ip, userAgent });
   }
 
   @Post('login')

@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsNotEmpty, Equals, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterDto {
@@ -20,4 +20,13 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   lastName: string;
+
+  @ApiProperty({ example: true, description: 'Debe ser true: acepta Términos y Política de Privacidad' })
+  @Equals(true, { message: 'Debes aceptar los Términos y Condiciones y la Política de Privacidad' })
+  acceptTerms: boolean;
+
+  @ApiProperty({ example: '2026-11-17', description: 'Versión de los términos que el usuario aceptó' })
+  @IsString()
+  @MaxLength(20)
+  termsVersion: string;
 }

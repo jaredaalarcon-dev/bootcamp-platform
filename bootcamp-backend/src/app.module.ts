@@ -11,6 +11,7 @@ import { CertificatesModule } from './certificates/certificates.module';
 import { ResourcesModule } from './resources/resources.module';
 import { BlogModule } from './blog/blog.module';
 import { AssistantModule } from './assistant/assistant.module';
+import { LegalModule } from './legal/legal.module';
 import configuration from './config/configuration';
 import { Category } from './courses/entities/category.entity';
 import { Course } from './courses/entities/course.entity';
@@ -24,6 +25,7 @@ import { BlogPost } from './blog/entities/blog-post.entity';
 import { BlogSubscriber } from './blog/entities/blog-subscriber.entity';
 import { AssistantMessage } from './assistant/entities/assistant-message.entity';
 import { AssistantSetting } from './assistant/entities/assistant-setting.entity';
+import { TermsAcceptance } from './legal/entities/terms-acceptance.entity';
 
 @Module({
   imports: [
@@ -51,6 +53,7 @@ import { AssistantSetting } from './assistant/entities/assistant-setting.entity'
           BlogSubscriber,
           AssistantMessage,
           AssistantSetting,
+          TermsAcceptance,
         ],
         synchronize: process.env.NODE_ENV !== 'production',
         logging: false,
@@ -69,6 +72,7 @@ import { AssistantSetting } from './assistant/entities/assistant-setting.entity'
     ResourcesModule,
     BlogModule,
     AssistantModule,
+    LegalModule,
   ],
   controllers: [],
   providers: [],

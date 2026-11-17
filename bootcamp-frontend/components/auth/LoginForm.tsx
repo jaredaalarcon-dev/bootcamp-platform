@@ -85,6 +85,12 @@ export function LoginForm() {
         <BottomGradient />
       </button>
 
+      <p className="text-center text-[11px] leading-snug text-gray-600">
+        Al iniciar sesión aceptas nuestros{" "}
+        <a href="/terminos" target="_blank" className="text-gray-400 underline-offset-2 hover:text-[#00C0E7] hover:underline">Términos</a> y la{" "}
+        <a href="/privacidad" target="_blank" className="text-gray-400 underline-offset-2 hover:text-[#00C0E7] hover:underline">Política de Privacidad</a>.
+      </p>
+
       {/* Register Link */}
       <p className="text-center text-sm text-gray-500">
         ¿No tienes cuenta?{" "}

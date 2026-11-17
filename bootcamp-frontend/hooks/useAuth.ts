@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { TERMS_VERSION } from "@/lib/legal";
 import axios from "axios";
 
 interface LoginResponse {
@@ -55,6 +56,7 @@ export function useAuth() {
     password: string,
     firstName: string,
     lastName: string,
+    acceptTerms = false,
   ) => {
     setLoading(true);
     setError(null);
@@ -67,6 +69,8 @@ export function useAuth() {
           password,
           firstName,
           lastName,
+          acceptTerms,
+          termsVersion: TERMS_VERSION,
         },
       );
 

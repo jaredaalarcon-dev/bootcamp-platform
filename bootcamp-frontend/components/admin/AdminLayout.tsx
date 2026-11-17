@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { TermsGate } from "@/components/legal/TermsGate";
 
 const NAV = [
   {
@@ -122,6 +123,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen bg-[#0d0d0d] overflow-hidden">
+      <TermsGate />
       {/* Sidebar desktop */}
       <div className="hidden lg:flex lg:w-60 lg:flex-col lg:shrink-0">{sidebar}</div>
 

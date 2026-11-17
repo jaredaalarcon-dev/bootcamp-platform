@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { LegalService } from '../legal/legal.service';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +22,7 @@ export class AuthService {
   constructor(
     private jwtService: JwtService,
     private configService: ConfigService,
+    private legalService: LegalService,
   ) {
     const supabaseUrl = this.configService.get<string>('SUPABASE_URL') || '';
     const supabaseKey = this.configService.get<string>('SUPABASE_KEY') || '';
@@ -35,8 +37,11 @@ export class AuthService {
     );
   }
 
-  async register(registerDto: RegisterDto) {
-    const { email, password, firstName, lastName } = registerDto;
+  async register(
+    registerDto: RegisterDto,
+    origen: { ip?: string; userAgent?: string } = {},
+  ) {
+    const { email, password, firstName, lastName, termsVersion } = registerDto;
 
     // PASO 1: crear el usuario en Supabase Auth
     const { data, error } = await this.supabase.auth.signUp({
@@ -84,6 +89,19 @@ export class AuthService {
       throw new BadRequestException(
         `No se pudo crear el perfil: ${perfilError.message}`,
       );
+    }
+
+    // PASO 4: guardar la aceptación de los Términos y la Política de Privacidad
+    // (prueba del consentimiento). Si la versión no coincide, se le volverá
+    // a pedir al iniciar sesión; el registro no se detiene por eso.
+    try {
+      await this.legalService.accept(user.id, termsVersion, {
+        source: 'registro',
+        ip: origen.ip,
+        userAgent: origen.userAgent,
+      });
+    } catch {
+      /* se pedirá de nuevo en el primer inicio de sesión */
     }
 
     return {
