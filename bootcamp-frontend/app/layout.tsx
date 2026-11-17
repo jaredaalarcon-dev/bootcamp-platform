@@ -1,5 +1,6 @@
 // src/app/layout.tsx
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import { ThemeSync } from "@/components/ui/ThemeSync";
@@ -18,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: temaInicial }} />
+        <Script id="tema-inicial" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: temaInicial }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Anton&family=Great+Vibes&family=Playfair+Display:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet" />

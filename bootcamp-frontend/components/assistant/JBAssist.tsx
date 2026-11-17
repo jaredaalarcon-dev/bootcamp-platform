@@ -52,7 +52,7 @@ function guardarConversacion(id: string, mensajes: Mensaje[]) {
   try {
     localStorage.setItem(
       CLAVE_CONV,
-      JSON.stringify({ id, mensajes: mensajes.filter((m) => !m.error).slice(-30).map(({ nuevo, ...m }) => m) }),
+      JSON.stringify({ id, mensajes: mensajes.filter((m) => !m.error).slice(-30).map((m) => ({ id: m.id, role: m.role, content: m.content })) }),
     );
   } catch {}
 }

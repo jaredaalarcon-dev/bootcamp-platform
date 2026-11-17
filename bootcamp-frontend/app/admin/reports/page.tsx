@@ -4,7 +4,7 @@
 // cambian solos entre modo oscuro y claro (variables .rx en globals.css).
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useAdminApi, Analytics, CourseAnalytics, Periodo } from "@/hooks/useAdminApi";
 
 /* ═════════════════════════════ Utilidades ═════════════════════════════ */
@@ -160,7 +160,7 @@ function Sparkline({ datos }: { datos: number[] }) {
   const max = Math.max(...datos, 1);
   const pts = datos.map((v, i) => [(i / Math.max(datos.length - 1, 1)) * W, H - 3 - (v / max) * (H - 6)]);
   const linea = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join("");
-  const id = useMemo(() => `sp${Math.random().toString(36).slice(2, 8)}`, []);
+  const id = `sp${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="h-9 w-28" preserveAspectRatio="none" aria-hidden>
       <defs>
@@ -400,14 +400,16 @@ function Dona({ estado }: { estado: Analytics["status"] }) {
   const totalAnim = useContador(total);
   const S = 180, R = 80, r = 55, cx = S / 2, cy = S / 2;
 
-  const arcos = useMemo(() => {
-    let a0 = -Math.PI / 2;
-    const conValor = valores.filter((v) => v > 0).length;
+  const clave = valores.join(",");
+  const arcos = (() => {
+    const vals = clave.split(",").map(Number);
+    const conValor = vals.filter((v) => v > 0).length;
     const hueco = conValor > 1 ? 0.025 : 0; // separación entre segmentos
-    return valores.map((v) => {
-      const ang = total ? (v / total) * Math.PI * 2 : 0;
+    const angulo = (v: number) => (total ? (v / total) * Math.PI * 2 : 0);
+    return vals.map((v, i) => {
+      const a0 = -Math.PI / 2 + vals.slice(0, i).reduce((s, x) => s + angulo(x), 0);
+      const ang = angulo(v);
       const ini = a0 + (v ? hueco / 2 : 0), fin = a0 + ang - (v ? hueco / 2 : 0);
-      a0 += ang;
       if (v === 0) return "";
       if (ang >= Math.PI * 2 - 1e-6) {
         // Un solo estado: anillo completo
@@ -417,7 +419,7 @@ function Dona({ estado }: { estado: Analytics["status"] }) {
       const p = (rad: number, a: number) => `${cx + rad * Math.cos(a)},${cy + rad * Math.sin(a)}`;
       return `M${p(R, ini)}A${R},${R} 0 ${grande} 1 ${p(R, fin)}L${p(r, fin)}A${r},${r} 0 ${grande} 0 ${p(r, ini)}Z`;
     });
-  }, [valores.join(","), total]);
+  })();
 
   if (!total) return <Vacio texto="Todavía no hay inscripciones" />;
   const sel = hover !== null ? hover : null;
@@ -703,8 +705,8 @@ export default function AdminReportsPage() {
   const periodoTxt = RANGOS.find((r) => r.d === dias)?.l ?? "";
 
   const ordenar = (k: Orden) => setOrden((o) => ({ k, asc: o.k === k ? !o.asc : k === "title" }));
-  const Th = ({ k, children, className = "" }: { k: Orden; children: React.ReactNode; className?: string }) => (
-    <th className={`px-4 py-3 font-medium ${className}`}>
+  const th = (k: Orden, children: React.ReactNode, className = "") => (
+    <th key={k} className={`px-4 py-3 font-medium ${className}`}>
       <button onClick={() => ordenar(k)} className="inline-flex items-center gap-1 hover:text-(--rx-ink)">
         {children}
         <span className={`text-[9px] ${orden.k === k ? "text-(--rx-accent)" : "opacity-30"}`}>{orden.k === k && orden.asc ? "▲" : "▼"}</span>
@@ -900,10 +902,10 @@ export default function AdminReportsPage() {
                 <table className="w-full min-w-[640px] text-sm">
                   <thead>
                     <tr className="border-y border-(--rx-border) text-left text-xs text-(--rx-ink-3)">
-                      <Th k="title">Curso</Th>
-                      <Th k="enrollments" className="text-right">Inscritos</Th>
-                      <Th k="completions" className="text-right">Certificados</Th>
-                      <Th k="avgProgress">Avance promedio</Th>
+                      {th("title", "Curso")}
+                      {th("enrollments", "Inscritos", "text-right")}
+                      {th("completions", "Certificados", "text-right")}
+                      {th("avgProgress", "Avance promedio")}
                       <th className="px-4 py-3 font-medium">Estado</th>
                     </tr>
                   </thead>

@@ -11,6 +11,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('Auth')
@@ -32,8 +33,8 @@ export class AuthController {
 
   @Post('refresh')
   @ApiOperation({ summary: 'Renovar token JWT' })
-  async refresh(@Body('refreshToken') refreshToken: string) {
-    return this.authService.refreshToken(refreshToken);
+  async refresh(@Body() dto: RefreshTokenDto) {
+    return this.authService.refreshToken(dto.refreshToken);
   }
 
   @Post('logout')

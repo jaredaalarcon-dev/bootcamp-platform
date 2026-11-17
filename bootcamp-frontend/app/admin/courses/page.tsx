@@ -22,7 +22,7 @@ export default function AdminCoursesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadData = async () => {
+  async function loadData() {
     setLoading(true);
     const [coursesResult, categoriesResult] = await Promise.all([
       getCourses(),

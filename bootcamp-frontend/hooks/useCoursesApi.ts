@@ -1,53 +1,6 @@
 // src/hooks/useCoursesApi.ts
 import { apiClient } from "@/lib/api-client";
-import { useState, useEffect } from "react";
-
-interface Category {
-  id: string;
-  name: string;
-  description?: string;
-}
-
-interface Video {
-  id: string;
-  title: string;
-  videoUrl: string;
-  duration?: number;
-}
-
-interface Lesson {
-  id: string;
-  title: string;
-  description?: string;
-  orderNumber?: number;
-  video?: Video;
-}
-
-interface Module {
-  id: string;
-  title: string;
-  description?: string;
-  orderNumber?: number;
-  lessons?: Lesson[];
-}
-
-interface Course {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  status: string;
-  category?: Category;
-  modules?: Module[];
-}
-
-interface Enrollment {
-  id: string;
-  status: string;
-  userId: string;
-  courseId: string;
-  course?: Course;
-}
+import { useState } from "react";
 
 export function useCoursesApi() {
   const [loading, setLoading] = useState(false);

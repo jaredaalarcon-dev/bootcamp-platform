@@ -1,7 +1,7 @@
 // src/components/ui/StudentLayout.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -71,7 +71,10 @@ export function StudentLayout({ children, topbar }: Props) {
   const pathname = usePathname();
   const router   = useRouter();
   const { getUser, logout } = useAuth();
-  const user = getUser();
+  // El usuario vive en localStorage: se lee después de montar para que
+  // el HTML del servidor y el del navegador coincidan.
+  const [user, setUser] = useState<ReturnType<typeof getUser>>(null);
+  useEffect(() => { setUser(getUser()); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = () => { logout(); router.push("/login"); };
@@ -80,7 +83,7 @@ export function StudentLayout({ children, topbar }: Props) {
   const isActive = (href: string) =>
     pathname === href || (href !== "/dashboard" && pathname.startsWith(href + "/"));
 
-  const Sidebar = () => (
+  const sidebar = (
     <aside className="flex flex-col h-full bg-[#111827] border-r border-[rgba(0,192,231,0.12)]">
       {/* Logo */}
       <div className="px-5 pt-6 pb-4">
@@ -141,7 +144,7 @@ export function StudentLayout({ children, topbar }: Props) {
     <div className="flex h-screen bg-[#0d0d0d] overflow-hidden">
       {/* Sidebar desktop */}
       <div className="hidden lg:flex lg:w-60 lg:flex-col lg:shrink-0">
-        <Sidebar />
+        {sidebar}
       </div>
 
       {/* Mobile sidebar */}
@@ -149,7 +152,7 @@ export function StudentLayout({ children, topbar }: Props) {
         <div className="fixed inset-0 z-40 flex lg:hidden">
           <div className="fixed inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
           <div className="relative flex w-60 flex-col z-50">
-            <Sidebar />
+            {sidebar}
           </div>
         </div>
       )}

@@ -63,7 +63,7 @@ export default function CourseDetailPage() {
     if (courseId) { loadCourse(); loadEnrollment(); loadProgress(); }
   }, [courseId]);
 
-  const loadCourse = async () => {
+  async function loadCourse() {
     const r = await getCourseById(courseId);
     if (r.success && r.data) {
       setCourse(r.data);
@@ -72,11 +72,11 @@ export default function CourseDetailPage() {
       if (first) setSelectedLesson(first);
     }
   };
-  const loadEnrollment = async () => {
+  async function loadEnrollment() {
     const r = await checkEnrollment(courseId);
     setEnrolled(r.enrolled);
   };
-  const loadProgress = async () => {
+  async function loadProgress() {
     const r = await getCourseProgress(courseId);
     if (r.success && r.data) {
       setCompletadas(r.data.completedLessonIds || []);

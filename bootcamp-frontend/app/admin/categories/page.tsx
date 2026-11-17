@@ -23,7 +23,7 @@ export default function AdminCategoriesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadCategories = async () => {
+  async function loadCategories() {
     setLoading(true);
     const result = await getCategories();
     if (result.success) {

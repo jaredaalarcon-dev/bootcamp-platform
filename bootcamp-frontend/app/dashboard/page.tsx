@@ -14,6 +14,20 @@ function StatusBadge({ pct }: { pct: number }) {
   return              <span className="absolute top-2 left-2 bg-gray-700 text-gray-300 text-xs font-bold px-2 py-0.5 rounded-full">Pendiente</span>;
 }
 
+function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string | number; label: string }) {
+  return (
+  <div className="bg-[#111827] border border-[rgba(0,192,231,0.15)] rounded-xl p-5 flex items-center gap-4">
+    <div className="w-12 h-12 rounded-xl bg-[rgba(0,192,231,0.1)] border border-[rgba(0,192,231,0.2)] flex items-center justify-center text-[#00C0E7]">
+      {icon}
+    </div>
+    <div>
+      <p className="font-brand text-[#00C0E7] text-3xl leading-none">{value}</p>
+      <p className="text-gray-400 text-xs mt-1">{label}</p>
+    </div>
+  </div>
+);
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const { getUser, getToken } = useAuth();
@@ -42,18 +56,6 @@ export default function DashboardPage() {
 
   const nombre = user?.firstName ?? user?.email?.split("@")[0] ?? "Estudiante";
   const recientes = cursos.slice(0, 3);
-
-  const StatCard = ({ icon, value, label }: { icon: React.ReactNode; value: string | number; label: string }) => (
-    <div className="bg-[#111827] border border-[rgba(0,192,231,0.15)] rounded-xl p-5 flex items-center gap-4">
-      <div className="w-12 h-12 rounded-xl bg-[rgba(0,192,231,0.1)] border border-[rgba(0,192,231,0.2)] flex items-center justify-center text-[#00C0E7]">
-        {icon}
-      </div>
-      <div>
-        <p className="font-brand text-[#00C0E7] text-3xl leading-none">{value}</p>
-        <p className="text-gray-400 text-xs mt-1">{label}</p>
-      </div>
-    </div>
-  );
 
   return (
     <StudentLayout
@@ -96,7 +98,7 @@ export default function DashboardPage() {
             </div>
             <div className="hidden md:block text-right max-w-xs">
               <p className="text-white/80 text-sm italic leading-relaxed">
-                "La educación es la clave para un mejor futuro."
+                &ldquo;La educación es la clave para un mejor futuro.&rdquo;
               </p>
             </div>
           </div>

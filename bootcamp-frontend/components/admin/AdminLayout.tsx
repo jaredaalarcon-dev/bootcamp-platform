@@ -1,7 +1,7 @@
 // src/components/admin/AdminLayout.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -52,14 +52,17 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const router   = useRouter();
   const { getUser, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const user = getUser();
+  // El usuario vive en localStorage: se lee después de montar para que
+  // el HTML del servidor y el del navegador coincidan.
+  const [user, setUser] = useState<ReturnType<typeof getUser>>(null);
+  useEffect(() => { setUser(getUser()); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLogout = () => { logout(); router.push("/admin/login"); };
 
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
 
-  const Sidebar = () => (
+  const sidebar = (
     <aside className="flex flex-col h-full bg-[#111827] border-r border-[rgba(231,30,36,0.2)]">
       {/* Logo */}
       <div className="px-5 pt-6 pb-4">
@@ -120,13 +123,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen bg-[#0d0d0d] overflow-hidden">
       {/* Sidebar desktop */}
-      <div className="hidden lg:flex lg:w-60 lg:flex-col lg:shrink-0"><Sidebar /></div>
+      <div className="hidden lg:flex lg:w-60 lg:flex-col lg:shrink-0">{sidebar}</div>
 
       {/* Mobile */}
       {mobileOpen && (
         <div className="fixed inset-0 z-40 flex lg:hidden">
           <div className="fixed inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
-          <div className="relative flex w-60 flex-col z-50"><Sidebar /></div>
+          <div className="relative flex w-60 flex-col z-50">{sidebar}</div>
         </div>
       )}
 

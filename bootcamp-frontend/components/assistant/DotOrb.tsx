@@ -51,8 +51,10 @@ export function DotOrb({
   const ref = useRef<HTMLCanvasElement>(null);
   const estado = useRef(state);
   const claro = useRef(light);
-  estado.current = state;
-  claro.current = light;
+  useEffect(() => {
+    estado.current = state;
+    claro.current = light;
+  }, [state, light]);
 
   useEffect(() => {
     const canvas = ref.current;

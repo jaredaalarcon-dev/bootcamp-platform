@@ -47,7 +47,7 @@ export default function CourseContentPage() {
   useEffect(() => { if (courseId) cargarTodo(); }, [courseId]);
 
   // ── Carga ────────────────────────────────────────────────────────────────
-  const cargarTodo = async () => {
+  async function cargarTodo() {
     setCargando(true);
     const [curso, contenido] = await Promise.all([
       getCourseById(courseId),
