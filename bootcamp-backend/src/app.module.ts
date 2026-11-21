@@ -31,6 +31,7 @@ import { CertificateProfile } from './certificates/entities/certificate-profile.
 import { IssuedCertificate } from './certificates/entities/issued-certificate.entity';
 import { Complaint } from './complaints/entities/complaint.entity';
 import { ComplaintsModule } from './complaints/complaints.module';
+import { HealthController } from './health/health.controller';
 
 @Module({
   imports: [
@@ -84,7 +85,7 @@ import { ComplaintsModule } from './complaints/complaints.module';
     LegalModule,
     ComplaintsModule,
   ],
-  controllers: [],
+  controllers: [HealthController],
   providers: [],
 })
 export class AppModule {}

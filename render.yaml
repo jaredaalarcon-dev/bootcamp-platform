@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+# render.yaml — Despliegue del backend en Render (plan gratuito).
+# Render lo lee al crear un "Blueprint" desde tu repositorio de GitHub.
+# Las claves secretas NO van aquí: Render te las pide al crear el servicio.
+services:
+  - type: web
+    name: sijb-bootcamp-api
+    runtime: node
+    plan: free
+    region: virginia          # la región de Render más cercana a Perú
+    rootDir: bootcamp-backend
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /health
+    autoDeployTrigger: commit # cada git push a main vuelve a desplegar
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: JWT_EXPIRES_IN
+        value: 24h
+      # ── Te las pedirá Render (cópialas de tu archivo .env) ──
+      - key: FRONTEND_URL        # la URL que te dé Vercel, ej. https://sijb-bootcamp.vercel.app
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false

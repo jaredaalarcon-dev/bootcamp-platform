@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Plantilla de variables (sin valores reales)
 !.env.example
+
+# Carpeta generada por npm run build:cpanel
+/deploy-cpanel/

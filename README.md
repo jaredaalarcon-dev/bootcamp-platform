@@ -47,3 +47,12 @@ Los archivos `.env` reales **nunca** se suben al repositorio.
 - Row Level Security activado en todas las tablas públicas de Supabase.
 - Las claves privadas (Supabase service role, JWT, Gemini) solo viven en el servidor.
 - Validación de datos en todas las rutas de la API.
+
+## Despliegue
+
+- **Gratis (Vercel + Render + Supabase):** sigue la guía paso a paso en [`docs/DESPLIEGUE.md`](docs/DESPLIEGUE.md).
+  - `render.yaml`: configuración del backend en Render.
+  - `.github/workflows/keep-alive.yml`: visita `/health` cada 10 minutos para que el backend no se apague.
+  - `GET /health`: estado del backend y de la base de datos.
+- **cPanel (más adelante):** `npm run build:cpanel` en el frontend genera la carpeta `deploy-cpanel/`; detalles en la misma guía.
+- **Base de datos nueva desde cero:** `bootcamp-backend/database/schema.sql`.

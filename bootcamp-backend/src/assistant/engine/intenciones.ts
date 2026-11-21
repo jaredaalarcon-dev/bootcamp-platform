@@ -193,7 +193,7 @@ export const INTENCIONES: Intencion[] = [
     id: 'pagar_certificado',
     titulo: 'Pagos',
     categoria: 'certificados',
-    ejemplos: ['como pago', 'medios de pago', 'yape', 'plin', 'transferencia', 'pagar el certificado', 'donde pago', 'formas de pago', 'ya pague', 'envie mi pago'],
+    ejemplos: ['como pago', 'medios de pago', 'yape', 'plin', 'transferencia', 'pagar el certificado', 'como pago el certificado', 'pago del certificado', 'pague mi certificado', 'pagar con tarjeta', 'donde pago', 'formas de pago', 'ya pague', 'envie mi pago'],
     claves: ['pago', 'pague', 'yape', 'plin', 'transferencia', 'deposito', 'voucher'],
     respuesta: `Los pagos se coordinan **solo por WhatsApp** al ${W}: ahí te indicamos el precio, los medios de pago y te enviamos el comprobante. Si ya pagaste, envíanos tu constancia de pago por ese mismo chat y habilitamos tu certificado.\n\nPor seguridad, nunca compartas datos de tarjetas en este chat.`,
     acciones: [wa('Ir a WhatsApp', 'Hola, quiero coordinar el pago de mi certificado del Bootcamp SIJB.')],
