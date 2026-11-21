@@ -29,6 +29,8 @@ import { AssistantFaq } from './assistant/entities/assistant-faq.entity';
 import { TermsAcceptance } from './legal/entities/terms-acceptance.entity';
 import { CertificateProfile } from './certificates/entities/certificate-profile.entity';
 import { IssuedCertificate } from './certificates/entities/issued-certificate.entity';
+import { Complaint } from './complaints/entities/complaint.entity';
+import { ComplaintsModule } from './complaints/complaints.module';
 
 @Module({
   imports: [
@@ -60,6 +62,7 @@ import { IssuedCertificate } from './certificates/entities/issued-certificate.en
           TermsAcceptance,
           CertificateProfile,
           IssuedCertificate,
+          Complaint,
         ],
         synchronize: process.env.NODE_ENV !== 'production',
         logging: false,
@@ -79,6 +82,7 @@ import { IssuedCertificate } from './certificates/entities/issued-certificate.en
     BlogModule,
     AssistantModule,
     LegalModule,
+    ComplaintsModule,
   ],
   controllers: [],
   providers: [],

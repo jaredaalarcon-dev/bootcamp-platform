@@ -1,6 +1,7 @@
 // src/app/page.tsx
 "use client";
 
+import { SiteFooter } from "@/components/ui/SiteFooter";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -73,13 +74,7 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className="border-t border-gray-900 py-6 text-center text-xs text-gray-600">
-        © {new Date().getFullYear()} Soluciones Integrales JB S.A.C. Todos los derechos reservados.
-        <div className="mt-2 flex justify-center gap-4">
-          <a href="/terminos" className="hover:text-[#00C0E7]">Términos y Condiciones</a>
-          <a href="/privacidad" className="hover:text-[#00C0E7]">Política de Privacidad</a>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

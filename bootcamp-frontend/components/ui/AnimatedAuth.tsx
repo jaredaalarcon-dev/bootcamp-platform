@@ -262,7 +262,9 @@ export function AuthShell({
           </div>
         </div>
         <p className="pb-6 text-center text-xs text-gray-600">
-          © {new Date().getFullYear()} Soluciones Integrales JB S.A.C. Todos los derechos reservados.
+          © {new Date().getFullYear()} Soluciones Integrales JB. Todos los derechos reservados.
+          {" · "}
+          <a href="/libro-de-reclamaciones" className="hover:text-[#E31E24]">Libro de Reclamaciones</a>
         </p>
       </div>
     </div>

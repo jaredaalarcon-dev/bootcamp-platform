@@ -142,7 +142,7 @@ export function LegalDocument({ tipo, titulo, intro, secciones }: Props) {
             </div>
           </div>
           <p className="mt-6 text-xs text-gray-600">
-            {EMPRESA.titular} · RUC {EMPRESA.ruc} · Nombre comercial: {EMPRESA.nombreComercial}
+            {EMPRESA.titular} · RUC {EMPRESA.ruc} · Nombre comercial: {EMPRESA.nombreComercial} · Domicilio: {EMPRESA.direccion}
           </p>
         </article>
       </div>

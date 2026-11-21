@@ -14,6 +14,9 @@ export const EMPRESA = {
   ruc: "10410697551",
   nombreComercial: "Soluciones Integrales JB",
   correo: "consultas@solucionesintegralesjb.com",
+  direccion: "Calle López de Zúñiga 547, Chancay, Huaral, Lima (C.P. 15131)",
+  direccionCorta: "C. López de Zúñiga 547, Chancay 15131",
+  mapa: "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("Calle López de Zúñiga 547, Chancay 15131, Perú"),
   whatsapp: WHATSAPP_VISIBLE,
   whatsappLink: enlaceWhatsApp(),
   plataforma: "Plataforma Bootcamp de Soluciones Integrales JB",
@@ -34,7 +37,7 @@ export const TERMINOS: SeccionLegal[] = [
     id: "quienes-somos",
     titulo: "Quiénes somos",
     parrafos: [
-      `La ${E.plataforma} (en adelante, «la Plataforma») es operada por ${E.titular}, con RUC ${E.ruc}, que desarrolla sus actividades con el nombre comercial «${E.nombreComercial}» (en adelante, «la Empresa»).`,
+      `La ${E.plataforma} (en adelante, «la Plataforma») es operada por ${E.titular}, con RUC ${E.ruc} y domicilio en ${E.direccion}, que desarrolla sus actividades con el nombre comercial «${E.nombreComercial}» (en adelante, «la Empresa»).`,
       `Puedes comunicarte con nosotros al correo ${E.correo} o por WhatsApp al ${E.whatsapp}.`,
     ],
   },
@@ -155,7 +158,7 @@ export const PRIVACIDAD: SeccionLegal[] = [
     id: "responsable",
     titulo: "Responsable de tus datos",
     parrafos: [
-      `El responsable del tratamiento de tus datos personales es ${E.titular}, con RUC ${E.ruc}, nombre comercial «${E.nombreComercial}». Contacto: ${E.correo} · WhatsApp ${E.whatsapp}.`,
+      `El responsable del tratamiento de tus datos personales es ${E.titular}, con RUC ${E.ruc}, nombre comercial «${E.nombreComercial}», con domicilio en ${E.direccion}. Contacto: ${E.correo} · WhatsApp ${E.whatsapp}.`,
       "Tratamos tus datos conforme a la Ley N.° 29733, Ley de Protección de Datos Personales, y su Reglamento.",
     ],
   },
@@ -167,6 +170,7 @@ export const PRIVACIDAD: SeccionLegal[] = [
       "Datos de acceso: tu contraseña, que se guarda cifrada y nadie de la Empresa puede ver.",
       "Datos académicos: cursos en los que te inscribes, avance, lecciones completadas, certificados y constancias.",
       "Datos para tu certificado, solo si decides registrarlos: nombre completo, tipo y número de documento de identidad y una foto formal. La foto se guarda en un almacenamiento privado y solo se usa en tu certificado.",
+      "Si usas el Libro de Reclamaciones: nombre, documento, domicilio, teléfono, correo y el detalle de tu reclamo o queja, que usamos solo para atenderlo y conservar el registro que exige la ley.",
       "Estado de pago del certificado (pagado o pendiente). Los pagos se coordinan por WhatsApp; la Plataforma no guarda datos bancarios ni de tarjetas.",
       "Mensajes que escribes al asistente JB Assist.",
       "Datos técnicos: dirección IP, tipo de navegador y la fecha en que aceptaste estos documentos.",
@@ -202,6 +206,7 @@ export const PRIVACIDAD: SeccionLegal[] = [
     lista: [
       "Supabase: base de datos, autenticación y almacenamiento de archivos.",
       "Google (Gemini): procesa los mensajes que escribes a JB Assist para generar las respuestas.",
+      "Vercel: alojamiento de la página web y estadísticas anónimas de visitas (Vercel Web Analytics, sin cookies).",
       "Proveedores de alojamiento web y de envío de correos.",
     ],
     nota: "Algunos de estos proveedores tienen servidores fuera del Perú, por lo que tus datos pueden almacenarse o procesarse en otros países (transferencia internacional), siempre con medidas para protegerlos.",
@@ -243,7 +248,8 @@ export const PRIVACIDAD: SeccionLegal[] = [
     id: "almacenamiento",
     titulo: "Almacenamiento en tu navegador",
     parrafos: [
-      "La Plataforma guarda en tu navegador la información necesaria para funcionar: tu sesión, tu preferencia de modo claro u oscuro y la conversación reciente con JB Assist. No usamos cookies publicitarias.",
+      "La Plataforma guarda en tu navegador la información necesaria para funcionar: tu sesión, tu preferencia de modo claro u oscuro y la conversación reciente con JB Assist. No usamos cookies publicitarias ni de rastreo.",
+      "Para mejorar la Plataforma medimos visitas de forma anónima y agregada (páginas vistas, país y tipo de dispositivo) con Vercel Web Analytics, que no usa cookies ni nos permite identificarte.",
     ],
   },
   {

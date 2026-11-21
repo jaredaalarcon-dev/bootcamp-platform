@@ -5,6 +5,7 @@
 // la cabecera de la página principal.
 "use client";
 
+import { SiteFooter } from "@/components/ui/SiteFooter";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -342,13 +343,7 @@ export default function BlogPage() {
         </div>
       </header>
       <ContenidoBlog logueado={false} />
-      <footer className="border-t border-gray-900 py-6 text-center text-xs text-gray-600">
-        © {new Date().getFullYear()} Soluciones Integrales JB S.A.C. Todos los derechos reservados.
-        <div className="mt-2 flex justify-center gap-4">
-          <a href="/terminos" className="hover:text-[#00C0E7]">Términos y Condiciones</a>
-          <a href="/privacidad" className="hover:text-[#00C0E7]">Política de Privacidad</a>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

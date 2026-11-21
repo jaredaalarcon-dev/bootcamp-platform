@@ -4,7 +4,7 @@ import { LegalDocument } from "@/components/legal/LegalDocument";
 import { PRIVACIDAD } from "@/lib/legal";
 
 export const metadata: Metadata = {
-  title: "Política de Privacidad — Soluciones Integrales JB",
+  title: "Política de Privacidad",
   description: "Cómo tratamos y protegemos tus datos personales en la Plataforma Bootcamp.",
 };
 

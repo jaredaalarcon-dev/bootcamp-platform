@@ -4,7 +4,7 @@ import { LegalDocument } from "@/components/legal/LegalDocument";
 import { TERMINOS } from "@/lib/legal";
 
 export const metadata: Metadata = {
-  title: "Términos y Condiciones — Soluciones Integrales JB",
+  title: "Términos y Condiciones",
   description: "Condiciones de uso de la Plataforma Bootcamp de Soluciones Integrales JB.",
 };
 

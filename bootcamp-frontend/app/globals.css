@@ -604,3 +604,11 @@ html.light .rx {
   .jb-pane, .jb-tile, .jb-row, .jb-action { animation: none !important; }
   .jb-word, .jb-msg, .jb-chip, .jb-empty { animation: none !important; }
 }
+
+/* Página 404: el cubo flota suavemente */
+@keyframes nf-flota { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.nf-flota { animation: nf-flota 3.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .nf-flota { animation: none; } }
+
+/* Al imprimir (por ejemplo, la hoja de reclamación) no se muestra el asistente */
+@media print { .jb-root { display: none !important; } }

@@ -66,11 +66,16 @@ export function RegisterForm() {
     );
 
     if (result.success) {
-      toast.success("¡Cuenta creada correctamente! Iniciando sesión...");
-      // Aquí podrías hacer login automático si lo deseas
+      toast.success("¡Cuenta creada correctamente!");
+      // Pantalla de bienvenida con los siguientes pasos
+      try {
+        sessionStorage.setItem("sijb-nuevo-nombre", formData.firstName.trim().split(" ")[0]);
+      } catch {
+        /* navegador sin almacenamiento */
+      }
       setTimeout(() => {
-        router.push("/login");
-      }, 1500);
+        router.push("/bienvenida");
+      }, 800);
     } else {
       toast.error(result.error || "Error al crear cuenta");
     }

@@ -4,6 +4,7 @@
 import { useRef, useState } from "react";
 import { useUploadApi } from "@/hooks/useUploadApi";
 import toast from "react-hot-toast";
+import { comprimirImagen } from "@/lib/comprimir-imagen";
 
 interface ImageUploadProps {
   currentUrl?: string;
@@ -13,6 +14,8 @@ interface ImageUploadProps {
 
 const TIPOS_ACEPTADOS = "image/jpeg,image/png,image/webp,image/gif";
 const MAX_MB = 5;
+// Antes de optimizar se aceptan fotos más pesadas (por ejemplo, de un celular)
+const MAX_MB_ORIGINAL = 20;
 
 export function ImageUpload({ currentUrl, onUpload, disabled }: ImageUploadProps) {
   const { uploadImage, uploading } = useUploadApi();
@@ -23,7 +26,13 @@ export function ImageUpload({ currentUrl, onUpload, disabled }: ImageUploadProps
 
   const displayUrl = preview || currentUrl;
 
-  const handleFile = async (file: File) => {
+  const handleFile = async (original: File) => {
+    if (original.size > MAX_MB_ORIGINAL * 1024 * 1024) {
+      toast.error(`La imagen no puede superar los ${MAX_MB_ORIGINAL} MB`);
+      return;
+    }
+    // Optimiza la imagen (más liviana = la página carga más rápido)
+    const file = await comprimirImagen(original);
     // Validar tamaño en el cliente para dar feedback inmediato
     if (file.size > MAX_MB * 1024 * 1024) {
       toast.error(`La imagen no puede superar los ${MAX_MB} MB`);
@@ -123,7 +132,7 @@ export function ImageUpload({ currentUrl, onUpload, disabled }: ImageUploadProps
                 <span className="text-[#00C0E7]">haz clic para seleccionar</span>
               </p>
               <p className="mt-1 text-xs text-gray-500">
-                JPG, PNG, WEBP o GIF · máx. {MAX_MB} MB
+                JPG, PNG, WEBP o GIF · máx. {MAX_MB_ORIGINAL} MB · se optimiza automáticamente
               </p>
             </>
           )}

@@ -2,13 +2,32 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Toaster } from "react-hot-toast";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { ThemeSync } from "@/components/ui/ThemeSync";
 import { JBAssist } from "@/components/assistant/JBAssist";
 
+const SITIO = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
 export const metadata: Metadata = {
-  title: "Soluciones Integrales JB — Plataforma de Cursos",
-  description: "Plataforma educativa de Soluciones Integrales JB — Tu mejor opción tecnológica",
+  metadataBase: new URL(SITIO),
+  // Cada página pone su propio título; se muestra como "Mis cursos · SIJB Bootcamp"
+  title: {
+    default: "SIJB Bootcamp — Cursos de tecnología de Soluciones Integrales JB",
+    template: "%s · SIJB Bootcamp",
+  },
+  description:
+    "Cursos virtuales de tecnología a tu ritmo: desarrollo web, apps móviles con IA, automatización, datos y ciberseguridad. Constancia gratuita y certificado verificable. Soluciones Integrales JB — Tu mejor opción tecnológica.",
+  applicationName: "SIJB Bootcamp",
+  keywords: ["cursos de tecnología", "bootcamp", "Perú", "Chancay", "programación", "certificado", "Soluciones Integrales JB"],
+  openGraph: {
+    type: "website",
+    locale: "es_PE",
+    siteName: "SIJB Bootcamp",
+    title: "SIJB Bootcamp — Cursos de tecnología",
+    description: "Cursos virtuales de tecnología con constancia gratuita y certificado verificable.",
+    images: [{ url: "/brand/logo-sijb-oscuro.png", alt: "Soluciones Integrales JB" }],
+  },
 };
 
 // Aplica el tema guardado ANTES de pintar (evita el parpadeo claro/oscuro).
@@ -28,6 +47,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeSync />
         {children}
         <JBAssist />
+        {/* Visitas anónimas y sin cookies (solo funciona publicado en Vercel; en tu PC no hace nada) */}
+        <Analytics />
         <Toaster
           position="top-right"
           toastOptions={{
