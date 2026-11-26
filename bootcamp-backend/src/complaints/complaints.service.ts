@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { Complaint } from './entities/complaint.entity';
 import type { TipoBien, TipoReclamo } from './entities/complaint.entity';
 import { CreateComplaintDto } from './dto/complaint.dto';
+import { N8nService } from '../integrations/n8n.service';
 
 export const PLAZO_DIAS_HABILES = 15;
 const MAX_POR_HORA_IP = 5;
@@ -27,7 +28,10 @@ export function sumarDiasHabiles(desde: Date, dias: number): Date {
 export class ComplaintsService {
   private envios = new Map<string, number[]>();
 
-  constructor(@InjectRepository(Complaint) private repo: Repository<Complaint>) {}
+  constructor(
+    @InjectRepository(Complaint) private repo: Repository<Complaint>,
+    private readonly n8n: N8nService,
+  ) {}
 
   async create(dto: CreateComplaintDto, meta: { ip?: string; userAgent?: string }) {
     this.limitar(meta.ip);
@@ -55,7 +59,9 @@ export class ComplaintsService {
     // Código correlativo visible (el número lo asigna la base de datos)
     hoja.code = `LR-${hoja.createdAt.getFullYear()}-${String(hoja.numero).padStart(6, '0')}`;
     await this.repo.update({ id: hoja.id }, { code: hoja.code });
-    return this.vista(hoja, true);
+    const vista = this.vista(hoja, true);
+    this.n8n.emitir('reclamo.nuevo', vista as unknown as Record<string, unknown>);
+    return vista;
   }
 
   /** El consumidor consulta su hoja con el código y su número de documento */

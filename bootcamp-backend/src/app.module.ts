@@ -41,6 +41,7 @@ import { Quiz } from './quizzes/entities/quiz.entity';
 import { QuizQuestion } from './quizzes/entities/quiz-question.entity';
 import { QuizAttempt } from './quizzes/entities/quiz-attempt.entity';
 import { QuizzesModule } from './quizzes/quizzes.module';
+import { IntegrationsModule } from './integrations/integrations.module';
 
 @Module({
   imports: [
@@ -102,6 +103,7 @@ import { QuizzesModule } from './quizzes/quizzes.module';
     NotificationsModule,
     CommunityModule,
     QuizzesModule,
+    IntegrationsModule,
   ],
   controllers: [HealthController],
   providers: [],

@@ -406,7 +406,53 @@ export class AssistantService implements OnModuleInit {
   async conversation(conversationId: string) {
     const lista = await this.mensajes.find({ where: { conversationId }, order: { createdAt: 'ASC' } });
     if (!lista.length) throw new NotFoundException('Conversación no encontrada');
-    return lista.map((m) => ({ role: m.role, content: m.content, provider: m.provider, createdAt: m.createdAt }));
+    return lista.map((m) => ({ id: m.id, role: m.role, content: m.content, provider: m.provider, createdAt: m.createdAt }));
+  }
+
+  // ── Admin: borrar preguntas o comentarios indebidos ──────────────────────
+  // Al borrar un mensaje del usuario también se borra la respuesta que le dio
+  // JB Assist (el siguiente mensaje del asistente en esa conversación).
+  private async borrarConRespuesta(filtro: string, params: unknown[]) {
+    const borrados: { id: string }[] = await this.db.query(
+      `WITH usuario AS (
+         SELECT id, "conversationId", "createdAt" FROM assistant_messages WHERE role = 'user' AND ${filtro}
+       ),
+       respuesta AS (
+         SELECT (SELECT a.id FROM assistant_messages a
+                  WHERE a."conversationId" = u."conversationId" AND a.role = 'assistant' AND a."createdAt" >= u."createdAt"
+                  ORDER BY a."createdAt" ASC LIMIT 1) AS id
+           FROM usuario u
+       )
+       DELETE FROM assistant_messages
+        WHERE id IN (SELECT id FROM usuario) OR id IN (SELECT id FROM respuesta WHERE id IS NOT NULL)
+       RETURNING id`,
+      params,
+    );
+    this.cacheIA.clear(); // por si alguna respuesta de la IA quedó guardada
+    return { eliminados: borrados.length };
+  }
+
+  /** Borra un mensaje. Si es del usuario, también su respuesta. */
+  async deleteMessage(id: string) {
+    const m = await this.mensajes.findOne({ where: { id } });
+    if (!m) throw new NotFoundException('Mensaje no encontrado');
+    if (m.role === 'user') return this.borrarConRespuesta(`id = $1`, [id]);
+    await this.mensajes.delete({ id });
+    return { eliminados: 1 };
+  }
+
+  /** Borra todas las veces que se envió ese mismo texto (lista de «sin respuesta»). */
+  async deleteByContent(content: string) {
+    const texto = (content ?? '').trim();
+    if (!texto) throw new NotFoundException('Mensaje no encontrado');
+    return this.borrarConRespuesta(`content = $1`, [texto]);
+  }
+
+  async deleteConversation(conversationId: string) {
+    const r = await this.mensajes.delete({ conversationId });
+    if (!r.affected) throw new NotFoundException('Conversación no encontrada');
+    this.cacheIA.clear();
+    return { eliminados: r.affected };
   }
 
   // ── Admin: estadísticas ──────────────────────────────────────────────────

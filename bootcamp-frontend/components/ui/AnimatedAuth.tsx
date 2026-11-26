@@ -219,6 +219,68 @@ function PanelMarca({ variante, titulo, resaltado, texto }: { variante: Variante
   );
 }
 
+// ── Versión compacta del panel para celular y tablet (arriba del formulario) ──
+function PanelMovil({ variante, titulo, resaltado }: { variante: Variante; titulo: string; resaltado: string }) {
+  const acento = variante === "admin" ? "#E31E24" : "#00C0E7";
+  const escala = 0.5;
+  return (
+    <div className="keep-theme auth-movil lg:hidden rounded-b-[32px] border-b" style={{ borderColor: `${acento}40` }}>
+      <div className="absolute inset-0" style={{ background: `radial-gradient(360px 260px at 50% 55%, ${variante === "admin" ? "rgba(227,30,36,0.22)" : "rgba(0,192,231,0.24)"}, transparent 70%), radial-gradient(260px 200px at 100% 100%, rgba(227,30,36,0.16), transparent 70%)` }} />
+      <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: "linear-gradient(#00C0E7 1px, transparent 1px), linear-gradient(90deg, #00C0E7 1px, transparent 1px)", backgroundSize: "34px 34px", maskImage: "radial-gradient(ellipse at center, #000 30%, transparent 75%)", WebkitMaskImage: "radial-gradient(ellipse at center, #000 30%, transparent 75%)" }} />
+
+      <div className="relative z-10 flex items-center justify-between px-5 pt-5">
+        <BrandLogo width={150} variant="dark" />
+      </div>
+
+      {/* Ondas + órbitas en miniatura */}
+      <div className="relative h-[210px] sm:h-[250px]">
+        <div className="absolute left-1/2 top-1/2 h-0 w-0">
+          {Array.from({ length: 6 }, (_, i) => (
+            <span key={i} className="auth-ripple absolute rounded-full border"
+              style={{
+                width: 80 + i * 44, height: 80 + i * 44,
+                borderColor: `${acento}${Math.max(10, 44 - i * 6).toString(16).padStart(2, "0")}`,
+                background: i === 0 ? `${acento}12` : "transparent",
+                animationDelay: `${i * 0.08}s`,
+              }} />
+          ))}
+          {ORBITAS.map((o, i) => {
+            const tam = Math.round(o.tam * 0.72);
+            return (
+              <div key={i} className="auth-orbit absolute"
+                style={{
+                  ["--radius" as string]: `${Math.round(o.radio * escala)}px`,
+                  ["--duration" as string]: `${o.duracion}s`,
+                  animationDelay: `-${o.retraso}s`,
+                  animationDirection: o.reverso ? "reverse" : "normal",
+                  width: tam, height: tam, marginLeft: -tam / 2, marginTop: -tam / 2,
+                } as React.CSSProperties}>
+                <div className="flex h-full w-full items-center justify-center rounded-xl border border-white/10 bg-[#111827]/90"
+                  style={{ boxShadow: `0 0 0 1px ${o.color}22, 0 0 16px ${o.color}2a` }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke={o.color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ width: tam * 0.5, height: tam * 0.5 }}>
+                    {ICONOS[o.icono]}
+                  </svg>
+                </div>
+              </div>
+            );
+          })}
+          <div className="absolute -ml-[36px] -mt-[36px] flex h-[72px] w-[72px] items-center justify-center rounded-[20px] border border-white/10 bg-[#0d1524]"
+            style={{ boxShadow: `0 0 0 6px ${acento}14, 0 0 40px ${acento}66` }}>
+            <img src={CUBO_SRC} alt="" className="h-[56px] w-[56px] object-contain" draggable={false} />
+          </div>
+        </div>
+      </div>
+
+      <div className="relative z-10 px-5 pb-5 -mt-2 text-center">
+        <p className="font-brand uppercase leading-none text-[26px] sm:text-3xl tracking-wide">
+          <span className="text-white">{titulo} </span>
+          <span style={{ color: acento }}>{resaltado}</span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ── Pantalla completa ──
 export function AuthShell({
   variante = "student",
@@ -240,12 +302,13 @@ export function AuthShell({
       <PanelMarca variante={variante} {...panel} />
 
       <div className="relative flex w-full lg:w-1/2 flex-col">
-        <div className="absolute right-5 top-5 z-20"><ThemeToggle /></div>
-        <div className="flex flex-1 items-center justify-center px-6 py-14 sm:px-[10%]">
+        <div className="absolute right-4 top-4 lg:right-5 lg:top-5 z-20"><ThemeToggle /></div>
+        <PanelMovil variante={variante} titulo={panel.titulo} resaltado={panel.resaltado} />
+        <div className="flex flex-1 items-center justify-center px-6 pt-8 pb-10 lg:py-14 sm:px-[10%]">
           <div className="w-full max-w-[400px]">
-            <Reveal delay={0.05}><BrandLogo width={250} /></Reveal>
+            <div className="hidden lg:block"><Reveal delay={0.05}><BrandLogo width={250} /></Reveal></div>
 
-            <div className="mt-8 space-y-1.5">
+            <div className="lg:mt-8 space-y-1.5">
               <Reveal delay={0.15} color={variante === "admin" ? "#E31E24" : "#00C0E7"}>
                 <h1 className="text-3xl font-bold text-white tracking-tight">{titulo}</h1>
               </Reveal>

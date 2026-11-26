@@ -5,6 +5,7 @@ import { DataSource, IsNull, Not, Repository } from 'typeorm';
 import { LessonQuestion } from './entities/lesson-question.entity';
 import { NotificationsService } from '../notifications/notifications.service';
 import { estaInscrito, limpiarTexto, nombrePublico } from './community.helpers';
+import { N8nService } from '../integrations/n8n.service';
 
 const LIMITE_POR_HORA = 10;
 
@@ -14,6 +15,7 @@ export class QuestionsService {
     @InjectRepository(LessonQuestion) private readonly repo: Repository<LessonQuestion>,
     @InjectDataSource() private readonly db: DataSource,
     private readonly notifications: NotificationsService,
+    private readonly n8n: N8nService,
   ) {}
 
   private async leccion(lessonId: string) {
@@ -71,6 +73,10 @@ export class QuestionsService {
       authorName: await nombrePublico(this.db, userId),
       question: pregunta,
     }));
+    this.n8n.emitir('pregunta.nueva', {
+      id: q.id, alumno: q.authorName, pregunta: q.question, curso: l.courseTitle, leccion: l.title,
+      enlaceAdmin: '/admin/community', enlaceLeccion: `/courses/${l.courseId}?leccion=${lessonId}#preguntas`,
+    });
     return this.vista(q, userId);
   }
 
@@ -136,6 +142,8 @@ export class QuestionsService {
       link: `/courses/${l.courseId}?leccion=${q.lessonId}#preguntas`,
     });
     void admin;
+    const [perfil] = await this.db.query(`SELECT email FROM profiles WHERE supabase_id = $1`, [q.userId]);
+    this.n8n.emitir('pregunta.respondida', { id: q.id, userId: q.userId, email: perfil?.email, alumno: q.authorName, pregunta: q.question, respuesta, curso: l.courseTitle, leccion: l.title });
     return this.vista(q);
   }
 

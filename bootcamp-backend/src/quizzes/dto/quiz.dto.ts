@@ -45,6 +45,12 @@ export class SaveQuizDto {
   @Matches(UUID, { message: 'Lección no válida' })
   lessonId?: string | null;
 
+  // Examen final del curso: sin módulo ni lección. Se desbloquea al 100 %
+  // y aprobarlo es requisito para la constancia y el certificado.
+  @IsOptional()
+  @IsBoolean()
+  final?: boolean;
+
   @IsString()
   @MinLength(3, { message: 'El cuestionario necesita un título' })
   @MaxLength(200)

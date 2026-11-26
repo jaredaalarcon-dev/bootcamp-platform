@@ -60,11 +60,15 @@ export default function ProfilePage() {
   const [subiendo, setSubiendo] = useState(false);
   const [aviso, setAviso] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
   const [usuario, setUsuario] = useState<ReturnType<typeof getUser>>(null);
+  // ?volver=/certificates/... → después de guardar, botón para regresar a la constancia
+  const [volver, setVolver] = useState<string | null>(null);
   const archivoRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!getToken()) { router.push("/login"); return; }
     setUsuario(getUser());
+    const v = new URLSearchParams(window.location.search).get("volver");
+    if (v && v.startsWith("/") && !v.startsWith("//")) setVolver(v);
     certificatesApi.getProfile()
       .then((p) => {
         setPerfil(p);
@@ -80,7 +84,7 @@ export default function ProfilePage() {
     setGuardando(true); setAviso(null);
     const r = await certificatesApi.saveProfile(form);
     setGuardando(false);
-    if (r.ok) { setPerfil(r.data); setAviso({ tipo: "ok", texto: "Datos guardados." }); }
+    if (r.ok) { setPerfil(r.data); setAviso({ tipo: "ok", texto: volver ? "Datos guardados. Ya puedes volver por tu documento." : "Datos guardados." }); }
     else setAviso({ tipo: "error", texto: r.error });
   };
 
@@ -122,7 +126,7 @@ export default function ProfilePage() {
       <div className="p-6 space-y-6 max-w-5xl mx-auto">
         <div>
           <h1 className="font-brand text-[#00C0E7] text-2xl uppercase tracking-wide">Mi perfil</h1>
-          <p className="text-gray-500 text-sm mt-1">Tu cuenta y los datos que aparecerán en tu certificado</p>
+          <p className="text-gray-500 text-sm mt-1">Tu cuenta y los datos que aparecerán en tu constancia y certificado</p>
         </div>
 
         {cargando ? (
@@ -143,7 +147,7 @@ export default function ProfilePage() {
               <div className="flex items-center gap-2 text-sm">
                 <Check ok={Boolean(perfil?.complete)} />
                 <span className={perfil?.complete ? "text-[#00C0E7] font-semibold" : "text-gray-400"}>
-                  {perfil?.complete ? "Listo para tu certificado" : "Faltan datos para tu certificado"}
+                  {perfil?.complete ? "Listo para constancia y certificado" : datosGuardados ? "Listo para tu constancia · falta la foto para el certificado" : "Faltan datos para tu constancia"}
                 </span>
               </div>
             </section>
@@ -153,7 +157,18 @@ export default function ProfilePage() {
                 role="status"
                 className={`rounded-lg px-4 py-3 text-sm border ${aviso.tipo === "ok" ? "border-[#00C0E7]/40 text-[#00C0E7] bg-[#00C0E7]/5" : "border-[#E31E24]/40 text-[#E31E24] bg-[#E31E24]/5"}`}
               >
-                {aviso.texto}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <span className="flex-1">{aviso.texto}</span>
+                  {aviso.tipo === "ok" && volver && datosGuardados && (
+                    <Link href={volver} className="btn-red text-xs px-4 py-1.5 text-center">Volver a mi constancia →</Link>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {volver && !datosGuardados && !aviso && (
+              <div className="rounded-lg px-4 py-3 text-sm border border-[#E31E24]/40 text-gray-300 bg-[#E31E24]/5">
+                <b className="text-white">Para descargar tu constancia</b> completa abajo tu nombre completo y tu número de documento, y presiona «Guardar».
               </div>
             )}
 
@@ -161,10 +176,10 @@ export default function ProfilePage() {
               {/* ── Datos para el certificado ─────────────────────────── */}
               <form onSubmit={guardar} className="card-dark p-5 space-y-4">
                 <div>
-                  <h2 className="font-brand text-white text-lg uppercase tracking-wide">Datos para tu certificado</h2>
+                  <h2 className="font-brand text-white text-lg uppercase tracking-wide">Datos para tu constancia y certificado</h2>
                   <div className="h-[2px] w-10 bg-[#E31E24] rounded mt-1" />
                   <p className="text-gray-500 text-xs mt-2">
-                    Escríbelos tal como figuran en tu documento de identidad. Saldrán impresos en tu certificado y constancias.
+                    Obligatorios para obtener tu constancia. Escríbelos tal como figuran en tu documento de identidad: saldrán impresos en tus constancias y certificados.
                   </p>
                 </div>
 
@@ -275,7 +290,7 @@ export default function ProfilePage() {
                 <div className="rounded-lg border border-gray-800 p-4">
                   <p className="text-[#00C0E7] text-xs font-bold uppercase tracking-wider">Gratis</p>
                   <p className="text-white font-semibold mt-1">Constancia de culminación</p>
-                  <p className="text-gray-400 text-sm mt-1">Se descarga al completar el 100 % del curso. No necesitas pagar.</p>
+                  <p className="text-gray-400 text-sm mt-1">Se descarga al completar el 100 % del curso y aprobar el examen final, con tu nombre y documento. No necesitas pagar.</p>
                 </div>
                 <div className="rounded-lg border border-[#E31E24]/40 p-4">
                   <p className="text-[#E31E24] text-xs font-bold uppercase tracking-wider">Con pago</p>

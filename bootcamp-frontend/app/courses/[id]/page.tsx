@@ -103,7 +103,15 @@ export default function CourseDetailPage() {
   }, [courseId]);
 
   async function loadQuizzes() {
-    try { setQuizzes(await quizzesApi.forCourse(courseId)); } catch { setQuizzes([]); }
+    try {
+      const lista = await quizzesApi.forCourse(courseId);
+      setQuizzes(lista);
+      // ?examen=final (desde la notificación o la página del certificado)
+      if (new URLSearchParams(window.location.search).get("examen") === "final") {
+        const fin = lista.find((q) => q.isFinal);
+        if (fin) setSelectedQuizId(fin.id);
+      }
+    } catch { setQuizzes([]); }
   }
   async function loadRating() {
     try {
@@ -182,6 +190,12 @@ export default function CourseDetailPage() {
     setSelectedQuizId(id);
     irAlContenido();
   };
+  const examenFinal = quizzes.find((q) => q.isFinal) ?? null;
+  const elegirExamenFinal = () => {
+    if (!examenFinal) return;
+    if (porcentaje < 100) { toast("Completa el 100 % del curso para desbloquear el examen final", { icon: "🔒" }); return; }
+    elegirQuiz(examenFinal.id);
+  };
   const quizzesDeLeccion = (lessonId: string) => quizzes.filter((q) => q.lessonId === lessonId);
   const quizzesDeModulo  = (moduleId: string) => quizzes.filter((q) => q.moduleId === moduleId);
   const quizActual = quizzes.find((q) => q.id === selectedQuizId) ?? null;
@@ -197,6 +211,7 @@ export default function CourseDetailPage() {
   // Dónde está el cuestionario elegido y qué lección sigue
   const ctxQuiz = (() => {
     if (!quizActual || !course) return { texto: "", siguiente: null as Lesson | null };
+    if (quizActual.isFinal) return { texto: "Examen final del curso", siguiente: null as Lesson | null };
     if (quizActual.lessonId) {
       const i = flatLessons.findIndex((l) => l.id === quizActual.lessonId);
       return { texto: `Después de la lección: ${flatLessons[i]?.title ?? ""}`, siguiente: flatLessons[i + 1] ?? null };
@@ -390,6 +405,41 @@ export default function CourseDetailPage() {
                   </div>
                 );
               })}
+
+              {/* Examen final: se desbloquea al 100 % */}
+              {examenFinal && (
+                <div className="pt-1">
+                  <p className="text-sm font-bold text-white mb-2">Examen final</p>
+                  <button
+                    onClick={elegirExamenFinal}
+                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all text-sm border ${
+                      selectedQuizId === examenFinal.id
+                        ? "bg-[rgba(227,30,36,0.1)] border-[#E31E24]/50"
+                        : porcentaje < 100 ? "border-gray-800 opacity-70" : "border-[#E31E24]/30 hover:bg-gray-800/60"
+                    }`}
+                  >
+                    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                      examenFinal.passed ? "bg-emerald-500 text-white" : porcentaje < 100 ? "bg-gray-800 text-gray-500" : "bg-[#E31E24] text-white"
+                    }`}>
+                      {examenFinal.passed ? (
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      ) : porcentaje < 100 ? (
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                      ) : (
+                        <span className="text-base leading-none">🏆</span>
+                      )}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold text-gray-200 line-clamp-1">{examenFinal.title}</span>
+                      <span className="block text-[11px] text-gray-500">
+                        {examenFinal.passed
+                          ? `Aprobado con ${examenFinal.bestScore}% · constancia habilitada`
+                          : porcentaje < 100 ? `Se desbloquea al 100 % (llevas ${porcentaje} %)` : `${examenFinal.questionCount} preguntas · necesario para tu constancia`}
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Reproductor y contenido de la lección */}
@@ -402,6 +452,7 @@ export default function CourseDetailPage() {
                     contexto={ctxQuiz.texto}
                     onTerminado={(r) => alTerminarQuiz(selectedQuizId, r)}
                     onSiguiente={ctxQuiz.siguiente ? () => elegirLeccion(ctxQuiz.siguiente!) : undefined}
+                    courseId={courseId}
                   />
                 ) : (
                   <div className="bg-[#111827] border border-[rgba(0,192,231,0.15)] rounded-2xl p-8 text-center">
@@ -492,14 +543,21 @@ export default function CourseDetailPage() {
                     </button>
                   )}
 
-                  {enrolled && porcentaje === 100 && (
+                  {enrolled && porcentaje === 100 && (examenFinal && !examenFinal.passed ? (
+                    <button
+                      onClick={elegirExamenFinal}
+                      className="btn-red w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm"
+                    >
+                      🏆 Rendir el examen final para obtener tu constancia
+                    </button>
+                  ) : (
                     <Link
                       href={`/certificates/${courseId}`}
                       className="btn-red w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm"
                     >
-                      🏆 Ver mi certificado
+                      🏆 Ver mi constancia
                     </Link>
-                  )}
+                  ))}
 
                   {/* Cuestionarios de esta lección y del módulo (si es la última lección) */}
                   {(() => {

@@ -43,6 +43,53 @@ export default function AdminAssistantPage() {
   const [convs, setConvs] = useState<Awaited<ReturnType<typeof assistantAdminApi.conversations>> | null>(null);
   const [conv, setConv] = useState<{ id: string; mensajes: Awaited<ReturnType<typeof assistantAdminApi.conversation>> } | null>(null);
   const [guardando, setGuardando] = useState(false);
+  // Confirmación antes de borrar
+  const [confirmar, setConfirmar] = useState<{ titulo: string; detalle: string; accion: () => Promise<void> } | null>(null);
+  const [borrando, setBorrando] = useState(false);
+
+  const ejecutarBorrado = async () => {
+    if (!confirmar) return;
+    setBorrando(true);
+    try { await confirmar.accion(); setConfirmar(null); }
+    catch { toast.error("No se pudo eliminar"); }
+    finally { setBorrando(false); }
+  };
+
+  const borrarSinRespuesta = (content: string) => setConfirmar({
+    titulo: "¿Eliminar esta pregunta?",
+    detalle: `Se borrarán todas las veces que se envió «${content.slice(0, 80)}${content.length > 80 ? "…" : ""}» y las respuestas que dio JB Assist.`,
+    accion: async () => {
+      const r = await assistantAdminApi.deleteByContent(content);
+      setStats((s) => (s ? { ...s, unanswered: s.unanswered.filter((u) => u.content !== content) } : s));
+      setConvs(null);
+      toast.success(`Eliminado (${r.eliminados} mensajes)`);
+    },
+  });
+
+  const borrarMensaje = (m: { id: string; role: string; content: string }) => setConfirmar({
+    titulo: m.role === "user" ? "¿Eliminar este mensaje del usuario?" : "¿Eliminar esta respuesta?",
+    detalle: m.role === "user" ? "También se borrará la respuesta que le dio JB Assist." : "Solo se borra esta respuesta del bot.",
+    accion: async () => {
+      await assistantAdminApi.deleteMessage(m.id);
+      if (conv) {
+        const mensajes = await assistantAdminApi.conversation(conv.id).catch(() => []);
+        setConv(mensajes.length ? { id: conv.id, mensajes } : null);
+        if (!mensajes.length) setConvs((c) => c?.filter((x) => x.conversationId !== conv.id) ?? c);
+      }
+      toast.success("Mensaje eliminado");
+    },
+  });
+
+  const borrarConversacion = (id: string) => setConfirmar({
+    titulo: "¿Eliminar la conversación completa?",
+    detalle: "Se borrarán todos sus mensajes. No se puede deshacer.",
+    accion: async () => {
+      await assistantAdminApi.deleteConversation(id);
+      setConvs((c) => c?.filter((x) => x.conversationId !== id) ?? c);
+      if (conv?.id === id) setConv(null);
+      toast.success("Conversación eliminada");
+    },
+  });
 
   useEffect(() => {
     assistantAdminApi.stats(dias).then(setStats).catch(() => toast.error("No se pudieron cargar las métricas"));
@@ -213,7 +260,7 @@ export default function AdminAssistantPage() {
 
               <div className={`${card} p-5`}>
                 <h2 className="font-brand text-white uppercase tracking-wide">Preguntas que el chatbot no tenía</h2>
-                <p className="text-gray-500 text-xs mt-1">Las respondió la IA o quedaron sin respuesta. Conviértelas en preguntas frecuentes para que se respondan al instante.</p>
+                <p className="text-gray-500 text-xs mt-1">Las respondió la IA o quedaron sin respuesta. Conviértelas en preguntas frecuentes, o elimina las que sean malas o indebidas con el ícono de papelera.</p>
                 {stats.unanswered.length === 0 ? (
                   <p className="text-gray-500 text-sm mt-4">¡Nada pendiente! 🎉</p>
                 ) : (
@@ -230,7 +277,15 @@ export default function AdminAssistantPage() {
                           onClick={() => { setEditando({ ...vacia, question: u.content }); setTab("faqs"); }}
                           className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-[#00C0E7] text-[#00C0E7] hover:bg-[rgba(0,192,231,0.1)] shrink-0"
                         >
-                          Crear respuesta
+                          <span className="hidden sm:inline">Crear respuesta</span><span className="sm:hidden">Responder</span>
+                        </button>
+                        <button
+                          onClick={() => borrarSinRespuesta(u.content)}
+                          aria-label="Eliminar esta pregunta"
+                          title="Eliminar (pregunta mala o indebida)"
+                          className="shrink-0 p-1.5 rounded-lg border border-gray-700 text-gray-500 hover:text-[#E31E24] hover:border-[#E31E24]/50"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </button>
                       </li>
                     ))}
@@ -416,9 +471,22 @@ export default function AdminAssistantPage() {
               <p className="text-gray-500 text-sm">Elige una conversación para verla.</p>
             ) : (
               <div className="space-y-3">
-                {conv.mensajes.map((m, i) => (
-                  <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[80%] rounded-xl px-3 py-2 text-sm whitespace-pre-line ${m.role === "user" ? "bg-[#00C0E7] text-[#0d0d0d]" : "bg-gray-800 text-gray-300"}`}>
+                <div className="flex items-center justify-between gap-3 pb-2 border-b border-gray-800">
+                  <p className="text-gray-500 text-xs">{conv.mensajes.length} mensajes · pasa el cursor sobre un mensaje para borrarlo</p>
+                  <button onClick={() => borrarConversacion(conv.id)} className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-[#E31E24]/50 text-[#E31E24] hover:bg-[rgba(227,30,36,0.08)] shrink-0">
+                    Eliminar conversación
+                  </button>
+                </div>
+                {conv.mensajes.map((m) => (
+                  <div key={m.id} className={`group flex items-center gap-2 ${m.role === "user" ? "justify-end" : "justify-start flex-row-reverse"}`}>
+                    <button
+                      onClick={() => borrarMensaje(m)}
+                      aria-label="Eliminar mensaje"
+                      className="shrink-0 p-1 rounded text-gray-600 hover:text-[#E31E24] sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 transition"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                    <div className={`max-w-[80%] rounded-xl px-3 py-2 text-sm whitespace-pre-line break-words ${m.role === "user" ? "bg-[#00C0E7] text-[#0d0d0d]" : "bg-gray-800 text-gray-300"}`}>
                       {m.content}
                       {m.role === "assistant" && m.provider && (
                         <p className="text-[10px] mt-1 opacity-60">{PROVEEDORES[m.provider]?.label ?? m.provider} · {fecha(m.createdAt)}</p>
@@ -428,6 +496,18 @@ export default function AdminAssistantPage() {
                 ))}
               </div>
             )}
+          </div>
+        </div>
+      )}
+      {confirmar && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/60" onClick={() => !borrando && setConfirmar(null)}>
+          <div className="card-dark p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+            <p className="text-white font-semibold">{confirmar.titulo}</p>
+            <p className="text-gray-400 text-sm mt-2 break-words">{confirmar.detalle}</p>
+            <div className="mt-5 flex gap-2 justify-end">
+              <button onClick={() => setConfirmar(null)} disabled={borrando} className="text-sm text-gray-400 hover:text-white px-4 py-2">Cancelar</button>
+              <button onClick={ejecutarBorrado} disabled={borrando} className="btn-red text-sm px-5 py-2 disabled:opacity-60">{borrando ? "Eliminando..." : "Eliminar"}</button>
+            </div>
           </div>
         </div>
       )}

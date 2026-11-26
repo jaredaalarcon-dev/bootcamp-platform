@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import toast from "react-hot-toast";
 import { CuestionarioAlumno, ResultadoCuestionario, mensajeError, quizzesApi } from "@/hooks/useCommunityApi";
 
@@ -10,11 +11,12 @@ interface Props {
   contexto?: string;                  // "Al final del módulo 1: Fundamentos"
   onTerminado?: (r: ResultadoCuestionario) => void;
   onSiguiente?: () => void;
+  courseId?: string;
 }
 
 const LETRAS = ["A", "B", "C", "D", "E", "F"];
 
-export function QuizPlayer({ quizId, contexto, onTerminado, onSiguiente }: Props) {
+export function QuizPlayer({ quizId, contexto, onTerminado, onSiguiente, courseId }: Props) {
   const [quiz, setQuiz] = useState<CuestionarioAlumno | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [respuestas, setRespuestas] = useState<Record<string, number>>({});
@@ -108,7 +110,9 @@ export function QuizPlayer({ quizId, contexto, onTerminado, onSiguiente }: Props
           </p>
           <div className="mt-4 flex flex-col sm:flex-row gap-2 justify-center">
             <button onClick={reintentar} className="btn-cyan text-sm px-5 py-2">Intentar de nuevo</button>
-            {onSiguiente && <button onClick={onSiguiente} className="btn-red text-sm px-5 py-2">Continuar con el curso</button>}
+            {resultado.isFinal && resultado.passed && courseId ? (
+              <Link href={`/certificates/${courseId}?tipo=constancia`} className="btn-red text-sm px-5 py-2">🏆 Obtener mi constancia</Link>
+            ) : onSiguiente && <button onClick={onSiguiente} className="btn-red text-sm px-5 py-2">Continuar con el curso</button>}
           </div>
         </div>
       )}

@@ -67,6 +67,7 @@ export interface CuestionarioResumen {
   bestScore: number | null;
   attempts: number;
   passed: boolean;
+  isFinal?: boolean;
 }
 
 export interface CuestionarioAlumno {
@@ -77,6 +78,7 @@ export interface CuestionarioAlumno {
   title: string;
   description: string | null;
   passingScore: number;
+  isFinal?: boolean;
   bestScore: number | null;
   attempts: number;
   passed: boolean;
@@ -84,6 +86,7 @@ export interface CuestionarioAlumno {
 }
 
 export interface ResultadoCuestionario {
+  isFinal?: boolean;
   score: number;
   passed: boolean;
   passingScore: number;
@@ -111,6 +114,7 @@ export interface CuestionarioAdmin {
   description: string | null;
   passingScore: number;
   published: boolean;
+  isFinal?: boolean;
   questions: PreguntaCuestionario[];
   stats: { intentos: number; alumnos: number; promedio: number; aprobados: number };
 }
@@ -123,6 +127,7 @@ export interface GuardarCuestionario {
   description?: string;
   passingScore: number;
   published: boolean;
+  final?: boolean;
   questions: { text: string; options: string[]; correctIndex: number; explanation?: string }[];
 }
 

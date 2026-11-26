@@ -178,15 +178,16 @@ export default function DashboardPage() {
 
                       {/* Botón */}
                       <div className="mt-auto pt-3">
-                        <Link href={completado ? `/certificates/${e.course.id}` : `/courses/${e.course.id}`}>
-                          {completado ? (
-                            <button className="w-full btn-cyan text-sm py-2">Ver certificado</button>
-                          ) : enProgreso ? (
-                            <button className="w-full btn-red text-sm py-2">Continuar</button>
-                          ) : (
-                            <button className="w-full btn-cyan text-sm py-2">Comenzar</button>
-                          )}
-                        </Link>
+                        {completado ? (
+                          <div className="grid grid-cols-2 gap-2">
+                            <Link href={`/courses/${e.course.id}`} className="btn-cyan text-xs py-2 text-center">▶ Repasar</Link>
+                            <Link href={`/certificates/${e.course.id}`} className="btn-red text-xs py-2 text-center">🏆 Constancia</Link>
+                          </div>
+                        ) : (
+                          <Link href={`/courses/${e.course.id}`} className={`block w-full text-sm py-2 text-center ${enProgreso ? "btn-red" : "btn-cyan"}`}>
+                            {enProgreso ? "Continuar" : "Comenzar"}
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </div>

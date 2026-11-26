@@ -7,6 +7,8 @@ import { QuizQuestion } from './entities/quiz-question.entity';
 import { QuizAttempt } from './entities/quiz-attempt.entity';
 import { SaveQuizDto } from './dto/quiz.dto';
 import { estaInscrito } from '../community/community.helpers';
+import { NotificationsService } from '../notifications/notifications.service';
+import { N8nService } from '../integrations/n8n.service';
 
 const INTENTOS_POR_HORA = 20;
 
@@ -16,7 +18,34 @@ export class QuizzesService {
     @InjectRepository(Quiz) private readonly quizzes: Repository<Quiz>,
     @InjectRepository(QuizAttempt) private readonly attempts: Repository<QuizAttempt>,
     @InjectDataSource() private readonly db: DataSource,
+    private readonly notifications: NotificationsService,
+    private readonly n8n: N8nService,
   ) {}
+
+  private esFinal(q: { moduleId: string | null; lessonId: string | null }) {
+    return !q.moduleId && !q.lessonId;
+  }
+
+  /** Porcentaje de lecciones completadas del curso. */
+  private async porcentaje(userId: string, courseId: string) {
+    const [r] = await this.db.query(
+      `SELECT COUNT(l.id)::int AS total,
+              COUNT(p.id) FILTER (WHERE p.status = 'completed')::int AS hechas
+         FROM lessons l JOIN modules m ON m.id = l."moduleId"
+         LEFT JOIN progress p ON p."lessonId" = l.id AND p."userId" = $1
+        WHERE m."courseId" = $2`,
+      [userId, courseId],
+    );
+    return r.total > 0 ? Math.round((r.hechas / r.total) * 100) : 0;
+  }
+
+  private async exigirCien(userId: string, quiz: Quiz) {
+    if (!this.esFinal(quiz)) return;
+    const pct = await this.porcentaje(userId, quiz.courseId);
+    if (pct < 100) {
+      throw new ForbiddenException(`El examen final se desbloquea al completar el 100 % del curso. Llevas ${pct} %.`);
+    }
+  }
 
   // ── Alumno ──────────────────────────────────────────────────────────────
   /** Cuestionarios publicados del curso, con mi mejor nota en cada uno. */
@@ -26,7 +55,8 @@ export class QuizzesService {
               (SELECT COUNT(*)::int FROM quiz_questions qq WHERE qq."quizId" = q.id) AS "questionCount",
               (SELECT MAX(a.score)::int FROM quiz_attempts a WHERE a."quizId" = q.id AND a."userId" = $2) AS "bestScore",
               (SELECT COUNT(*)::int FROM quiz_attempts a WHERE a."quizId" = q.id AND a."userId" = $2) AS attempts,
-              EXISTS (SELECT 1 FROM quiz_attempts a WHERE a."quizId" = q.id AND a."userId" = $2 AND a.passed) AS passed
+              EXISTS (SELECT 1 FROM quiz_attempts a WHERE a."quizId" = q.id AND a."userId" = $2 AND a.passed) AS passed,
+              (q."moduleId" IS NULL AND q."lessonId" IS NULL) AS "isFinal"
          FROM quizzes q
         WHERE q."courseId" = $1 AND q.published = true
         ORDER BY q."createdAt" ASC`,
@@ -51,6 +81,7 @@ export class QuizzesService {
     if (!(await estaInscrito(this.db, userId, quiz.courseId))) {
       throw new ForbiddenException('Inscríbete al curso para resolver el cuestionario');
     }
+    await this.exigirCien(userId, quiz);
     const [mejor] = await this.db.query(
       `SELECT MAX(score)::int AS "bestScore", COUNT(*)::int AS attempts, BOOL_OR(passed) AS passed
          FROM quiz_attempts WHERE "quizId" = $1 AND "userId" = $2`,
@@ -64,6 +95,7 @@ export class QuizzesService {
       title: quiz.title,
       description: quiz.description,
       passingScore: quiz.passingScore,
+      isFinal: this.esFinal(quiz),
       bestScore: mejor?.bestScore ?? null,
       attempts: mejor?.attempts ?? 0,
       passed: !!mejor?.passed,
@@ -76,6 +108,7 @@ export class QuizzesService {
     if (!(await estaInscrito(this.db, userId, quiz.courseId))) {
       throw new ForbiddenException('Inscríbete al curso para resolver el cuestionario');
     }
+    await this.exigirCien(userId, quiz);
     const [{ n }] = await this.db.query(
       `SELECT COUNT(*)::int AS n FROM quiz_attempts
         WHERE "quizId" = $1 AND "userId" = $2 AND "createdAt" > now() - interval '1 hour'`,
@@ -106,7 +139,20 @@ export class QuizzesService {
       `SELECT MAX(score)::int AS "bestScore", COUNT(*)::int AS attempts FROM quiz_attempts WHERE "quizId" = $1 AND "userId" = $2`,
       [quizId, userId],
     );
+    if (aprobado && this.esFinal(quiz)) {
+      const [curso] = await this.db.query(`SELECT title FROM courses WHERE id = $1`, [quiz.courseId]);
+      const [p] = await this.db.query(`SELECT email, first_name AS nombre FROM profiles WHERE supabase_id = $1`, [userId]);
+      this.n8n.emitir('examen_final.aprobado', { userId, email: p?.email, nombre: p?.nombre, courseId: quiz.courseId, curso: curso?.title, nota: nota });
+      await this.notifications.notify(userId, {
+        type: 'constancia',
+        title: '¡Aprobaste el examen final! Tu constancia está lista',
+        message: `Aprobaste el examen final de "${curso?.title ?? 'tu curso'}" con ${nota} %. Ya puedes descargar tu constancia.`,
+        link: `/certificates/${quiz.courseId}`,
+        key: `examen_final:${quiz.id}`,
+      });
+    }
     return {
+      isFinal: this.esFinal(quiz),
       score: nota,
       passed: aprobado,
       passingScore: quiz.passingScore,
@@ -144,6 +190,7 @@ export class QuizzesService {
       description: q.description,
       passingScore: q.passingScore,
       published: q.published,
+      isFinal: this.esFinal(q),
       questions: q.questions.map((p) => ({
         id: p.id, text: p.text, options: p.options, correctIndex: p.correctIndex, explanation: p.explanation,
       })),
@@ -151,13 +198,26 @@ export class QuizzesService {
     }));
   }
 
-  private async validarUbicacion(dto: SaveQuizDto) {
+  private async validarUbicacion(dto: SaveQuizDto, id?: string) {
     const tieneModulo = !!dto.moduleId;
     const tieneLeccion = !!dto.lessonId;
-    if (tieneModulo === tieneLeccion) {
+    if (dto.final) {
+      if (tieneModulo || tieneLeccion) {
+        throw new BadRequestException('El examen final no va en un módulo ni en una lección');
+      }
+      const [otro] = await this.db.query(
+        `SELECT id FROM quizzes WHERE "courseId" = $1 AND "moduleId" IS NULL AND "lessonId" IS NULL AND id <> COALESCE($2::uuid, '00000000-0000-0000-0000-000000000000'::uuid)`,
+        [dto.courseId, id ?? null],
+      );
+      if (otro) throw new BadRequestException('Este curso ya tiene un examen final. Edítalo en lugar de crear otro.');
+      const [c] = await this.db.query(`SELECT 1 FROM courses WHERE id = $1`, [dto.courseId]);
+      if (!c) throw new BadRequestException('Curso no encontrado');
+    } else if (tieneModulo === tieneLeccion) {
       throw new BadRequestException('Elige si el cuestionario va al final de un módulo o después de una lección');
     }
-    if (tieneModulo) {
+    if (dto.final) {
+      // ubicación ya validada
+    } else if (tieneModulo) {
       const [m] = await this.db.query(`SELECT 1 FROM modules WHERE id = $1 AND "courseId" = $2`, [dto.moduleId, dto.courseId]);
       if (!m) throw new BadRequestException('El módulo no pertenece a este curso');
     } else {
@@ -180,7 +240,7 @@ export class QuizzesService {
   }
 
   async save(dto: SaveQuizDto, id?: string) {
-    await this.validarUbicacion(dto);
+    await this.validarUbicacion(dto, id);
     return this.db.transaction(async (m) => {
       let quiz: Quiz | null;
       if (id) {
@@ -191,8 +251,8 @@ export class QuizzesService {
       } else {
         quiz = m.create(Quiz, { courseId: dto.courseId });
       }
-      quiz.moduleId = dto.moduleId || null;
-      quiz.lessonId = dto.lessonId || null;
+      quiz.moduleId = dto.final ? null : dto.moduleId || null;
+      quiz.lessonId = dto.final ? null : dto.lessonId || null;
       quiz.title = dto.title.trim();
       quiz.description = dto.description?.trim() || null;
       quiz.passingScore = dto.passingScore;

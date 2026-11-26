@@ -16,12 +16,16 @@ export interface CertificateProfile {
   updatedAt: string | null;
 }
 
+export interface ExamenFinal { quizId: string; title: string; passingScore: number; passed: boolean; bestScore: number | null }
+
 export interface CertSummary {
   profileComplete: boolean;
+  profileBasic?: boolean;
   courses: {
     courseId: string;
     paid: boolean;
     paidAt: string | null;
+    finalExam?: ExamenFinal | null;
     issued: { type: TipoEmitido; code: string; createdAt: string }[];
   }[];
 }
@@ -38,6 +42,7 @@ export interface CertData {
   issuedAt: string;
   totalLessons: number;
   paid: boolean;
+  finalExamScore?: number | null;
 }
 
 export interface VerifyResult {
@@ -50,6 +55,10 @@ export interface VerifyResult {
   completedAt?: string;
   issuedAt?: string;
 }
+
+// Código que el servidor manda cuando falta algo (examen final o datos del perfil)
+const codigoError = (err: unknown) =>
+  (err as { response?: { data?: { code?: string; quizId?: string } } })?.response?.data ?? {};
 
 const mensaje = (err: unknown, porDefecto: string) => {
   const m = (err as { response?: { data?: { message?: string | string[] } } })?.response?.data?.message;
@@ -98,11 +107,43 @@ export const certificatesApi = {
       const { data } = await apiClient.get(`/certificates/course/${courseId}`, { params: tipo ? { tipo } : {} });
       return { ok: true as const, data: data.data as CertData };
     } catch (err) {
-      return { ok: false as const, error: mensaje(err, "No se pudo cargar el documento") };
+      const d = codigoError(err);
+      return {
+        ok: false as const,
+        error: mensaje(err, "No se pudo cargar el documento"),
+        code: d.code as "EXAMEN_FINAL" | "PERFIL_INCOMPLETO" | undefined,
+        quizId: d.quizId,
+      };
     }
   },
   async verify(code: string): Promise<VerifyResult> {
     const { data } = await apiClient.get(`/certificates/verify/${encodeURIComponent(code)}`);
+    return data.data;
+  },
+};
+
+// ── Admin: datos que registró cada alumno ──────────────────────────────────
+export interface DatoCertificadoAdmin {
+  userId: string;
+  email: string;
+  accountName: string;
+  registeredAt: string;
+  fullName: string | null;
+  documentType: TipoDocumento | null;
+  documentNumber: string | null;
+  photoUrl: string | null;
+  hasPhoto: boolean;
+  updatedAt: string | null;
+  basic: boolean;
+  complete: boolean;
+  completedCourses: number;
+  constancias: number;
+  certificados: number;
+}
+
+export const certificateDataAdminApi = {
+  async list(): Promise<{ total: number; conDatos: number; conFoto: number; items: DatoCertificadoAdmin[] }> {
+    const { data } = await apiClient.get("/admin/certificate-data");
     return data.data;
   },
 };

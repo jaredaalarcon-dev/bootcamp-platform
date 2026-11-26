@@ -8,12 +8,14 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Enrollment } from './entities/enrollment.entity';
+import { N8nService } from '../integrations/n8n.service';
 
 @Injectable()
 export class EnrollmentsService {
   constructor(
     @InjectRepository(Enrollment)
     private enrollmentRepository: Repository<Enrollment>,
+    private readonly n8n: N8nService,
   ) {}
 
   async create(userId: string, courseId: string) {
@@ -31,7 +33,18 @@ export class EnrollmentsService {
       status: 'in_progress',
     });
 
-    return this.enrollmentRepository.save(inscripcion);
+    const guardada = await this.enrollmentRepository.save(inscripcion);
+    void this.avisarN8n(userId, courseId);
+    return guardada;
+  }
+
+  private async avisarN8n(userId: string, courseId: string) {
+    if (!this.n8n.configurado) return;
+    const [d] = await this.enrollmentRepository.manager.query(
+      `SELECT p.email, p.first_name AS nombre, c.title AS curso FROM profiles p, courses c WHERE p.supabase_id = $1 AND c.id = $2`,
+      [userId, courseId],
+    ).catch(() => []);
+    this.n8n.emitir('curso.inscripcion', { userId, courseId, email: d?.email, nombre: d?.nombre, curso: d?.curso });
   }
 
   async findMyEnrollments(userId: string) {

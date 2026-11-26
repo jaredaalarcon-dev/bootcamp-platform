@@ -37,8 +37,10 @@ export default function MyCoursesPage() {
             {enrollments.map((e) => {
               const pct = e.progress.percentage;
               return (
-                <Link key={e.enrollmentId} href={pct === 100 ? `/certificates/${e.course.id}` : `/courses/${e.course.id}`} className="block h-full">
-                  <div className="h-full flex flex-col bg-[#111827] border border-[rgba(0,192,231,0.15)] rounded-xl overflow-hidden hover:border-[#00C0E7]/50 transition-colors cursor-pointer group">
+                <div key={e.enrollmentId} className="h-full">
+                  <div className="h-full flex flex-col bg-[#111827] border border-[rgba(0,192,231,0.15)] rounded-xl overflow-hidden hover:border-[#00C0E7]/50 transition-colors group">
+                    {/* Al tocar la tarjeta siempre se abre el contenido del curso (también al 100 %) */}
+                    <Link href={`/courses/${e.course.id}`} className="flex flex-col flex-1">
                     <div className="relative h-44 shrink-0 bg-gray-800 overflow-hidden">
                       {e.course.image ? (
                         <img src={e.course.image} alt={e.course.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -67,12 +69,21 @@ export default function MyCoursesPage() {
                         </div>
                         <p className="text-xs text-gray-600 mt-1">{e.progress.completedLessons} de {e.progress.totalLessons} lecciones</p>
                       </div>
-                      <p className="mt-auto pt-3 text-sm font-semibold text-[#00C0E7]">
-                        {pct === 100 ? "🏆 Ver certificado →" : pct > 0 ? "Continuar →" : "Comenzar →"}
-                      </p>
+                      {pct < 100 && (
+                        <p className="mt-auto pt-3 text-sm font-semibold text-[#00C0E7]">
+                          {pct > 0 ? "Continuar →" : "Comenzar →"}
+                        </p>
+                      )}
                     </div>
+                    </Link>
+                    {pct === 100 && (
+                      <div className="px-4 pb-4 -mt-1 grid grid-cols-2 gap-2">
+                        <Link href={`/courses/${e.course.id}`} className="btn-cyan text-xs py-2 text-center">▶ Repasar curso</Link>
+                        <Link href={`/certificates/${e.course.id}`} className="btn-red text-xs py-2 text-center">🏆 Mi constancia</Link>
+                      </div>
+                    )}
                   </div>
-                </Link>
+                </div>
               );
             })}
           </div>

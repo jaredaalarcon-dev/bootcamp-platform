@@ -4,7 +4,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../auth/guards/admin-auth.guard';
 import { AssistantService } from './assistant.service';
-import { ChatDto, FaqDto, TestMessageDto, UpdateAssistantSettingsDto } from './dto/assistant.dto';
+import { ChatDto, DeleteByContentDto, FaqDto, TestMessageDto, UpdateAssistantSettingsDto } from './dto/assistant.dto';
 
 @ApiTags('Assistant')
 @Controller('assistant')
@@ -109,6 +109,31 @@ export class AssistantController {
   @UseGuards(JwtAuthGuard, AdminAuthGuard)
   async deleteFaq(@Param('id', ParseUUIDPipe) id: string) {
     return { success: true, data: await this.assistant.deleteFaq(id) };
+  }
+
+  @Delete('conversations/:conversationId')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, AdminAuthGuard)
+  @ApiOperation({ summary: 'Eliminar una conversación completa' })
+  async deleteConversation(@Param('conversationId') id: string) {
+    return { success: true, data: await this.assistant.deleteConversation(id) };
+  }
+
+  @Delete('messages/:id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, AdminAuthGuard)
+  @ApiOperation({ summary: 'Eliminar un mensaje (si es del usuario, también la respuesta del bot)' })
+  async deleteMessage(@Param('id', ParseUUIDPipe) id: string) {
+    return { success: true, data: await this.assistant.deleteMessage(id) };
+  }
+
+  @Post('messages/delete-by-content')
+  @HttpCode(200)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, AdminAuthGuard)
+  @ApiOperation({ summary: 'Eliminar todas las veces que se envió un texto (y sus respuestas)' })
+  async deleteByContent(@Body() dto: DeleteByContentDto) {
+    return { success: true, data: await this.assistant.deleteByContent(dto.content) };
   }
 
   @Post('test')

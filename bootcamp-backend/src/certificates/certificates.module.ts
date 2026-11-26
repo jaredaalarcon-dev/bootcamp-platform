@@ -2,7 +2,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CertificatesService } from './certificates.service';
-import { CertificatesController, CertificateVerifyController } from './certificates.controller';
+import { AdminCertificateDataController, CertificatesController, CertificateVerifyController } from './certificates.controller';
 import { Enrollment } from '../enrollments/entities/enrollment.entity';
 import { Lesson } from '../courses/entities/lesson.entity';
 import { Progress } from '../progress/entities/progress.entity';
@@ -13,7 +13,7 @@ import { IssuedCertificate } from './entities/issued-certificate.entity';
   imports: [
     TypeOrmModule.forFeature([Enrollment, Lesson, Progress, CertificateProfile, IssuedCertificate]),
   ],
-  controllers: [CertificatesController, CertificateVerifyController],
+  controllers: [CertificatesController, CertificateVerifyController, AdminCertificateDataController],
   providers: [CertificatesService],
 })
 export class CertificatesModule {}

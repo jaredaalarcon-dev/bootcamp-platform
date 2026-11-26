@@ -1,0 +1,81 @@
+{
+  "name": "SIJB - Avisos por correo (eventos de la plataforma)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sijb-eventos",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "2a4380d6-59f6-4d77-bad1-57d5f5375d44",
+      "name": "Eventos SIJB",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "30e70a33-9ec9-489e-bae3-2345dff22b98"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ⚙️ CAMBIA ESTOS 2 DATOS\nconst CLAVE = 'PEGA_AQUI_TU_N8N_WEBHOOK_SECRET';      // la misma que pusiste en Render\nconst CORREO_ADMIN = 'consultas@solucionesintegralesjb.com'; // a dónde llegan los avisos del equipo\nconst WEB = 'https://sijb-bootcamp.vercel.app';\n\nconst entrada = $input.first().json;\nconst clave = (entrada.headers || {})['x-sijb-key'];\nif (clave !== CLAVE) {\n  // Rechaza avisos que no vienen de tu plataforma\n  return [];\n}\nconst e = entrada.body || {};\nconst d = e.datos || {};\nconst salida = [];\nconst alEquipo = (asunto, texto) => salida.push({ json: { para: CORREO_ADMIN, asunto, texto } });\nconst alAlumno = (correo, asunto, texto) => { if (correo) salida.push({ json: { para: correo, asunto, texto } }); };\n\nswitch (e.evento) {\n  case 'reclamo.nuevo':\n    alEquipo(`⚠️ Nuevo ${d.type === 'queja' ? 'queja' : 'reclamo'} ${d.code} (responder en 15 días hábiles)`,\n      `Llegó una hoja al Libro de Reclamaciones.\\n\\nCódigo: ${d.code}\\nPlazo de respuesta: ${d.deadline}\\nDetalle: ${d.detail}\\nPedido: ${d.request}\\n\\nRespóndela en: ${WEB}/admin/complaints`);\n    break;\n  case 'pregunta.nueva':\n    alEquipo(`💬 Nueva pregunta en \"${d.leccion}\"`,\n      `${d.alumno} preguntó en ${d.curso} › ${d.leccion}:\\n\\n\"${d.pregunta}\"\\n\\nResponde en: ${WEB}${d.enlaceAdmin}`);\n    break;\n  case 'pago.confirmado':\n    alAlumno(d.email, `Tu certificado de \"${d.curso}\" está habilitado`,\n      `Hola ${d.nombre || ''},\\n\\nConfirmamos tu pago. Cuando completes el curso y tus datos en «Mi perfil», descarga tu certificado oficial en:\\n${WEB}/certificates/${d.courseId}\\n\\nSoluciones Integrales JB`);\n    break;\n  case 'alumno.registrado':\n    alAlumno(d.email, '¡Bienvenido(a) al Bootcamp SIJB! 🎓',\n      `Hola ${d.nombre || ''},\\n\\nGracias por unirte a SIJB Bootcamp. Confirma tu correo y empieza tu primer curso:\\n${WEB}/courses\\n\\nSoluciones Integrales JB · Tu mejor opción tecnológica`);\n    alEquipo('👤 Nuevo alumno registrado', `${d.nombre || ''} ${d.apellido || ''} (${d.email}) creó su cuenta.`);\n    break;\n  case 'examen_final.aprobado':\n    alAlumno(d.email, `🏆 ¡Aprobaste el examen final de ${d.curso}!`,\n      `¡Felicitaciones ${d.nombre || ''}! Aprobaste con ${d.nota} %.\\nDescarga tu constancia aquí: ${WEB}/certificates/${d.courseId}?tipo=constancia`);\n    break;\n  case 'pregunta.respondida':\n    alAlumno(d.email, `Respondieron tu pregunta en \"${d.leccion}\"`,\n      `Hola ${d.alumno || ''},\\n\\nTu pregunta: \"${d.pregunta}\"\\n\\nRespuesta del equipo SIJB:\\n${d.respuesta}\\n\\nVer la lección: ${WEB}/notifications`);\n    break;\n  case 'resena.nueva':\n    alEquipo(`⭐ Nueva reseña (${d.estrellas}/5) en ${d.curso}`, `${d.alumno}: ${d.comentario || '(sin comentario)'}\\n\\nModera en: ${WEB}/admin/community`);\n    break;\n  case 'prueba':\n    alEquipo('✅ Prueba de n8n', 'La conexión entre SIJB Bootcamp y n8n funciona correctamente.');\n    break;\n  default:\n    // curso.inscripcion, curso.completado, curso.publicado: úsalos para tus propias automatizaciones\n    break;\n}\nreturn salida;"
+      },
+      "id": "adbed650-fb76-4e0c-8fe3-b01a90633afc",
+      "name": "Preparar correo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "consultas@solucionesintegralesjb.com",
+        "toEmail": "={{ $json.para }}",
+        "subject": "={{ $json.asunto }}",
+        "emailFormat": "text",
+        "text": "={{ $json.texto }}",
+        "options": {}
+      },
+      "id": "a797bb9c-2a7b-4131-ab98-e52ecc040afa",
+      "name": "Enviar correo",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        520,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Eventos SIJB": {
+      "main": [
+        [
+          {
+            "node": "Preparar correo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar correo": {
+      "main": [
+        [
+          {
+            "node": "Enviar correo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

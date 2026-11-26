@@ -145,6 +145,23 @@ Cuando una actualización trae tablas nuevas, se agregan una sola vez desde Supa
 |---|---|---|
 | Nov. 2026 | `bootcamp-backend/database/2026-11-comunidad.sql` | Notificaciones, preguntas por lección, reseñas y cuestionarios (6 tablas) |
 
+### Cargar los cuestionarios de los cursos
+
+Los cuestionarios de cada módulo y el examen final están en `bootcamp-backend/cuestionarios/banco.json`.
+Para crearlos en la base de datos (una sola vez; si lo repites no duplica nada), desde tu PC:
+
+```bash
+cd bootcamp-backend
+npm run cuestionarios:cargar -- --revisar   # muestra qué crearía
+npm run cuestionarios:cargar                # los crea
+```
+
+Después puedes editarlos en el panel: **Gestionar cursos → Contenido → Cuestionarios**.
+
+### Automatizaciones con n8n (opcional)
+
+Ver la guía [`N8N.md`](N8N.md).
+
 > Los archivos se pueden ejecutar más de una vez sin problema: no borran ni cambian datos.
 
 ---

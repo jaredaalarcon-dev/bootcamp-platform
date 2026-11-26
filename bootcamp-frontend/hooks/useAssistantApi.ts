@@ -125,6 +125,19 @@ export const assistantAdminApi = {
   },
   async conversation(id: string) {
     const { data } = await apiClient.get(`/assistant/conversations/${id}`);
-    return data.data as { role: "user" | "assistant"; content: string; provider: string | null; createdAt: string }[];
+    return data.data as { id: string; role: "user" | "assistant"; content: string; provider: string | null; createdAt: string }[];
+  },
+  // Borrar preguntas o comentarios indebidos (con la respuesta que dio el bot)
+  async deleteConversation(id: string) {
+    const { data } = await apiClient.delete(`/assistant/conversations/${encodeURIComponent(id)}`);
+    return data.data as { eliminados: number };
+  },
+  async deleteMessage(id: string) {
+    const { data } = await apiClient.delete(`/assistant/messages/${id}`);
+    return data.data as { eliminados: number };
+  },
+  async deleteByContent(content: string) {
+    const { data } = await apiClient.post("/assistant/messages/delete-by-content", { content });
+    return data.data as { eliminados: number };
   },
 };

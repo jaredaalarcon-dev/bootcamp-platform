@@ -8,8 +8,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { certificatesApi, CertData, TipoEmitido } from "@/hooks/useCertificatesApi";
 import { enlaceWhatsApp } from "@/lib/social";
 import { SocialIcon } from "@/components/ui/SocialIcon";
-import { BrandLogo, LOGO_SRC, ICONO_SRC } from "@/components/ui/BrandLogo";
+import { BrandLogo, ICONO_SRC } from "@/components/ui/BrandLogo";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { ConstanciaHoja } from "@/components/certificates/ConstanciaHoja";
+
+// Logo original de la empresa en alta resolución (versión para fondo oscuro)
+const LOGO_ORIGINAL = "/brand/logo-sijb-original.png";
 
 // ── Datos de la firma (edítalos aquí) ─────────────────────────────────────
 // Coloca la imagen de la firma digital (PNG con fondo transparente) en:
@@ -87,6 +91,7 @@ export default function CertificatePage() {
 
   const [cert, setCert] = useState<CertData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [codigoError, setCodigoError] = useState<"EXAMEN_FINAL" | "PERFIL_INCOMPLETO" | undefined>();
   const [loading, setLoading] = useState(true);
   const [hayFirma, setHayFirma] = useState(true);
   const [origen, setOrigen] = useState("");
@@ -99,7 +104,7 @@ export default function CertificatePage() {
     const tipo = pedido === "constancia" || pedido === "certificado" ? pedido : undefined;
     certificatesApi.get(courseId, tipo).then((r) => {
       if (r.ok) setCert(r.data);
-      else setError(r.error);
+      else { setError(r.error); setCodigoError(r.code); }
       setLoading(false);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -132,11 +137,17 @@ export default function CertificatePage() {
     <div className="flex min-h-screen items-center justify-center bg-[#0d0d0d] px-4">
       <div className="max-w-md text-center card-dark p-10">
         <div className="flex justify-center mb-6"><BrandLogo width={260} align="center" /></div>
-        <h2 className="font-brand text-[#E31E24] text-xl uppercase tracking-wide mb-3">Documento no disponible</h2>
+        <h2 className="font-brand text-[#E31E24] text-xl uppercase tracking-wide mb-3">
+          {codigoError === "EXAMEN_FINAL" ? "Último paso: examen final" : codigoError === "PERFIL_INCOMPLETO" ? "Completa tus datos" : "Documento no disponible"}
+        </h2>
         <p className="text-gray-400 text-sm mb-6">
           {error ?? "Necesitas completar el 100% del curso para obtener tu constancia."}
         </p>
-        {error && /pago|WhatsApp/i.test(error) ? (
+        {codigoError === "EXAMEN_FINAL" ? (
+          <Link href={`/courses/${courseId}?examen=final`} className="btn-red text-sm px-6 py-2.5">Rendir el examen final</Link>
+        ) : codigoError === "PERFIL_INCOMPLETO" || (error && /Mi perfil/i.test(error)) ? (
+          <Link href={`/profile?volver=/certificates/${courseId}`} className="btn-red text-sm px-6 py-2.5">Completar mis datos</Link>
+        ) : error && /pago|WhatsApp/i.test(error) ? (
           <div className="flex flex-col gap-3 items-center">
             <a
               href={enlaceWhatsApp("Hola, quiero solicitar mi certificado oficial del Bootcamp SIJB.")}
@@ -150,8 +161,6 @@ export default function CertificatePage() {
               Descargar mi constancia gratuita
             </a>
           </div>
-        ) : error && /Mi perfil/i.test(error) ? (
-          <Link href="/profile" className="btn-red text-sm px-6 py-2.5">Completar mis datos</Link>
         ) : (
           <Link href={`/courses/${courseId}`} className="btn-red text-sm px-6 py-2.5">Continuar el curso</Link>
         )}
@@ -210,6 +219,9 @@ export default function CertificatePage() {
 
         {/* ── Hoja del certificado (A4 horizontal, escala con el ancho) ── */}
         <div className="cert-marco mx-auto w-full max-w-[1100px] px-3 sm:px-6 shadow-[0_0_60px_rgba(0,192,231,0.12)]" style={{ containerType: "inline-size" }}>
+          {!esCertificado ? (
+            <ConstanciaHoja cert={cert} fecha={fecha} dominio={(origen || "").replace(/^https?:\/\//, "")} firma={FIRMA} />
+          ) : (
           <div
             className="cert-hoja keep-theme relative w-full overflow-hidden rounded-md text-[#111111]"
             style={{
@@ -248,7 +260,7 @@ export default function CertificatePage() {
             <div className="absolute flex flex-col items-center text-center" style={{ inset: "2.35cqw" }}>
               {/* Franja con el logo */}
               <div className="w-full flex flex-col items-center justify-center bg-[#111111]" style={{ paddingTop: "1.5cqw", paddingBottom: "1.2cqw" }}>
-                <img src={LOGO_SRC} alt="Soluciones Integrales JB" draggable={false} style={{ width: "38cqw", height: "auto" }} />
+                <img src={LOGO_ORIGINAL} alt="Soluciones Integrales JB" draggable={false} style={{ width: "38cqw", height: "auto" }} />
               </div>
               <div className="w-full bg-[#00C0E7]" style={{ height: "0.35cqw" }} />
 
@@ -339,6 +351,7 @@ export default function CertificatePage() {
               </div>
             </div>
           </div>
+          )}
         </div>
 
         <p className="no-print text-center text-gray-600 text-xs mt-5 px-4">

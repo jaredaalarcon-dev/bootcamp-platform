@@ -19,7 +19,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "seed": "npx ts-node -r tsconfig-paths/register src/database/seed.ts",
     "seed:fresh": "npx ts-node -r tsconfig-paths/register src/database/seed.ts --fresh",
-    "material:cargar": "npx ts-node -r tsconfig-paths/register src/database/cargar-material.ts"
+    "material:cargar": "npx ts-node -r tsconfig-paths/register src/database/cargar-material.ts",
+    "cuestionarios:cargar": "npx ts-node -r tsconfig-paths/register src/database/cargar-cuestionarios.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

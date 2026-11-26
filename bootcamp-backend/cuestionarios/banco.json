@@ -1,0 +1,1579 @@
+{
+ "_ayuda": "Cuestionarios que crea 'npm run cuestionarios:cargar'. Un curso recibe los cuestionarios del primer grupo cuyas 'claves' estén en su título (todas las palabras de la clave). Cada módulo recibe el cuestionario con su mismo número de orden. Si el módulo o el curso ya tiene un cuestionario con el mismo título, no se duplica. Después se pueden editar desde el panel admin (Contenido del curso → Cuestionarios).",
+ "grupos": [
+  {
+   "nombre": "App móvil con IA · Intermedio",
+   "claves": [
+    "movil intermedio",
+    "moviles intermedio"
+   ],
+   "modulos": [
+    {
+     "orden": 1,
+     "titulo": "Repaso del módulo 1: Arquitectura de la app",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Por qué conviene separar la app en capas?",
+       "options": [
+        "Para que el código sea ordenado y fácil de mantener",
+        "Para que pese más",
+        "Para que no funcione sin internet",
+        "Porque Flutter lo exige siempre"
+       ],
+       "correctIndex": 0,
+       "explanation": "Separar interfaz, lógica y datos facilita cambios y pruebas."
+      },
+      {
+       "text": "¿Qué hace un repositorio en la arquitectura?",
+       "options": [
+        "Se encarga de obtener y guardar los datos",
+        "Dibuja los botones",
+        "Cambia el tema de colores",
+        "Compila la app"
+       ],
+       "correctIndex": 0,
+       "explanation": "La interfaz pide datos al repositorio sin saber si vienen de internet o del celular."
+      },
+      {
+       "text": "¿Para qué sirve Provider?",
+       "options": [
+        "Para tomar fotos",
+        "Para publicar en Google Play",
+        "Para crear íconos",
+        "Para compartir el estado entre varias pantallas"
+       ],
+       "correctIndex": 3,
+       "explanation": "Provider entrega datos y avisa a los widgets cuando cambian."
+      },
+      {
+       "text": "¿Qué hace notifyListeners() en un ChangeNotifier?",
+       "options": [
+        "Envía una notificación push",
+        "Avisa a la interfaz que los datos cambiaron",
+        "Cierra la app",
+        "Borra el estado"
+       ],
+       "correctIndex": 1,
+       "explanation": "Los widgets que escuchan se vuelven a dibujar."
+      },
+      {
+       "text": "¿Qué es un modelo (model)?",
+       "options": [
+        "Una pantalla de inicio",
+        "Un emulador",
+        "Una clase que representa un dato, como Nota o Usuario",
+        "Una fuente de letra"
+       ],
+       "correctIndex": 2,
+       "explanation": "Los modelos convierten el JSON en objetos de Dart."
+      }
+     ]
+    },
+    {
+     "orden": 2,
+     "titulo": "Repaso del módulo 2: Firebase: login y datos en la nube",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Qué servicio de Firebase maneja el inicio de sesión?",
+       "options": [
+        "Hosting",
+        "Authentication",
+        "Crashlytics",
+        "Analytics"
+       ],
+       "correctIndex": 1,
+       "explanation": "Firebase Authentication permite login con correo, Google y más."
+      },
+      {
+       "text": "¿Qué es Cloud Firestore?",
+       "options": [
+        "Un editor de video",
+        "Un antivirus",
+        "Un teclado",
+        "Una base de datos en la nube"
+       ],
+       "correctIndex": 3,
+       "explanation": "Firestore guarda documentos en colecciones y se sincroniza en tiempo real."
+      },
+      {
+       "text": "¿Qué herramienta conecta tu proyecto Flutter con Firebase?",
+       "options": [
+        "Photoshop",
+        "Notepad",
+        "Git Bash solamente",
+        "FlutterFire CLI"
+       ],
+       "correctIndex": 3,
+       "explanation": "flutterfire configure genera la configuración de Firebase."
+      },
+      {
+       "text": "¿Para qué sirven las reglas de seguridad de Firestore?",
+       "options": [
+        "Para decidir quién puede leer o escribir cada dato",
+        "Para cambiar el idioma",
+        "Para hacer copias del APK",
+        "Para acelerar el celular"
+       ],
+       "correctIndex": 0,
+       "explanation": "Sin reglas correctas, cualquiera podría leer tus datos."
+      },
+      {
+       "text": "¿Qué significa que Firestore funcione en tiempo real?",
+       "options": [
+        "Los cambios aparecen al instante en todos los dispositivos",
+        "Que solo funciona de día",
+        "Que se borra cada hora",
+        "Que no necesita internet nunca"
+       ],
+       "correctIndex": 0,
+       "explanation": "Con snapshots() la app escucha los cambios."
+      }
+     ]
+    },
+    {
+     "orden": 3,
+     "titulo": "Repaso del módulo 3: IA en el dispositivo (ML Kit)",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Qué permite ML Kit?",
+       "options": [
+        "Pagar con tarjeta",
+        "Editar videos largos",
+        "Usar IA dentro del celular, por ejemplo leer texto de una foto",
+        "Crear bases de datos"
+       ],
+       "correctIndex": 2,
+       "explanation": "ML Kit ofrece modelos listos que funcionan en el dispositivo."
+      },
+      {
+       "text": "¿Qué ventaja tiene la IA en el dispositivo?",
+       "options": [
+        "Siempre es más precisa que cualquier IA en la nube",
+        "No usa la cámara",
+        "Funciona sin internet y protege la privacidad",
+        "No necesita permisos"
+       ],
+       "correctIndex": 2,
+       "explanation": "Los datos no salen del celular."
+      },
+      {
+       "text": "¿Qué paquete permite tomar o elegir una foto?",
+       "options": [
+        "http",
+        "provider",
+        "image_picker",
+        "intl"
+       ],
+       "correctIndex": 2,
+       "explanation": "image_picker abre la cámara o la galería."
+      },
+      {
+       "text": "¿Qué debe hacer la app antes de usar la cámara?",
+       "options": [
+        "Nada",
+        "Reiniciar el celular",
+        "Desinstalar otras apps",
+        "Pedir permiso al usuario"
+       ],
+       "correctIndex": 3,
+       "explanation": "Android e iOS exigen permisos para cámara y galería."
+      },
+      {
+       "text": "¿Qué hace el reconocimiento de texto (OCR)?",
+       "options": [
+        "Traduce la voz",
+        "Cambia el tamaño de la imagen",
+        "Elimina el fondo",
+        "Convierte el texto de una imagen en texto editable"
+       ],
+       "correctIndex": 3,
+       "explanation": "Útil para escanear documentos o recibos."
+      }
+     ]
+    },
+    {
+     "orden": 4,
+     "titulo": "Repaso del módulo 4: IA generativa con Gemini",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Qué es la IA generativa?",
+       "options": [
+        "IA que crea contenido nuevo: texto, ideas o descripciones",
+        "Una IA que solo suma números",
+        "Un tipo de batería",
+        "Un juego"
+       ],
+       "correctIndex": 0,
+       "explanation": "Gemini genera respuestas a partir de un prompt."
+      },
+      {
+       "text": "¿Qué es el streaming de respuestas?",
+       "options": [
+        "Mostrar la respuesta poco a poco mientras se genera",
+        "Ver videos",
+        "Enviar correos",
+        "Descargar la app"
+       ],
+       "correctIndex": 0,
+       "explanation": "El usuario ve el texto aparecer sin esperar al final."
+      },
+      {
+       "text": "¿Qué significa multimodal?",
+       "options": [
+        "Que funciona en varios celulares",
+        "Que tiene varios colores",
+        "Que la IA entiende texto e imágenes",
+        "Que solo habla inglés"
+       ],
+       "correctIndex": 2,
+       "explanation": "Puedes enviar una foto y preguntar sobre ella."
+      },
+      {
+       "text": "¿Para qué sirve pedir la respuesta en JSON con esquema?",
+       "options": [
+        "Para que la respuesta sea más larga",
+        "Para cambiar el idioma",
+        "Para cifrar la foto",
+        "Para que la app reciba datos ordenados y fáciles de usar"
+       ],
+       "correctIndex": 3,
+       "explanation": "Así puedes leer campos como 'producto' o 'precio' sin adivinar."
+      },
+      {
+       "text": "¿Qué es un prompt?",
+       "options": [
+        "La instrucción o pregunta que le das a la IA",
+        "Un error de la app",
+        "Un tipo de widget",
+        "Una contraseña"
+       ],
+       "correctIndex": 0,
+       "explanation": "Un buen prompt es claro y da contexto."
+      }
+     ]
+    },
+    {
+     "orden": 5,
+     "titulo": "Repaso del módulo 5: IA responsable y seguridad",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Por qué hay que validar las respuestas de la IA?",
+       "options": [
+        "Porque la IA puede equivocarse",
+        "Porque siempre miente",
+        "Porque Flutter lo pide",
+        "No hace falta validarlas"
+       ],
+       "correctIndex": 0,
+       "explanation": "Revisa formato y contenido antes de mostrarlo o guardarlo."
+      },
+      {
+       "text": "¿Qué protege Firebase App Check?",
+       "options": [
+        "La batería",
+        "El brillo de la pantalla",
+        "Que solo tu app oficial use tus servicios de Firebase",
+        "La memoria RAM"
+       ],
+       "correctIndex": 2,
+       "explanation": "App Check bloquea solicitudes de apps falsas o scripts."
+      },
+      {
+       "text": "¿Qué dato NO deberías enviar a la IA sin permiso?",
+       "options": [
+        "Una pregunta general",
+        "El nombre de un color",
+        "Un número de ejemplo",
+        "Datos personales sensibles del usuario"
+       ],
+       "correctIndex": 3,
+       "explanation": "Respeta la privacidad: envía solo lo necesario."
+      },
+      {
+       "text": "¿Por qué conviene limitar cuántas veces se puede usar la IA?",
+       "options": [
+        "Para que la app se vea mejor",
+        "Para ganar espacio",
+        "Para controlar costos y evitar abusos",
+        "Para cambiar el idioma"
+       ],
+       "correctIndex": 2,
+       "explanation": "Las cuotas evitan gastos inesperados."
+      },
+      {
+       "text": "¿Qué es un buen diseño de prompts?",
+       "options": [
+        "Escribir lo más corto posible sin explicar",
+        "Escribir todo en mayúsculas",
+        "Repetir la misma palabra",
+        "Dar instrucciones claras, con contexto y el formato esperado"
+       ],
+       "correctIndex": 3,
+       "explanation": "Un prompt claro da respuestas más útiles y seguras."
+      }
+     ]
+    },
+    {
+     "orden": 6,
+     "titulo": "Repaso del módulo 6: Publicación en Google Play",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Qué formato pide Google Play para publicar?",
+       "options": [
+        "ZIP",
+        "EXE",
+        "App Bundle (.aab)",
+        "DOCX"
+       ],
+       "correctIndex": 2,
+       "explanation": "flutter build appbundle genera el .aab."
+      },
+      {
+       "text": "¿Para qué se firma la app?",
+       "options": [
+        "Para demostrar que la app es tuya y permitir actualizaciones",
+        "Para cambiar el color",
+        "Para que pese menos",
+        "No sirve para nada"
+       ],
+       "correctIndex": 0,
+       "explanation": "Google Play exige una firma con tu keystore."
+      },
+      {
+       "text": "¿Qué es la splash screen?",
+       "options": [
+        "Un error",
+        "El menú de ajustes",
+        "La tienda de apps",
+        "La pantalla que aparece mientras la app inicia"
+       ],
+       "correctIndex": 3,
+       "explanation": "Da una primera impresión mientras carga."
+      },
+      {
+       "text": "¿Qué debes probar antes de publicar?",
+       "options": [
+        "Nada, se prueba después",
+        "Solo el color del ícono",
+        "Que la app funcione bien en distintos celulares y casos",
+        "Solo el nombre"
+       ],
+       "correctIndex": 2,
+       "explanation": "Las pruebas evitan malas reseñas por errores."
+      },
+      {
+       "text": "¿Qué incluye la ficha de Google Play?",
+       "options": [
+        "El código fuente completo",
+        "Nombre, descripción, capturas e ícono de la app",
+        "Tu contraseña",
+        "La base de datos"
+       ],
+       "correctIndex": 1,
+       "explanation": "Una buena ficha ayuda a que te descarguen."
+      }
+     ]
+    }
+   ],
+   "final": {
+    "titulo": "Examen final del curso",
+    "descripcion": "Apruébalo para obtener tu constancia. Se desbloquea al completar el 100 % del curso y puedes reintentarlo.",
+    "notaMinima": 70,
+    "preguntas": [
+     {
+      "text": "¿Para qué sirve Provider en una app Flutter?",
+      "options": [
+       "Para compartir y actualizar el estado entre pantallas",
+       "Para tomar fotos",
+       "Para firmar el APK",
+       "Para crear íconos"
+      ],
+      "correctIndex": 0,
+      "explanation": "Provider + ChangeNotifier mantienen la interfaz sincronizada."
+     },
+     {
+      "text": "¿Qué servicio de Firebase guarda datos en la nube?",
+      "options": [
+       "Firebase Authentication",
+       "App Check",
+       "Crashlytics",
+       "Cloud Firestore"
+      ],
+      "correctIndex": 3,
+      "explanation": "Firestore es la base de datos en tiempo real."
+     },
+     {
+      "text": "¿Qué servicio de Firebase maneja usuarios y contraseñas?",
+      "options": [
+       "Authentication",
+       "Storage",
+       "Hosting",
+       "Remote Config"
+      ],
+      "correctIndex": 0,
+      "explanation": "Authentication ofrece login seguro."
+     },
+     {
+      "text": "¿Qué ventaja tiene ML Kit frente a una IA en la nube?",
+      "options": [
+       "Siempre genera textos largos",
+       "Funciona sin internet",
+       "No necesita la cámara",
+       "Es un editor de fotos"
+      ],
+      "correctIndex": 1,
+      "explanation": "Los modelos corren en el propio celular."
+     },
+     {
+      "text": "¿Qué significa que Gemini sea multimodal?",
+      "options": [
+       "Habla solo un idioma",
+       "Funciona solo en tablets",
+       "Entiende texto e imágenes",
+       "No usa internet"
+      ],
+      "correctIndex": 2,
+      "explanation": "Puedes enviar fotos junto con tu pregunta."
+     },
+     {
+      "text": "¿Para qué sirve pedir la salida de la IA en JSON con esquema?",
+      "options": [
+       "Para cambiar el tema",
+       "Para recibir datos ordenados que la app pueda leer",
+       "Para ahorrar batería",
+       "Para firmar la app"
+      ],
+      "correctIndex": 1,
+      "explanation": "El esquema define los campos esperados."
+     },
+     {
+      "text": "¿Qué protege Firebase App Check?",
+      "options": [
+       "El brillo de la pantalla",
+       "Que solo tu app oficial acceda a tus servicios",
+       "Las fotos del usuario",
+       "El teclado"
+      ],
+      "correctIndex": 1,
+      "explanation": "Bloquea solicitudes que no vienen de tu app."
+     },
+     {
+      "text": "¿Por qué hay que validar lo que responde la IA?",
+      "options": [
+       "Porque siempre es perfecta",
+       "Porque la ley lo prohíbe",
+       "No es necesario",
+       "Porque puede equivocarse"
+      ],
+      "correctIndex": 3,
+      "explanation": "La validación evita mostrar datos incorrectos."
+     },
+     {
+      "text": "¿Qué archivo se sube a Google Play?",
+      "options": [
+       "El código en ZIP",
+       "Un PDF",
+       "Una imagen PNG",
+       "El App Bundle (.aab)"
+      ],
+      "correctIndex": 3,
+      "explanation": "Google Play genera los APK optimizados a partir del .aab."
+     },
+     {
+      "text": "¿Para qué se firma una app?",
+      "options": [
+       "Para que ocupe menos",
+       "Para cambiar el ícono",
+       "Para traducirla",
+       "Para identificar al autor y permitir actualizaciones"
+      ],
+      "correctIndex": 3,
+      "explanation": "Sin la misma firma no puedes publicar actualizaciones."
+     }
+    ]
+   }
+  },
+  {
+   "nombre": "App móvil con IA · Básico",
+   "claves": [
+    "movil basico",
+    "moviles basico"
+   ],
+   "modulos": [
+    {
+     "orden": 1,
+     "titulo": "Repaso del módulo 1: Primeros pasos con Flutter",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Qué es Flutter?",
+       "options": [
+        "Un lenguaje de bases de datos",
+        "Un sistema operativo para celulares",
+        "Un kit de Google para crear apps para Android e iOS con un solo código",
+        "Un editor de imágenes"
+       ],
+       "correctIndex": 2,
+       "explanation": "Con Flutter escribes la app una vez y la publicas en Android y en iOS."
+      },
+      {
+       "text": "¿Qué comando revisa que Flutter esté bien instalado?",
+       "options": [
+        "flutter fix",
+        "flutter doctor",
+        "flutter check-all",
+        "dart install"
+       ],
+       "correctIndex": 1,
+       "explanation": "flutter doctor muestra qué falta configurar (SDK de Android, editor, etc.)."
+      },
+      {
+       "text": "¿Qué hace el hot reload?",
+       "options": [
+        "Borra el proyecto",
+        "Publica la app en Google Play",
+        "Apaga el emulador",
+        "Muestra tus cambios en la app al instante, sin reiniciarla"
+       ],
+       "correctIndex": 3,
+       "explanation": "El hot reload aplica los cambios del código en segundos mientras la app sigue abierta."
+      },
+      {
+       "text": "¿En qué archivo empieza normalmente una app de Flutter?",
+       "options": [
+        "lib/main.dart",
+        "index.html",
+        "app.py",
+        "config.xml"
+       ],
+       "correctIndex": 0,
+       "explanation": "La función main() de lib/main.dart es el punto de inicio."
+      },
+      {
+       "text": "¿Dónde puedes probar tu app mientras la desarrollas?",
+       "options": [
+        "En un emulador o en tu propio celular",
+        "Solo en una tienda de apps",
+        "Solo en una impresora",
+        "No se puede probar antes de publicarla"
+       ],
+       "correctIndex": 0,
+       "explanation": "Puedes usar el emulador de Android Studio o tu celular con depuración USB."
+      }
+     ]
+    },
+    {
+     "orden": 2,
+     "titulo": "Repaso del módulo 2: Dart: variables y funciones",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Qué lenguaje se usa para programar en Flutter?",
+       "options": [
+        "Dart",
+        "Java",
+        "PHP",
+        "Swift"
+       ],
+       "correctIndex": 0,
+       "explanation": "Flutter usa Dart, un lenguaje creado por Google."
+      },
+      {
+       "text": "¿Cuál declara una variable de texto en Dart?",
+       "options": [
+        "int nombre = 'Ana';",
+        "text nombre := Ana",
+        "String nombre = 'Ana';",
+        "var: nombre = Ana"
+       ],
+       "correctIndex": 2,
+       "explanation": "String guarda texto; int guarda números enteros."
+      },
+      {
+       "text": "¿Qué significa el signo ? en String? apellido;",
+       "options": [
+        "Que la variable puede ser nula (null)",
+        "Que es obligatoria",
+        "Que es un número",
+        "Que es una función"
+       ],
+       "correctIndex": 0,
+       "explanation": "Con null safety, el ? indica que el valor puede estar vacío."
+      },
+      {
+       "text": "¿Para qué sirve una función?",
+       "options": [
+        "Para borrar variables",
+        "Para agrupar instrucciones y reutilizarlas",
+        "Para cambiar el color de la app",
+        "Para instalar Flutter"
+       ],
+       "correctIndex": 1,
+       "explanation": "Una función se escribe una vez y se llama cuantas veces se necesite."
+      },
+      {
+       "text": "¿Qué palabra se usa para un valor que no cambia una vez asignado?",
+       "options": [
+        "final",
+        "loop",
+        "change",
+        "print"
+       ],
+       "correctIndex": 0,
+       "explanation": "final (o const) evita que el valor se modifique después."
+      }
+     ]
+    },
+    {
+     "orden": 3,
+     "titulo": "Repaso del módulo 3: Dart: clases, listas y async",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Qué es una clase?",
+       "options": [
+        "Un molde para crear objetos con datos y acciones",
+        "Un tipo de archivo de imagen",
+        "Una pantalla de la app",
+        "Un error del programa"
+       ],
+       "correctIndex": 0,
+       "explanation": "Por ejemplo, la clase Producto puede tener nombre, precio y un método para mostrarlo."
+      },
+      {
+       "text": "¿Cómo se crea una lista en Dart?",
+       "options": [
+        "var frutas = {manzana, pera}",
+        "list frutas = manzana, pera",
+        "frutas -> [manzana]",
+        "var frutas = ['manzana', 'pera'];"
+       ],
+       "correctIndex": 3,
+       "explanation": "Las listas usan corchetes [ ] y guardan elementos en orden."
+      },
+      {
+       "text": "¿Para qué sirve un Map?",
+       "options": [
+        "Para dibujar mapas de ciudades",
+        "Para ordenar números",
+        "Para conectarse a internet",
+        "Para guardar pares clave-valor, como {'nombre': 'Ana'}"
+       ],
+       "correctIndex": 3,
+       "explanation": "Un Map relaciona una clave con su valor."
+      },
+      {
+       "text": "¿Qué hacen async y await?",
+       "options": [
+        "Esperan una tarea lenta (como internet) sin congelar la app",
+        "Aceleran el celular",
+        "Borran datos antiguos",
+        "Cambian el idioma de la app"
+       ],
+       "correctIndex": 0,
+       "explanation": "await espera el resultado de un Future mientras la interfaz sigue funcionando."
+      },
+      {
+       "text": "¿Qué representa un Future?",
+       "options": [
+        "Una versión futura de Flutter",
+        "Un valor que estará disponible más adelante",
+        "Un widget de calendario",
+        "Un error de sintaxis"
+       ],
+       "correctIndex": 1,
+       "explanation": "Las respuestas de internet o de archivos llegan como Future."
+      }
+     ]
+    },
+    {
+     "orden": 4,
+     "titulo": "Repaso del módulo 4: Widgets: la base de la interfaz",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "En Flutter, ¿qué es un widget?",
+       "options": [
+        "Cada pieza de la interfaz: textos, botones, imágenes, etc.",
+        "Un virus",
+        "Un archivo de configuración",
+        "Una base de datos"
+       ],
+       "correctIndex": 0,
+       "explanation": "En Flutter todo lo que ves en pantalla es un widget."
+      },
+      {
+       "text": "¿Qué widget muestra un texto?",
+       "options": [
+        "Label",
+        "Write",
+        "Paragraph",
+        "Text"
+       ],
+       "correctIndex": 3,
+       "explanation": "Text('Hola') muestra un texto en pantalla."
+      },
+      {
+       "text": "¿Cuál es la diferencia de un StatefulWidget?",
+       "options": [
+        "Puede cambiar su contenido mientras la app está abierta",
+        "No se puede mostrar",
+        "Solo funciona en iOS",
+        "No admite botones"
+       ],
+       "correctIndex": 0,
+       "explanation": "Un StatefulWidget guarda un estado que puede cambiar (por ejemplo, un contador)."
+      },
+      {
+       "text": "¿Qué método se usa para actualizar la pantalla en un StatefulWidget?",
+       "options": [
+        "setState()",
+        "refresh()",
+        "update.now()",
+        "reloadApp()"
+       ],
+       "correctIndex": 0,
+       "explanation": "setState avisa a Flutter que debe volver a dibujar el widget."
+      },
+      {
+       "text": "¿Qué widget crea un botón con fondo de color en Material 3?",
+       "options": [
+        "TextField",
+        "ElevatedButton (o FilledButton)",
+        "Image",
+        "Divider"
+       ],
+       "correctIndex": 1,
+       "explanation": "ElevatedButton y FilledButton son botones destacados."
+      }
+     ]
+    },
+    {
+     "orden": 5,
+     "titulo": "Repaso del módulo 5: Layouts y Material Design 3",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Qué widget acomoda elementos uno al lado del otro (horizontal)?",
+       "options": [
+        "Row",
+        "Column",
+        "Stack",
+        "Center"
+       ],
+       "correctIndex": 0,
+       "explanation": "Row = fila (horizontal); Column = columna (vertical)."
+      },
+      {
+       "text": "¿Qué widget acomoda elementos uno debajo del otro?",
+       "options": [
+        "Row",
+        "Wrap",
+        "Spacer",
+        "Column"
+       ],
+       "correctIndex": 3,
+       "explanation": "Column organiza sus hijos de arriba hacia abajo."
+      },
+      {
+       "text": "¿Para qué sirve Stack?",
+       "options": [
+        "Para poner widgets uno encima de otro",
+        "Para hacer listas largas",
+        "Para guardar datos",
+        "Para navegar entre pantallas"
+       ],
+       "correctIndex": 0,
+       "explanation": "Stack superpone elementos, como un texto sobre una imagen."
+      },
+      {
+       "text": "¿Qué widget agrega espacio alrededor de otro?",
+       "options": [
+        "Margin()",
+        "Padding",
+        "Space",
+        "Border"
+       ],
+       "correctIndex": 1,
+       "explanation": "Padding agrega relleno interno alrededor de su hijo."
+      },
+      {
+       "text": "¿Dónde se definen los colores generales de la app?",
+       "options": [
+        "En el theme del MaterialApp",
+        "En cada imagen",
+        "En el archivo .apk",
+        "En el emulador"
+       ],
+       "correctIndex": 0,
+       "explanation": "Con ThemeData y ColorScheme defines colores para toda la app."
+      }
+     ]
+    },
+    {
+     "orden": 6,
+     "titulo": "Repaso del módulo 6: Navegación y formularios",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Qué clase se usa para ir a otra pantalla?",
+       "options": [
+        "Router.exe",
+        "Navigator",
+        "Screen.go",
+        "Window"
+       ],
+       "correctIndex": 1,
+       "explanation": "Navigator.push abre una pantalla y Navigator.pop regresa."
+      },
+      {
+       "text": "¿Qué hace Navigator.pop(context)?",
+       "options": [
+        "Cierra el celular",
+        "Borra la app",
+        "Regresa a la pantalla anterior",
+        "Abre la cámara"
+       ],
+       "correctIndex": 2,
+       "explanation": "pop quita la pantalla actual de la pila."
+      },
+      {
+       "text": "¿Qué widget permite escribir texto?",
+       "options": [
+        "Text",
+        "Icon",
+        "Card",
+        "TextField (o TextFormField)"
+       ],
+       "correctIndex": 3,
+       "explanation": "TextFormField además permite validar lo que escribe el usuario."
+      },
+      {
+       "text": "¿Para qué sirve validar un formulario?",
+       "options": [
+        "Para cambiar el color",
+        "Para revisar que los datos estén completos y correctos antes de usarlos",
+        "Para borrar el formulario",
+        "Para traducirlo"
+       ],
+       "correctIndex": 1,
+       "explanation": "Por ejemplo, revisar que el correo tenga @ antes de enviarlo."
+      },
+      {
+       "text": "¿Qué widget agrupa campos para validarlos juntos?",
+       "options": [
+        "Form",
+        "Group",
+        "Box",
+        "Panel"
+       ],
+       "correctIndex": 0,
+       "explanation": "Form con una GlobalKey permite validar todos sus campos a la vez."
+      }
+     ]
+    },
+    {
+     "orden": 7,
+     "titulo": "Repaso del módulo 7: Listas y datos guardados",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Qué widget muestra una lista que se puede desplazar?",
+       "options": [
+        "Row",
+        "TextField",
+        "ListView",
+        "AppBar"
+       ],
+       "correctIndex": 2,
+       "explanation": "ListView muestra muchos elementos con scroll."
+      },
+      {
+       "text": "¿Qué conviene usar para listas largas?",
+       "options": [
+        "Copiar cada elemento a mano",
+        "ListView.builder",
+        "Un Stack gigante",
+        "Un Text con todo junto"
+       ],
+       "correctIndex": 1,
+       "explanation": "ListView.builder crea solo los elementos que se ven, ahorrando memoria."
+      },
+      {
+       "text": "¿Para qué sirve shared_preferences?",
+       "options": [
+        "Para guardar datos simples en el celular (por ejemplo, ajustes)",
+        "Para enviar correos",
+        "Para tomar fotos",
+        "Para pagar en línea"
+       ],
+       "correctIndex": 0,
+       "explanation": "Guarda valores sencillos que siguen ahí al cerrar la app."
+      },
+      {
+       "text": "¿Qué pasa con los datos guardados con shared_preferences al cerrar la app?",
+       "options": [
+        "Se borran siempre",
+        "Se mantienen",
+        "Se envían a Google",
+        "Se convierten en imágenes"
+       ],
+       "correctIndex": 1,
+       "explanation": "Por eso sirve para recordar, por ejemplo, el modo oscuro o una lista de tareas."
+      },
+      {
+       "text": "¿Qué widget es ideal para mostrar cada elemento de una lista con título y subtítulo?",
+       "options": [
+        "Scaffold",
+        "SizedBox",
+        "ListTile",
+        "Expanded"
+       ],
+       "correctIndex": 2,
+       "explanation": "ListTile ya trae lugar para ícono, título y subtítulo."
+      }
+     ]
+    },
+    {
+     "orden": 8,
+     "titulo": "Repaso del módulo 8: Consumir APIs",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Qué es una API REST?",
+       "options": [
+        "Un servicio en internet que entrega datos (por ejemplo, el clima)",
+        "Un tipo de celular",
+        "Un botón de Flutter",
+        "Un formato de imagen"
+       ],
+       "correctIndex": 0,
+       "explanation": "Tu app pide datos a la API y la API responde, normalmente en JSON."
+      },
+      {
+       "text": "¿Qué paquete se usa para hacer peticiones a internet?",
+       "options": [
+        "http",
+        "camera",
+        "intl",
+        "path"
+       ],
+       "correctIndex": 0,
+       "explanation": "Con http.get(...) pides datos a una URL."
+      },
+      {
+       "text": "¿En qué formato suelen venir los datos de una API?",
+       "options": [
+        "JSON",
+        "MP3",
+        "PDF",
+        "PNG"
+       ],
+       "correctIndex": 0,
+       "explanation": "JSON es texto con pares clave-valor, fácil de convertir a clases de Dart."
+      },
+      {
+       "text": "¿Qué widget ayuda a mostrar datos que llegan desde un Future?",
+       "options": [
+        "ListTile",
+        "FutureBuilder",
+        "Divider",
+        "Opacity"
+       ],
+       "correctIndex": 1,
+       "explanation": "FutureBuilder muestra carga, error o los datos según el estado."
+      },
+      {
+       "text": "¿Qué debes mostrar mientras los datos se descargan?",
+       "options": [
+        "Nada, la pantalla en blanco",
+        "Un error siempre",
+        "Cerrar la app",
+        "Un indicador de carga"
+       ],
+       "correctIndex": 3,
+       "explanation": "CircularProgressIndicator le indica al usuario que se está cargando."
+      }
+     ]
+    },
+    {
+     "orden": 9,
+     "titulo": "Repaso del módulo 9: IA en tu app y publicación",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Qué modelo de IA se usa en el curso para el chat?",
+       "options": [
+        "Paint",
+        "Excel",
+        "Photoshop",
+        "Gemini"
+       ],
+       "correctIndex": 3,
+       "explanation": "Gemini es el modelo de IA de Google."
+      },
+      {
+       "text": "¿Qué servicio conecta tu app con Gemini de forma segura?",
+       "options": [
+        "Bluetooth",
+        "Google Maps",
+        "Firebase AI Logic",
+        "Wi-Fi Direct"
+       ],
+       "correctIndex": 2,
+       "explanation": "Firebase AI Logic evita poner claves secretas dentro de la app."
+      },
+      {
+       "text": "¿Por qué NO se debe poner una clave de API dentro de la app?",
+       "options": [
+        "Porque hace la app más rápida",
+        "Porque Flutter no lo permite",
+        "Porque cambia los colores",
+        "Porque cualquiera podría extraerla y usarla"
+       ],
+       "correctIndex": 3,
+       "explanation": "Las claves dentro del APK se pueden obtener con facilidad."
+      },
+      {
+       "text": "¿Qué permite un chat con memoria?",
+       "options": [
+        "Que el celular tenga más espacio",
+        "Que la app funcione sin batería",
+        "Que se borren los mensajes",
+        "Que la IA recuerde lo que se habló antes en la conversación"
+       ],
+       "correctIndex": 3,
+       "explanation": "El historial se envía en cada mensaje para mantener el contexto."
+      },
+      {
+       "text": "¿Qué archivo instalas en Android para probar tu app terminada?",
+       "options": [
+        "El .exe",
+        "El .docx",
+        "El APK",
+        "El .mp4"
+       ],
+       "correctIndex": 2,
+       "explanation": "Con flutter build apk generas el instalador de Android."
+      }
+     ]
+    }
+   ],
+   "final": {
+    "titulo": "Examen final del curso",
+    "descripcion": "Apruébalo para obtener tu constancia. Se desbloquea al completar el 100 % del curso y puedes reintentarlo.",
+    "notaMinima": 70,
+    "preguntas": [
+     {
+      "text": "¿Con qué lenguaje se programa en Flutter?",
+      "options": [
+       "Kotlin",
+       "C#",
+       "Dart",
+       "Ruby"
+      ],
+      "correctIndex": 2,
+      "explanation": "Flutter usa Dart."
+     },
+     {
+      "text": "¿Qué comando revisa la instalación de Flutter?",
+      "options": [
+       "flutter scan",
+       "flutter doctor",
+       "dart doctor --fix",
+       "flutter clean"
+      ],
+      "correctIndex": 1,
+      "explanation": "flutter doctor indica qué falta configurar."
+     },
+     {
+      "text": "¿Qué widget organiza elementos en forma vertical?",
+      "options": [
+       "Row",
+       "Column",
+       "Stack",
+       "Wrap"
+      ],
+      "correctIndex": 1,
+      "explanation": "Column apila sus hijos de arriba abajo."
+     },
+     {
+      "text": "¿Qué método actualiza la pantalla en un StatefulWidget?",
+      "options": [
+       "render()",
+       "setState()",
+       "paint()",
+       "redo()"
+      ],
+      "correctIndex": 1,
+      "explanation": "setState vuelve a dibujar el widget con el nuevo estado."
+     },
+     {
+      "text": "¿Qué hace Navigator.push?",
+      "options": [
+       "Abre una nueva pantalla",
+       "Cierra la app",
+       "Guarda un archivo",
+       "Llama por teléfono"
+      ],
+      "correctIndex": 0,
+      "explanation": "push agrega una pantalla; pop regresa."
+     },
+     {
+      "text": "¿Qué widget muestra listas largas con desplazamiento?",
+      "options": [
+       "Text",
+       "Icon",
+       "ListView",
+       "Center"
+      ],
+      "correctIndex": 2,
+      "explanation": "ListView (o ListView.builder) muestra listas con scroll."
+     },
+     {
+      "text": "¿En qué formato suele responder una API REST?",
+      "options": [
+       "ZIP",
+       "JPG",
+       "WAV",
+       "JSON"
+      ],
+      "correctIndex": 3,
+      "explanation": "JSON es el formato más común en APIs."
+     },
+     {
+      "text": "¿Qué palabras clave permiten esperar una respuesta de internet sin congelar la app?",
+      "options": [
+       "if y else",
+       "for y while",
+       "async y await",
+       "try y void"
+      ],
+      "correctIndex": 2,
+      "explanation": "async/await trabajan con Futures."
+     },
+     {
+      "text": "¿Qué servicio permite usar Gemini en tu app sin exponer claves?",
+      "options": [
+       "Google Drive",
+       "YouTube",
+       "Gmail",
+       "Firebase AI Logic"
+      ],
+      "correctIndex": 3,
+      "explanation": "Firebase AI Logic hace de intermediario seguro."
+     },
+     {
+      "text": "¿Qué comando genera el instalador de Android?",
+      "options": [
+       "flutter create apk",
+       "dart run apk",
+       "flutter build apk",
+       "flutter export"
+      ],
+      "correctIndex": 2,
+      "explanation": "El APK queda en build/app/outputs/flutter-apk/."
+     }
+    ]
+   }
+  },
+  {
+   "nombre": "Laravel",
+   "claves": [
+    "laravel"
+   ],
+   "modulos": [
+    {
+     "orden": 1,
+     "titulo": "Repaso del módulo 1: Fundamentos de Laravel",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Qué es Laravel?",
+       "options": [
+        "Un framework de PHP para crear aplicaciones web",
+        "Un lenguaje de diseño",
+        "Un navegador web",
+        "Una base de datos"
+       ],
+       "correctIndex": 0,
+       "explanation": "Laravel organiza tu proyecto y trae herramientas listas para usar."
+      },
+      {
+       "text": "¿Con qué herramienta se instalan Laravel y sus paquetes?",
+       "options": [
+        "npm solamente",
+        "Composer",
+        "Photoshop",
+        "Excel"
+       ],
+       "correctIndex": 1,
+       "explanation": "Composer es el gestor de paquetes de PHP."
+      },
+      {
+       "text": "¿Qué es Artisan?",
+       "options": [
+        "Un editor de imágenes",
+        "Un plugin de navegador",
+        "Un servidor de correo",
+        "La herramienta de comandos de Laravel"
+       ],
+       "correctIndex": 3,
+       "explanation": "Por ejemplo: php artisan serve o php artisan make:controller."
+      },
+      {
+       "text": "¿Para qué sirve el archivo .env?",
+       "options": [
+        "Para escribir las vistas",
+        "Para guardar imágenes",
+        "Para el diseño CSS",
+        "Para guardar la configuración, como los datos de la base de datos"
+       ],
+       "correctIndex": 3,
+       "explanation": "El .env no se sube a GitHub porque tiene datos sensibles."
+      },
+      {
+       "text": "¿Qué comando levanta un servidor local para probar tu proyecto?",
+       "options": [
+        "php run web",
+        "laravel start",
+        "php artisan serve",
+        "composer play"
+       ],
+       "correctIndex": 2,
+       "explanation": "Luego abres http://127.0.0.1:8000 en el navegador."
+      }
+     ]
+    },
+    {
+     "orden": 2,
+     "titulo": "Repaso del módulo 2: Rutas, controladores y Blade",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿En qué archivo se definen las rutas web?",
+       "options": [
+        "app/web.html",
+        "routes/web.php",
+        "config/routes.txt",
+        "public/index.css"
+       ],
+       "correctIndex": 1,
+       "explanation": "Ahí indicas qué responde cada URL."
+      },
+      {
+       "text": "¿Qué hace un controlador?",
+       "options": [
+        "Guarda imágenes",
+        "Diseña los colores",
+        "Instala PHP",
+        "Recibe la petición y decide qué responder"
+       ],
+       "correctIndex": 3,
+       "explanation": "Los controladores mantienen la lógica fuera de las rutas."
+      },
+      {
+       "text": "¿Qué comando crea un controlador?",
+       "options": [
+        "php artisan new:page",
+        "composer controller",
+        "php artisan make:controller",
+        "php make view"
+       ],
+       "correctIndex": 2,
+       "explanation": "Por ejemplo: php artisan make:controller ProductoController."
+      },
+      {
+       "text": "¿Qué es Blade?",
+       "options": [
+        "Una base de datos",
+        "Un framework de JavaScript",
+        "Un servidor",
+        "El sistema de plantillas (vistas) de Laravel"
+       ],
+       "correctIndex": 3,
+       "explanation": "Los archivos de Blade terminan en .blade.php."
+      },
+      {
+       "text": "¿Cómo se muestra una variable en una vista Blade?",
+       "options": [
+        "<?print nombre?>",
+        "[[nombre]]",
+        "{{ $nombre }}",
+        "#nombre#"
+       ],
+       "correctIndex": 2,
+       "explanation": "Las dobles llaves muestran el valor de forma segura."
+      }
+     ]
+    },
+    {
+     "orden": 3,
+     "titulo": "Repaso del módulo 3: Base de datos con Eloquent",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Para qué sirven las migraciones?",
+       "options": [
+        "Para mover archivos",
+        "Para traducir la web",
+        "Para enviar correos",
+        "Para crear y modificar tablas de la base de datos con código"
+       ],
+       "correctIndex": 3,
+       "explanation": "Se ejecutan con php artisan migrate."
+      },
+      {
+       "text": "¿Qué es Eloquent?",
+       "options": [
+        "Un tipo de vista",
+        "El ORM de Laravel para trabajar con la base de datos usando modelos",
+        "Un servidor web",
+        "Un lenguaje nuevo"
+       ],
+       "correctIndex": 1,
+       "explanation": "Por ejemplo: Producto::all() trae todos los productos."
+      },
+      {
+       "text": "¿Qué comando ejecuta las migraciones pendientes?",
+       "options": [
+        "php artisan db:start",
+        "php artisan migrate",
+        "composer migrate",
+        "php run tables"
+       ],
+       "correctIndex": 1,
+       "explanation": "Crea las tablas definidas en database/migrations."
+      },
+      {
+       "text": "¿Para qué sirven los seeders?",
+       "options": [
+        "Para llenar la base de datos con datos de prueba",
+        "Para borrar el proyecto",
+        "Para diseñar vistas",
+        "Para crear rutas"
+       ],
+       "correctIndex": 0,
+       "explanation": "Se ejecutan con php artisan db:seed."
+      },
+      {
+       "text": "¿Qué significa CRUD?",
+       "options": [
+        "Copiar, Revisar, Usar y Descargar",
+        "Crear, Leer, Actualizar y Eliminar",
+        "Cargar, Reiniciar, Unir y Dividir",
+        "Controlar, Rutear, Unificar y Desplegar"
+       ],
+       "correctIndex": 1,
+       "explanation": "Son las cuatro operaciones básicas sobre los datos."
+      }
+     ]
+    },
+    {
+     "orden": 4,
+     "titulo": "Repaso del módulo 4: Formularios, seguridad y API",
+     "descripcion": "Cuestionario corto para repasar lo visto en este módulo. Puedes intentarlo las veces que quieras.",
+     "notaMinima": 60,
+     "preguntas": [
+      {
+       "text": "¿Qué protege la directiva @csrf en un formulario?",
+       "options": [
+        "El color del botón",
+        "Que nadie envíe formularios falsos en nombre del usuario",
+        "El tamaño de la letra",
+        "La velocidad de la página"
+       ],
+       "correctIndex": 1,
+       "explanation": "El token CSRF verifica que el formulario venga de tu sitio."
+      },
+      {
+       "text": "¿Para qué sirve validar los datos de un formulario?",
+       "options": [
+        "Para cambiar el diseño",
+        "Para asegurar que lleguen completos y en el formato correcto",
+        "Para borrarlos",
+        "Para traducirlos"
+       ],
+       "correctIndex": 1,
+       "explanation": "Ejemplo: 'email' => 'required|email'."
+      },
+      {
+       "text": "¿Qué es una API REST?",
+       "options": [
+        "Una vista Blade",
+        "Un servicio que entrega datos (normalmente en JSON) a otras apps",
+        "Un tipo de base de datos",
+        "Un editor de código"
+       ],
+       "correctIndex": 1,
+       "explanation": "Las rutas de API suelen estar en routes/api.php."
+      },
+      {
+       "text": "¿Qué paquete de Laravel protege una API con tokens?",
+       "options": [
+        "Sanctum",
+        "Blade",
+        "Tinker",
+        "Mix"
+       ],
+       "correctIndex": 0,
+       "explanation": "Sanctum emite tokens para apps móviles y SPA."
+      },
+      {
+       "text": "¿Qué son las policies?",
+       "options": [
+        "Archivos de estilos",
+        "Tipos de rutas",
+        "Comandos de Composer",
+        "Reglas que deciden qué puede hacer cada usuario"
+       ],
+       "correctIndex": 3,
+       "explanation": "Por ejemplo: solo el autor puede editar su publicación."
+      }
+     ]
+    }
+   ],
+   "final": {
+    "titulo": "Examen final del curso",
+    "descripcion": "Apruébalo para obtener tu constancia. Se desbloquea al completar el 100 % del curso y puedes reintentarlo.",
+    "notaMinima": 70,
+    "preguntas": [
+     {
+      "text": "¿Qué es Laravel?",
+      "options": [
+       "Un framework de Python",
+       "Un framework de PHP",
+       "Una base de datos",
+       "Un sistema operativo"
+      ],
+      "correctIndex": 1,
+      "explanation": "Laravel es el framework PHP más usado."
+     },
+     {
+      "text": "¿Qué herramienta instala los paquetes de PHP?",
+      "options": [
+       "pip",
+       "Maven",
+       "Composer",
+       "NuGet"
+      ],
+      "correctIndex": 2,
+      "explanation": "Composer gestiona las dependencias de PHP."
+     },
+     {
+      "text": "¿En qué archivo van las rutas web?",
+      "options": [
+       "routes/app.js",
+       "config/web.yml",
+       "routes/web.php",
+       "public/routes.php"
+      ],
+      "correctIndex": 2,
+      "explanation": "Las rutas de API van en routes/api.php."
+     },
+     {
+      "text": "¿Qué comando crea un controlador?",
+      "options": [
+       "php artisan make:controller",
+       "php artisan controller:new",
+       "composer make:controller",
+       "laravel controller"
+      ],
+      "correctIndex": 0,
+      "explanation": "Artisan genera archivos con la estructura base."
+     },
+     {
+      "text": "¿Cómo se muestra una variable en Blade?",
+      "options": [
+       "<% variable %>",
+       "{{ $variable }}",
+       "{variable}",
+       "$$variable$$"
+      ],
+      "correctIndex": 1,
+      "explanation": "Las dobles llaves escapan el contenido para evitar ataques."
+     },
+     {
+      "text": "¿Qué comando crea las tablas de las migraciones?",
+      "options": [
+       "php artisan tables",
+       "composer db",
+       "php artisan serve",
+       "php artisan migrate"
+      ],
+      "correctIndex": 3,
+      "explanation": "migrate ejecuta las migraciones pendientes."
+     },
+     {
+      "text": "¿Qué es Eloquent?",
+      "options": [
+       "Un motor de plantillas",
+       "Un paquete de pagos",
+       "El ORM de Laravel",
+       "Un servidor"
+      ],
+      "correctIndex": 2,
+      "explanation": "Eloquent representa cada tabla con un modelo."
+     },
+     {
+      "text": "¿Qué protege @csrf?",
+      "options": [
+       "Contra virus en imágenes",
+       "Contra errores de escritura",
+       "Contra el envío de formularios falsos",
+       "Contra la falta de internet"
+      ],
+      "correctIndex": 2,
+      "explanation": "Laravel valida el token en cada formulario POST."
+     },
+     {
+      "text": "¿Qué paquete protege una API con tokens?",
+      "options": [
+       "Blade",
+       "Sanctum",
+       "Vite",
+       "Tinker"
+      ],
+      "correctIndex": 1,
+      "explanation": "Sanctum es la forma simple de autenticar APIs."
+     },
+     {
+      "text": "¿Por qué no se sube el archivo .env a GitHub?",
+      "options": [
+       "Porque contiene contraseñas y claves",
+       "Porque pesa mucho",
+       "Porque es una imagen",
+       "Porque Laravel no lo usa"
+      ],
+      "correctIndex": 0,
+      "explanation": "Se sube un .env.example sin datos reales."
+     }
+    ]
+   }
+  }
+ ]
+}

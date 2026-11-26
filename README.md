@@ -69,11 +69,12 @@ y un Libro de Reclamaciones virtual según la normativa peruana. Todo funcionand
 - Catálogo de cursos por categorías y búsqueda
 - Reproductor de lecciones con progreso automático
 - **Cuestionarios** al final de cada módulo o después de una lección, con nota al instante y reintentos
+- **Examen final** que se desbloquea al 100 % y habilita la constancia
 - **Preguntas en cada lección**: el equipo responde y el alumno recibe un aviso
 - **Calificación con estrellas y reseñas** de cada curso
 - **Notificaciones**: cursos nuevos, respuestas, constancia y certificado listos
 - Recursos del curso: **guías en PDF y kits de práctica en ZIP**
-- **Constancia gratuita** al completar el 100 % del curso
+- **Constancia gratuita** con nombre y documento al completar el curso y aprobar el examen final
 - **Certificado oficial** con foto y documento (pago por WhatsApp)
 - Perfil con foto formal comprimida en el navegador
 - Modo claro y oscuro, en computadora y celular
@@ -85,6 +86,8 @@ y un Libro de Reclamaciones virtual según la normativa peruana. Todo funcionand
 - Cursos, categorías, módulos y lecciones
 - **Cuestionarios** con editor de preguntas, respuesta correcta, explicación y estadísticas (intentos, nota promedio, aprobados)
 - **Preguntas y reseñas**: responde dudas por lección (con contador de pendientes) y oculta reseñas inapropiadas
+- **Datos para certificados**: lo que cada alumno registró para su constancia, con exportación a Excel
+- **Automatizaciones con n8n**: correos y avisos automáticos (guía en [`docs/N8N.md`](docs/N8N.md))
 - Usuarios y roles
 - **Pagos y certificados**: confirma pagos y libera el certificado
 - **Panel de JB Assist**: estadísticas, preguntas sin respuesta, FAQ editables, prueba en vivo y la IA activable o desactivable
@@ -267,6 +270,7 @@ npm run dev
 | `JWT_SECRET` / `JWT_EXPIRES_IN` | Firma de los tokens de sesión |
 | `GEMINI_API_KEY` | IA de respaldo de JB Assist (gratis en Google AI Studio) |
 | `GROQ_API_KEY` | *(Opcional)* segunda IA de respaldo |
+| `N8N_WEBHOOK_URL` / `N8N_WEBHOOK_SECRET` / `N8N_API_KEY` | *(Opcional)* automatizaciones con n8n ([guía](docs/N8N.md)) |
 
 **Frontend** (`bootcamp-frontend/.env.local`)
 
@@ -287,6 +291,8 @@ npm run dev
 | backend | `npm run seed` | Datos iniciales (roles, categorías, cursos) |
 | backend | `npm run material:cargar -- --revisar` | Muestra qué material se cargaría a cada curso |
 | backend | `npm run material:cargar -- --actualizar` | Sube las guías y kits a los cursos |
+| backend | `npm run cuestionarios:cargar -- --revisar` | Muestra qué cuestionarios se crearían en cada curso |
+| backend | `npm run cuestionarios:cargar` | Crea los cuestionarios por módulo y el examen final (no duplica) |
 | frontend | `npm run build` | Compilación de producción |
 | frontend | `npm run build:cpanel` | Paquete listo para un hosting con cPanel |
 

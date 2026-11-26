@@ -9,7 +9,7 @@ import { CuestionarioAdmin, GuardarCuestionario, mensajeError, quizzesApi } from
 interface PreguntaEditable { text: string; options: string[]; correctIndex: number; explanation: string }
 interface Borrador {
   id?: string;
-  ubicacion: string;          // "m:<id>" (final de módulo) o "l:<id>" (después de lección)
+  ubicacion: string;          // "m:<id>" (final de módulo), "l:<id>" (después de lección) o "final" (examen final)
   title: string;
   description: string;
   passingScore: number;
@@ -31,7 +31,9 @@ export function AdminQuizzesManager({ courseId, modulos }: { courseId: string; m
   useEffect(() => { cargar(); }, [courseId]);
 
   const ordenados = [...modulos].sort((a, b) => (a.orderNumber ?? 0) - (b.orderNumber ?? 0));
-  const nombreUbicacion = (q: { moduleId: string | null; lessonId: string | null }) => {
+  const hayFinal = (lista ?? []).some((q) => q.isFinal);
+  const nombreUbicacion = (q: { moduleId: string | null; lessonId: string | null; isFinal?: boolean }) => {
+    if (q.isFinal || (!q.moduleId && !q.lessonId)) return "Examen final del curso · se desbloquea al 100 % y es obligatorio para la constancia";
     if (q.moduleId) {
       const m = ordenados.find((x) => x.id === q.moduleId);
       return m ? `Final del módulo ${m.orderNumber}: ${m.title}` : "Módulo eliminado";
@@ -53,7 +55,7 @@ export function AdminQuizzesManager({ courseId, modulos }: { courseId: string; m
   const editar = (q: CuestionarioAdmin) => {
     setBorrador({
       id: q.id,
-      ubicacion: q.moduleId ? `m:${q.moduleId}` : `l:${q.lessonId}`,
+      ubicacion: q.isFinal ? "final" : q.moduleId ? `m:${q.moduleId}` : `l:${q.lessonId}`,
       title: q.title,
       description: q.description ?? "",
       passingScore: q.passingScore,
@@ -108,6 +110,7 @@ export function AdminQuizzesManager({ courseId, modulos }: { courseId: string; m
       courseId,
       moduleId: tipo === "m" ? id : null,
       lessonId: tipo === "l" ? id : null,
+      final: tipo === "final",
       title: borrador.title.trim(),
       description: borrador.description.trim() || undefined,
       passingScore: Math.max(0, Math.min(100, Math.round(borrador.passingScore || 0))),
@@ -175,6 +178,7 @@ export function AdminQuizzesManager({ courseId, modulos }: { courseId: string; m
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-white font-semibold">{q.title}</p>
+                    {q.isFinal && <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[rgba(227,30,36,0.15)] text-[#E31E24]">Examen final</span>}
                     {!q.published && <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-gray-800 text-gray-400">Oculto</span>}
                   </div>
                   <p className="text-[#00C0E7] text-xs mt-0.5">{nombreUbicacion(q)}</p>
@@ -212,6 +216,9 @@ export function AdminQuizzesManager({ courseId, modulos }: { courseId: string; m
             <div className="sm:col-span-2">
               <label className="label-dark block text-xs font-semibold mb-1" htmlFor="qz-ubicacion">¿Dónde aparece?</label>
               <select id="qz-ubicacion" value={borrador.ubicacion} onChange={(e) => setCampo("ubicacion", e.target.value)} className="input-dark w-full">
+                {(!hayFinal || borrador.ubicacion === "final") && (
+                  <option value="final">🏆 Examen final del curso (obligatorio para la constancia)</option>
+                )}
                 {ordenados.map((m) => (
                   <optgroup key={m.id} label={`Módulo ${m.orderNumber}: ${m.title}`}>
                     <option value={`m:${m.id}`}>Examen al final del módulo {m.orderNumber}</option>

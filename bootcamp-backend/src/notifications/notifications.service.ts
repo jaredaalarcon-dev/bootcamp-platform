@@ -75,6 +75,10 @@ export class NotificationsService {
     }
   }
 
+  async yaExiste(userId: string, key: string) {
+    return (await this.repo.count({ where: { userId, key } })) > 0;
+  }
+
   async list(userId: string, limit = 30) {
     const max = Math.min(Math.max(Number(limit) || 30, 1), 100);
     const [items, unread] = await Promise.all([

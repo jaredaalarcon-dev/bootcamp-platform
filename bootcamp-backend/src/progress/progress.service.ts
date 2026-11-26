@@ -6,6 +6,7 @@ import { Progress } from './entities/progress.entity';
 import { Lesson } from '../courses/entities/lesson.entity';
 import { Enrollment } from '../enrollments/entities/enrollment.entity';
 import { NotificationsService } from '../notifications/notifications.service';
+import { N8nService } from '../integrations/n8n.service';
 
 @Injectable()
 export class ProgressService {
@@ -17,6 +18,7 @@ export class ProgressService {
     @InjectRepository(Enrollment)
     private enrollmentRepository: Repository<Enrollment>,
     private readonly notifications: NotificationsService,
+    private readonly n8n: N8nService,
   ) {}
 
   // Marca o desmarca una lección como vista
@@ -170,9 +172,21 @@ export class ProgressService {
     // Aviso único: la clave evita repetirlo si desmarca y vuelve a marcar
     if (percentage === 100) {
       const [curso] = await this.enrollmentRepository.manager.query(
-        `SELECT title FROM courses WHERE id = $1`, [courseId],
+        `SELECT c.title,
+                EXISTS (SELECT 1 FROM quizzes q WHERE q."courseId" = c.id AND q."moduleId" IS NULL
+                          AND q."lessonId" IS NULL AND q.published = true) AS "tieneExamen"
+           FROM courses c WHERE c.id = $1`, [courseId],
       );
-      await this.notifications.notify(userId, {
+      if (!(await this.notifications.yaExiste(userId, `constancia:${courseId}`))) {
+        this.n8n.emitir('curso.completado', { userId, courseId, curso: curso?.title, tieneExamenFinal: !!curso?.tieneExamen });
+      }
+      await this.notifications.notify(userId, curso?.tieneExamen ? {
+        type: 'constancia',
+        title: '¡Completaste el curso! Rinde el examen final',
+        message: `Terminaste "${curso?.title ?? 'tu curso'}". Aprueba el examen final para obtener tu constancia.`,
+        link: `/courses/${courseId}?examen=final`,
+        key: `constancia:${courseId}`,
+      } : {
         type: 'constancia',
         title: '¡Completaste el curso! Tu constancia está lista',
         message: `Terminaste "${curso?.title ?? 'tu curso'}". Descarga tu constancia gratuita o solicita tu certificado oficial.`,

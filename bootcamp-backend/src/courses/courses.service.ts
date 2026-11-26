@@ -6,6 +6,7 @@ import { Course } from './entities/course.entity';
 import { Category } from './entities/category.entity';
 import { CreateCourseDto, UpdateCourseDto } from './dto/create-course.dto';
 import { NotificationsService } from '../notifications/notifications.service';
+import { N8nService } from '../integrations/n8n.service';
 
 @Injectable()
 export class CoursesService {
@@ -15,12 +16,14 @@ export class CoursesService {
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
     private readonly notifications: NotificationsService,
+    private readonly n8n: N8nService,
   ) {}
 
   // Aviso a todos los alumnos cuando un curso pasa a "publicado".
   // La clave evita repetirlo si se despublica y se vuelve a publicar.
   private async avisarSiSePublico(antes: string | undefined, curso: Course) {
     if (curso.status !== 'published' || antes === 'published') return;
+    this.n8n.emitir('curso.publicado', { courseId: curso.id, curso: curso.title, descripcion: curso.description, enlace: `/courses/${curso.id}` });
     await this.notifications.notifyAllStudents({
       type: 'curso_nuevo',
       title: `Nuevo curso disponible: ${curso.title}`,

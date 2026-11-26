@@ -20,6 +20,7 @@ import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagg
 import { CertificatesService, FOTO_MAX_MB, FOTO_TIPOS } from './certificates.service';
 import type { ArchivoFoto } from './certificates.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminAuthGuard } from '../auth/guards/admin-auth.guard';
 import { SaveCertificateProfileDto } from './dto/certificate-profile.dto';
 
 @ApiTags('Certificates')
@@ -94,5 +95,19 @@ export class CertificateVerifyController {
   @ApiOperation({ summary: 'Verificar un certificado o constancia por su código (público)' })
   async verify(@Param('code') code: string) {
     return { success: true, data: await this.certificatesService.verify(code) };
+  }
+}
+
+@ApiTags('Certificates (admin)')
+@ApiBearerAuth()
+@Controller('admin/certificate-data')
+@UseGuards(JwtAuthGuard, AdminAuthGuard)
+export class AdminCertificateDataController {
+  constructor(private readonly certificatesService: CertificatesService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Datos que cada alumno registró para su constancia y certificado' })
+  async list() {
+    return { success: true, data: await this.certificatesService.adminDatos() };
   }
 }

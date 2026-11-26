@@ -1,0 +1,126 @@
+{
+  "name": "SIJB - Recordatorio a alumnos inactivos",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "id": "9dd753e1-6493-424d-9d2f-bfdbb7302214",
+      "name": "Todos los días 9:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://sijb-bootcamp-api.onrender.com/v1/integrations/n8n/inactive-students?dias=7",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-sijb-key",
+              "value": "PEGA_AQUI_TU_N8N_API_KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1372236b-6a87-4428-9b21-568caed3ce36",
+      "name": "Alumnos sin avanzar (7 días)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Convierte la lista en un elemento por alumno y arma el mensaje\nconst r = $input.first().json;\nconst alumnos = (r.data && r.data.alumnos) || [];\nreturn alumnos.map((a) => ({\n  json: {\n    usuario: a.userId,\n    titulo: `Te esperamos en \"${a.curso}\" 💪`,\n    mensaje: `Hola ${a.nombre || ''}, hace unos días que no avanzas en ${a.curso}. ¡Una lección hoy y sigues sumando hacia tu constancia!`,\n    enlace: `/courses/${a.courseId}`,\n    clave: `recordatorio:${a.courseId}:${new Date().toISOString().slice(0, 10)}`,\n  },\n}));"
+      },
+      "id": "ea9bb6fe-68fd-4b5b-875b-345a97f34bdd",
+      "name": "Preparar recordatorios",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sijb-bootcamp-api.onrender.com/v1/integrations/n8n/notify",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-sijb-key",
+              "value": "PEGA_AQUI_TU_N8N_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ para: 'usuario', usuario: $json.usuario, titulo: $json.titulo, mensaje: $json.mensaje, enlace: $json.enlace, clave: $json.clave }) }}",
+        "options": {}
+      },
+      "id": "10472c82-f02d-4f29-a47f-ad5b1f62a06b",
+      "name": "Enviar aviso en la plataforma",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        780,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Todos los días 9:00": {
+      "main": [
+        [
+          {
+            "node": "Alumnos sin avanzar (7 días)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alumnos sin avanzar (7 días)": {
+      "main": [
+        [
+          {
+            "node": "Preparar recordatorios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar recordatorios": {
+      "main": [
+        [
+          {
+            "node": "Enviar aviso en la plataforma",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

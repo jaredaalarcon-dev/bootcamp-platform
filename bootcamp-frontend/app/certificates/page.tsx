@@ -48,6 +48,9 @@ export default function CertificatesPage() {
 
   const pagado = (courseId: string) => resumen?.courses.find((c) => c.courseId === courseId)?.paid ?? false;
   const perfilListo = resumen?.profileComplete ?? false;
+  const perfilBasico = resumen?.profileBasic ?? perfilListo;
+  const examen = (courseId: string) => resumen?.courses.find((c) => c.courseId === courseId)?.finalExam ?? null;
+  const yaEmitida = (courseId: string) => !!resumen?.courses.find((c) => c.courseId === courseId)?.issued.some((d) => d.type === "constancia");
   const pedirCertificado = (curso: string) =>
     enlaceWhatsApp(
       `Hola, terminé el curso "${curso}" en el Bootcamp SIJB y quiero solicitar mi certificado oficial.${correo ? ` Mi correo de la plataforma es ${correo}.` : ""}`,
@@ -64,7 +67,7 @@ export default function CertificatesPage() {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
           <div>
             <h1 className="font-brand text-[#00C0E7] text-2xl uppercase tracking-wide">Mis Certificados</h1>
-            <p className="text-gray-500 text-sm mt-1">Completa el 100% de un curso: la constancia es gratis y el certificado oficial se solicita por WhatsApp</p>
+            <p className="text-gray-500 text-sm mt-1">Completa el 100 % del curso y aprueba su examen final: la constancia es gratis y el certificado oficial se solicita por WhatsApp</p>
           </div>
           {!cargando && cursos.length > 0 && (
             <p className="text-sm text-gray-400">
@@ -76,10 +79,16 @@ export default function CertificatesPage() {
         {!cargando && resumen && !perfilListo && (
           <div className="card-dark p-4 flex flex-col sm:flex-row sm:items-center gap-3 border-l-4 border-l-[#E31E24]">
             <div className="flex-1">
-              <p className="text-white text-sm font-semibold">Completa tus datos para el certificado oficial</p>
-              <p className="text-gray-500 text-xs mt-0.5">Nombre como en tu documento, número de documento y foto formal. Las constancias gratuitas no los necesitan.</p>
+              <p className="text-white text-sm font-semibold">
+                {perfilBasico ? "Sube tu foto formal para el certificado oficial" : "Completa tus datos para obtener tu constancia"}
+              </p>
+              <p className="text-gray-500 text-xs mt-0.5">
+                {perfilBasico
+                  ? "Tu constancia ya saldrá con tu nombre y documento. El certificado oficial además lleva tu foto."
+                  : "Es obligatorio: tu nombre completo como figura en tu documento y tu número de documento. Así tu constancia sale con todos tus datos."}
+              </p>
             </div>
-            <Link href="/profile" className="btn-cyan text-sm px-4 py-2 text-center">Ir a Mi perfil</Link>
+            <Link href="/profile?volver=/certificates" className="btn-cyan text-sm px-4 py-2 text-center">Ir a Mi perfil</Link>
           </div>
         )}
 
@@ -95,7 +104,7 @@ export default function CertificatesPage() {
           <>
             {/* ── Obtenidos ───────────────────────────────────────────── */}
             <section>
-              <h2 className="font-brand text-white text-lg uppercase tracking-wide mb-1">Obtenidos</h2>
+              <h2 className="font-brand text-white text-lg uppercase tracking-wide mb-1">Cursos completados</h2>
               <div className="h-[2px] w-10 bg-[#E31E24] rounded mb-4" />
 
               {obtenidos.length === 0 ? (
@@ -118,7 +127,7 @@ export default function CertificatesPage() {
                           <IconMedalla className="w-7 h-7" />
                         </div>
                         <p className="text-gray-400 text-[10px] uppercase tracking-widest mt-3">
-                          {pagado(e.course.id) ? "Certificado habilitado" : "Constancia disponible"}
+                          {examen(e.course.id) && !examen(e.course.id)!.passed && !yaEmitida(e.course.id) ? "Falta el examen final" : pagado(e.course.id) ? "Certificado habilitado" : "Constancia disponible"}
                         </p>
                         <h3 className="font-brand text-[#00C0E7] text-base uppercase tracking-wide mt-1 line-clamp-2">
                           {e.course.title}
@@ -133,12 +142,25 @@ export default function CertificatesPage() {
                         <p className="text-gray-500 text-xs mt-1">{e.progress.totalLessons} lecciones completadas</p>
                         <div className="flex-1" />
                         <div className="mt-4 space-y-2">
-                          <Link
-                            href={`/certificates/${e.course.id}?tipo=constancia`}
-                            className="btn-cyan text-sm py-2 flex items-center justify-center gap-2"
-                          >
-                            Constancia <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">· gratis</span>
-                          </Link>
+                          {(() => {
+                            const ex = examen(e.course.id);
+                            if (ex && !ex.passed && !yaEmitida(e.course.id)) return (
+                              <Link href={`/courses/${e.course.id}?examen=final`} className="btn-cyan text-sm py-2 flex flex-col items-center justify-center leading-tight">
+                                <span>🏆 Rendir el examen final</span>
+                                <span className="text-[10px] font-semibold opacity-80">{ex.bestScore != null ? `Tu mejor nota: ${ex.bestScore}% · necesitas ${ex.passingScore}%` : `Necesario para tu constancia · aprueba con ${ex.passingScore}%`}</span>
+                              </Link>
+                            );
+                            if (!perfilBasico && !yaEmitida(e.course.id)) return (
+                              <Link href={`/profile?volver=/certificates/${e.course.id}`} className="btn-cyan text-sm py-2 flex items-center justify-center gap-2">
+                                Completa tus datos para la constancia
+                              </Link>
+                            );
+                            return (
+                              <Link href={`/certificates/${e.course.id}?tipo=constancia`} className="btn-cyan text-sm py-2 flex items-center justify-center gap-2">
+                                Constancia <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">· gratis</span>
+                              </Link>
+                            );
+                          })()}
                           {pagado(e.course.id) ? (
                             perfilListo ? (
                               <Link

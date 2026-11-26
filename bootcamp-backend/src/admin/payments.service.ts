@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Enrollment } from '../enrollments/entities/enrollment.entity';
 import { NotificationsService } from '../notifications/notifications.service';
+import { N8nService } from '../integrations/n8n.service';
 
 interface FilaPago {
   id: string;
@@ -34,6 +35,7 @@ export class PaymentsService {
     @InjectRepository(Enrollment) private enrollmentRepo: Repository<Enrollment>,
     private config: ConfigService,
     private readonly notifications: NotificationsService,
+    private readonly n8n: N8nService,
   ) {
     const url = this.config.get<string>('SUPABASE_URL') ?? '';
     const key =
@@ -141,6 +143,8 @@ export class PaymentsService {
         link: `/certificates/${inscripcion.courseId}`,
         key: `certificado:${inscripcion.id}:${inscripcion.paidAt?.getTime() ?? ''}`,
       });
+      const [p] = await this.db.query(`SELECT email, first_name AS nombre FROM profiles WHERE supabase_id = $1`, [inscripcion.userId]);
+      this.n8n.emitir('pago.confirmado', { userId: inscripcion.userId, email: p?.email, nombre: p?.nombre, courseId: inscripcion.courseId, curso: curso?.title, nota: inscripcion.paymentNote });
     }
     return {
       enrollmentId: inscripcion.id,

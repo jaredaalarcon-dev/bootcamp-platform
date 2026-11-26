@@ -1,5 +1,5 @@
 // src/assistant/dto/assistant.dto.ts
-import { IsBoolean, IsNotEmpty, IsOptional, IsString, Matches, MaxLength, ValidateIf } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, Matches, MaxLength, MinLength, ValidateIf } from 'class-validator';
 
 export class ChatDto {
   // Puede venir vacío si la persona tocó un botón (llega "intent")
@@ -68,4 +68,11 @@ export class TestMessageDto {
   @IsNotEmpty()
   @MaxLength(1000)
   message: string;
+}
+
+export class DeleteByContentDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(2000)
+  content: string;
 }

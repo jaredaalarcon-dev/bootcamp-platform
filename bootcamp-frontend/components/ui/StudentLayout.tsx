@@ -134,7 +134,7 @@ export function StudentLayout({ children, topbar }: Props) {
 
       {/* User card */}
       <div className="p-4 border-t border-[rgba(0,192,231,0.12)]">
-        <div className="flex items-center gap-3 mb-3">
+        <Link href="/profile" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 mb-3 rounded-lg -m-1 p-1 hover:bg-[rgba(255,255,255,0.05)] transition-colors" title="Mi perfil">
           <div className="w-9 h-9 rounded-full bg-[#00C0E7] flex items-center justify-center shrink-0">
             <span className="font-brand text-[#0d0d0d] text-sm">
               {user?.email?.[0]?.toUpperCase() ?? "U"}
@@ -144,9 +144,9 @@ export function StudentLayout({ children, topbar }: Props) {
             <p className="text-white text-sm font-semibold truncate">
               {user?.firstName ?? user?.email?.split("@")[0] ?? "Usuario"}
             </p>
-            <p className="text-gray-500 text-xs">Estudiante</p>
+            <p className="text-gray-500 text-xs">Estudiante · Ver perfil</p>
           </div>
-        </div>
+        </Link>
         <button
           onClick={handleLogout}
           className="w-full text-xs text-gray-500 hover:text-[#E31E24] transition-colors py-1 flex items-center gap-2"
@@ -204,12 +204,17 @@ export function StudentLayout({ children, topbar }: Props) {
           {/* Modo claro / oscuro */}
           <ThemeToggle />
 
-          {/* Avatar */}
-          <div className="w-8 h-8 rounded-full bg-[#00C0E7] flex items-center justify-center cursor-pointer">
+          {/* Avatar: lleva a «Mi perfil» */}
+          <Link
+            href="/profile"
+            aria-label="Ir a Mi perfil"
+            title="Mi perfil"
+            className="w-8 h-8 rounded-full bg-[#00C0E7] flex items-center justify-center ring-offset-2 ring-offset-[#111827] hover:ring-2 hover:ring-[#00C0E7] focus-visible:ring-2 focus-visible:ring-[#00C0E7] transition"
+          >
             <span className="font-brand text-[#0d0d0d] text-sm font-bold">
               {user?.email?.[0]?.toUpperCase() ?? "U"}
             </span>
-          </div>
+          </Link>
         </header>
 
         {/* Page content */}

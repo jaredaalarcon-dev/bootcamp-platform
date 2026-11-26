@@ -2,6 +2,7 @@
 "use client";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { N8nPanel } from "@/components/admin/N8nPanel";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -16,12 +17,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function SettingRow({ label, desc, children }: { label: string; desc?: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
       <div>
         <p className="text-white text-sm font-medium">{label}</p>
         {desc && <p className="text-gray-500 text-xs mt-0.5">{desc}</p>}
       </div>
-      <div className="shrink-0">{children}</div>
+      <div className="shrink-0 w-full sm:w-auto">{children}</div>
     </div>
   );
 }
@@ -51,17 +52,19 @@ export default function AdminSettingsPage() {
   const handleSave = () => toast.success("Configuración guardada (demo)");
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       <div>
         <h1 className="font-brand text-[#00C0E7] text-2xl uppercase tracking-wide">Configuración</h1>
         <p className="text-gray-500 text-sm mt-1">Ajustes generales de la plataforma</p>
       </div>
 
+      <N8nPanel />
+
       <Section title="Información de la Plataforma">
         <SettingRow label="Nombre de la plataforma">
           <input value={settings.platformName}
             onChange={(e) => setSettings((p) => ({ ...p, platformName: e.target.value }))}
-            className="bg-[#0d0d0d] border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#00C0E7] w-64" />
+            className="bg-[#0d0d0d] border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#00C0E7] w-full sm:w-64" />
         </SettingRow>
         <SettingRow label="Modo mantenimiento" desc="Los estudiantes no podrán acceder mientras esté activo">
           <Toggle enabled={settings.maintenanceMode} onChange={() => toggle("maintenanceMode")} />

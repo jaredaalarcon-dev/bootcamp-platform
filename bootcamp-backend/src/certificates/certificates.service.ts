@@ -150,12 +150,16 @@ export class CertificatesService {
     const inscripciones = await this.enrollmentRepo.find({ where: { userId } });
     const emitidos = await this.emitidoRepo.find({ where: { userId, revoked: false } });
     const perfil = await this.perfilRepo.findOne({ where: { userId } });
+    const examenes = await Promise.all(inscripciones.map((i) => this.examenFinal(userId, i.courseId)));
     return {
       profileComplete: Boolean(perfil?.fullName && perfil?.documentNumber && perfil?.photoPath),
-      courses: inscripciones.map((i) => ({
+      // Nombre y documento: lo mínimo para la constancia
+      profileBasic: Boolean(perfil?.fullName && perfil?.documentNumber),
+      courses: inscripciones.map((i, k) => ({
         courseId: i.courseId,
         paid: i.paid,
         paidAt: i.paidAt,
+        finalExam: examenes[k],
         issued: emitidos
           .filter((e) => e.courseId === i.courseId)
           .map((e) => ({ type: e.type, code: e.code, createdAt: e.createdAt })),
@@ -198,12 +202,37 @@ export class CertificatesService {
       );
     }
 
+    // Un documento ya emitido se sigue mostrando aunque luego cambien las reglas
+    const yaEmitido = await this.emitidoRepo.findOne({ where: { userId, courseId, type: tipo } });
+
+    // 3b. Examen final aprobado (si el curso tiene uno)
+    if (!yaEmitido) {
+      const examen = await this.examenFinal(userId, courseId);
+      if (examen && !examen.passed) {
+        throw new ForbiddenException({
+          statusCode: 403,
+          code: 'EXAMEN_FINAL',
+          quizId: examen.quizId,
+          message: `Para obtener tu ${tipo === 'certificado' ? 'certificado' : 'constancia'} aprueba el examen final del curso (nota mínima ${examen.passingScore} %).`,
+        });
+      }
+    }
+
     // 4. Datos del alumno (los del perfil de certificado tienen prioridad)
     const perfil = await this.perfilRepo.findOne({ where: { userId } });
     if (tipo === 'certificado' && !(perfil?.fullName && perfil?.documentNumber && perfil?.photoPath)) {
-      throw new BadRequestException(
-        'Para emitir tu certificado completa primero tus datos y tu foto formal en «Mi perfil».',
-      );
+      throw new BadRequestException({
+        statusCode: 400,
+        code: 'PERFIL_INCOMPLETO',
+        message: 'Para emitir tu certificado completa primero tus datos y tu foto formal en «Mi perfil».',
+      });
+    }
+    if (tipo === 'constancia' && !yaEmitido && !(perfil?.fullName && perfil?.documentNumber)) {
+      throw new BadRequestException({
+        statusCode: 400,
+        code: 'PERFIL_INCOMPLETO',
+        message: 'Para emitir tu constancia completa tu nombre completo y tu documento de identidad en «Mi perfil».',
+      });
     }
     const cuenta = await this.datosCuenta(userId);
     const nombre = perfil?.fullName || cuenta.nombre;
@@ -212,7 +241,7 @@ export class CertificatesService {
       : null;
 
     // 5. Registro del documento emitido (se crea una sola vez y no cambia)
-    let emitido = await this.emitidoRepo.findOne({ where: { userId, courseId, type: tipo } });
+    let emitido = yaEmitido;
     if (!emitido) {
       const fin = await this.fechaFinalizacion(userId, courseId);
       emitido = this.emitidoRepo.create({
@@ -241,7 +270,7 @@ export class CertificatesService {
       certificateId: emitido.code,
       studentName: emitido.studentName,
       document: emitido.documentLabel,
-      photoUrl: tipo === 'certificado' && perfil?.photoPath ? await this.urlFoto(perfil.photoPath) : null,
+      photoUrl: perfil?.photoPath ? await this.urlFoto(perfil.photoPath) : null,
       courseName: emitido.courseName,
       courseCategory: enrollment.course.category?.name ?? '',
       courseImage: enrollment.course.image ?? '',
@@ -250,6 +279,7 @@ export class CertificatesService {
       totalLessons,
       percentage,
       paid: enrollment.paid,
+      finalExamScore: (await this.examenFinal(userId, courseId))?.bestScore ?? null,
     };
   }
 
@@ -276,6 +306,23 @@ export class CertificatesService {
   // ════════════════════════════════════════════════════════════════════════
   // Ayudantes
   // ════════════════════════════════════════════════════════════════════════
+
+  /** Examen final publicado del curso y si el alumno ya lo aprobó (null si no hay). */
+  async examenFinal(userId: string, courseId: string) {
+    const [q] = await this.enrollmentRepo.manager.query(
+      `SELECT q.id, q.title, q."passingScore",
+              EXISTS (SELECT 1 FROM quiz_attempts a WHERE a."quizId" = q.id AND a."userId" = $1 AND a.passed) AS passed,
+              (SELECT MAX(a.score)::int FROM quiz_attempts a WHERE a."quizId" = q.id AND a."userId" = $1) AS "bestScore"
+         FROM quizzes q
+        WHERE q."courseId" = $2 AND q."moduleId" IS NULL AND q."lessonId" IS NULL AND q.published = true
+          AND EXISTS (SELECT 1 FROM quiz_questions qq WHERE qq."quizId" = q.id)
+        LIMIT 1`,
+      [userId, courseId],
+    );
+    return q
+      ? { quizId: q.id as string, title: q.title as string, passingScore: q.passingScore as number, passed: !!q.passed, bestScore: q.bestScore as number | null }
+      : null;
+  }
 
   // SIJB-CE-xxxxxxxxxx (certificado) o SIJB-CO-xxxxxxxxxx (constancia).
   // Determinista: el mismo alumno y curso siempre generan el mismo código.
@@ -319,6 +366,60 @@ export class CertificatesService {
   }
 
   // URL firmada (la foto es privada; el enlace caduca en 1 hora)
+  // ════════════════════════════════════════════════════════════════════════
+  // Admin: datos de los alumnos para constancias y certificados
+  // ════════════════════════════════════════════════════════════════════════
+
+  async adminDatos() {
+    const filas: {
+      userId: string; email: string; firstName: string | null; lastName: string | null; registeredAt: Date;
+      fullName: string | null; documentType: string | null; documentNumber: string | null; photoPath: string | null;
+      updatedAt: Date | null; completados: number; constancias: number; certificados: number;
+    }[] = await this.enrollmentRepo.manager.query(
+      `SELECT p.supabase_id AS "userId", p.email, p.first_name AS "firstName", p.last_name AS "lastName",
+              p.created_at AS "registeredAt",
+              cp."fullName", cp."documentType", cp."documentNumber", cp."photoPath", cp."updatedAt",
+              (SELECT COUNT(*)::int FROM enrollments e WHERE e."userId"::text = p.supabase_id::text AND e.status = 'completed') AS completados,
+              (SELECT COUNT(*)::int FROM issued_certificates ic WHERE ic."userId"::text = p.supabase_id::text AND ic.type = 'constancia' AND NOT ic.revoked) AS constancias,
+              (SELECT COUNT(*)::int FROM issued_certificates ic WHERE ic."userId"::text = p.supabase_id::text AND ic.type = 'certificado' AND NOT ic.revoked) AS certificados
+         FROM profiles p
+         LEFT JOIN roles r ON r.id = p.role_id
+         LEFT JOIN certificate_profiles cp ON cp."userId"::text = p.supabase_id::text
+        WHERE COALESCE(r.name, 'student') <> 'admin'
+        ORDER BY (cp."fullName" IS NULL), cp."updatedAt" DESC NULLS LAST, p.created_at DESC`,
+    );
+    // Fotos: enlaces firmados en un solo pedido (vencen en 1 hora)
+    const rutas = filas.map((f) => f.photoPath).filter((r): r is string => !!r);
+    const urls = new Map<string, string>();
+    if (rutas.length) {
+      const { data } = await this.supabaseAdmin.storage.from(BUCKET_FOTOS).createSignedUrls(rutas, 60 * 60);
+      data?.forEach((d) => { if (d.path && d.signedUrl) urls.set(d.path, d.signedUrl); });
+    }
+    const items = filas.map((f) => ({
+      userId: f.userId,
+      email: f.email,
+      accountName: [f.firstName, f.lastName].filter(Boolean).join(' ') || f.email.split('@')[0],
+      registeredAt: f.registeredAt,
+      fullName: f.fullName,
+      documentType: f.documentType,
+      documentNumber: f.documentNumber,
+      photoUrl: f.photoPath ? urls.get(f.photoPath) ?? null : null,
+      hasPhoto: !!f.photoPath,
+      updatedAt: f.updatedAt,
+      basic: !!(f.fullName && f.documentNumber),
+      complete: !!(f.fullName && f.documentNumber && f.photoPath),
+      completedCourses: f.completados,
+      constancias: f.constancias,
+      certificados: f.certificados,
+    }));
+    return {
+      total: items.length,
+      conDatos: items.filter((i) => i.basic).length,
+      conFoto: items.filter((i) => i.complete).length,
+      items,
+    };
+  }
+
   private async urlFoto(ruta: string) {
     const { data, error } = await this.supabaseAdmin.storage
       .from(BUCKET_FOTOS)

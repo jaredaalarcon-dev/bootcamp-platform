@@ -10,6 +10,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { LegalService } from '../legal/legal.service';
+import { N8nService } from '../integrations/n8n.service';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +24,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private legalService: LegalService,
+    private readonly n8n: N8nService,
   ) {
     const supabaseUrl = this.configService.get<string>('SUPABASE_URL') || '';
     const supabaseKey = this.configService.get<string>('SUPABASE_KEY') || '';
@@ -103,6 +105,8 @@ export class AuthService {
     } catch {
       /* se pedirá de nuevo en el primer inicio de sesión */
     }
+
+    this.n8n.emitir('alumno.registrado', { userId: user.id, email, nombre: firstName, apellido: lastName });
 
     return {
       id: user.id,

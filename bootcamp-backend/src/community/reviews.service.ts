@@ -4,12 +4,14 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { CourseReview } from './entities/course-review.entity';
 import { estaInscrito, limpiarTexto, nombrePublico } from './community.helpers';
+import { N8nService } from '../integrations/n8n.service';
 
 @Injectable()
 export class ReviewsService {
   constructor(
     @InjectRepository(CourseReview) private readonly repo: Repository<CourseReview>,
     @InjectDataSource() private readonly db: DataSource,
+    private readonly n8n: N8nService,
   ) {}
 
   private vista(r: CourseReview, userId?: string) {
@@ -74,6 +76,7 @@ export class ReviewsService {
     }
     const texto = limpiarTexto(comment ?? '');
     let r = await this.repo.findOne({ where: { userId, courseId } });
+    const nueva = !r;
     if (!r) {
       r = this.repo.create({ userId, courseId, authorName: await nombrePublico(this.db, userId) });
     } else {
@@ -82,6 +85,10 @@ export class ReviewsService {
     r.rating = Math.round(rating);
     r.comment = texto || null;
     r = await this.repo.save(r);
+    if (nueva) {
+      const [c] = await this.db.query(`SELECT title FROM courses WHERE id = $1`, [courseId]);
+      this.n8n.emitir('resena.nueva', { alumno: r.authorName, curso: c?.title, courseId, estrellas: r.rating, comentario: r.comment });
+    }
     return { ...this.vista(r, userId), hidden: r.hidden };
   }
 

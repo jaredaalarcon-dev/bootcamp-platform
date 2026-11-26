@@ -4,14 +4,15 @@
 import Link from "next/link";
 import { EMPRESA } from "@/lib/legal";
 
-export function SiteFooter() {
+// conRuc=false: la página de inicio no muestra el RUC (sí en las demás páginas públicas)
+export function SiteFooter({ conRuc = true }: { conRuc?: boolean }) {
   return (
     <footer className="border-t border-gray-900 py-8 text-xs text-gray-500">
       <div className="max-w-6xl mx-auto px-4 grid gap-6 sm:grid-cols-[1fr_auto] items-start">
         <div className="space-y-1.5 text-center sm:text-left">
           <p className="text-gray-400 font-semibold">{EMPRESA.nombreComercial}</p>
           <p>
-            {EMPRESA.titular} · RUC {EMPRESA.ruc}
+            {EMPRESA.titular}{conRuc && <> · RUC {EMPRESA.ruc}</>}
           </p>
           <p>
             <a href={EMPRESA.mapa} target="_blank" rel="noopener noreferrer" className="hover:text-[#00C0E7]">
