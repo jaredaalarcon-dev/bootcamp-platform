@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
 import { Category } from './entities/category.entity';
 import { CreateCourseDto, UpdateCourseDto } from './dto/create-course.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class CoursesService {
@@ -13,7 +14,21 @@ export class CoursesService {
     private courseRepository: Repository<Course>,
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
+    private readonly notifications: NotificationsService,
   ) {}
+
+  // Aviso a todos los alumnos cuando un curso pasa a "publicado".
+  // La clave evita repetirlo si se despublica y se vuelve a publicar.
+  private async avisarSiSePublico(antes: string | undefined, curso: Course) {
+    if (curso.status !== 'published' || antes === 'published') return;
+    await this.notifications.notifyAllStudents({
+      type: 'curso_nuevo',
+      title: `Nuevo curso disponible: ${curso.title}`,
+      message: (curso.description ?? '').slice(0, 200) || 'Ya puedes inscribirte y empezar a aprender.',
+      link: `/courses/${curso.id}`,
+      key: `curso_nuevo:${curso.id}`,
+    });
+  }
 
   async create(createCourseDto: CreateCourseDto) {
     const category = await this.categoryRepository.findOne({
@@ -29,7 +44,9 @@ export class CoursesService {
       category,
     });
 
-    return this.courseRepository.save(course);
+    const guardado = await this.courseRepository.save(course);
+    await this.avisarSiSePublico(undefined, guardado);
+    return guardado;
   }
 
   async findAll() {
@@ -86,9 +103,12 @@ export class CoursesService {
       course.category = category;
     }
 
+    const estadoAnterior = course.status;
     Object.assign(course, updateCourseDto);
 
-    return this.courseRepository.save(course);
+    const guardado = await this.courseRepository.save(course);
+    await this.avisarSiSePublico(estadoAnterior, guardado);
+    return guardado;
   }
 
   async remove(id: string) {
@@ -117,7 +137,10 @@ export class CoursesService {
       throw new NotFoundException('Curso no encontrado');
     }
 
+    const estadoAnterior = course.status;
     course.status = status;
-    return this.courseRepository.save(course);
+    const guardado = await this.courseRepository.save(course);
+    await this.avisarSiSePublico(estadoAnterior, guardado);
+    return guardado;
   }
 }

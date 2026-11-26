@@ -1,7 +1,7 @@
 // src/app/courses/[id]/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useCoursesApi } from "@/hooks/useCoursesApi";
 import { useProgressApi } from "@/hooks/useProgressApi";
@@ -9,6 +9,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { StudentLayout } from "@/components/ui/StudentLayout";
 import { SecureVideoPlayer } from "@/components/ui/SecureVideoPlayer";
 import { CourseResourcesPanel } from "@/components/ui/CourseResourcesPanel";
+import { LessonQuestions } from "@/components/course/LessonQuestions";
+import { QuizPlayer } from "@/components/course/QuizPlayer";
+import { CourseReviews } from "@/components/course/CourseReviews";
+import { Stars } from "@/components/ui/Stars";
+import { CuestionarioResumen, ResultadoCuestionario, quizzesApi, reviewsApi } from "@/hooks/useCommunityApi";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
@@ -18,7 +23,37 @@ interface Lesson { id: string; title: string; description: string; orderNumber: 
 interface Module { id: string; title: string; orderNumber: number; lessons: Lesson[]; }
 interface Course { id: string; title: string; description: string; image: string; category?: { name: string }; modules: Module[]; }
 
-type Tab = "modulos" | "acerca" | "recursos";
+type Tab = "modulos" | "acerca" | "recursos" | "resenas";
+
+const TABS: [Tab, string][] = [["modulos", "Módulos"], ["acerca", "Acerca del curso"], ["recursos", "Recursos"], ["resenas", "Reseñas"]];
+
+// ── Ítem de cuestionario en la lista de lecciones ───────────────────────────
+function QuizItem({ quiz, active, onClick, etiqueta }: { quiz: CuestionarioResumen; active: boolean; onClick: () => void; etiqueta: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all text-sm ${
+        active ? "bg-[rgba(227,30,36,0.1)] border border-[#E31E24]/40" : "hover:bg-gray-800/60"
+      }`}
+    >
+      <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
+        quiz.passed ? "bg-emerald-500 text-white" : "bg-[rgba(227,30,36,0.15)] text-[#E31E24]"
+      }`}>
+        {quiz.passed ? (
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+        ) : (
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+        )}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className={`block line-clamp-1 ${active ? "text-[#E31E24] font-medium" : "text-gray-300"}`}>{quiz.title}</span>
+        <span className="block text-[11px] text-gray-500">
+          {etiqueta} · {quiz.attempts > 0 ? `Mejor nota ${quiz.bestScore}%` : `${quiz.questionCount} preguntas`}
+        </span>
+      </span>
+    </button>
+  );
+}
 
 // ── Indicador de lección ────────────────────────────────────────────────────
 function LessonIndicator({ completed, active, num }: { completed: boolean; active: boolean; num: number }) {
@@ -57,19 +92,38 @@ export default function CourseDetailPage() {
   const [porcentaje,     setPorcentaje]     = useState(0);
   const [guardando,      setGuardando]      = useState(false);
   const [activeTab,      setActiveTab]      = useState<Tab>("modulos");
+  const [quizzes,        setQuizzes]        = useState<CuestionarioResumen[]>([]);
+  const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
+  const [rating,         setRating]         = useState<{ promedio: number; total: number } | null>(null);
+  const contenidoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!getToken()) { router.push("/login"); return; }
-    if (courseId) { loadCourse(); loadEnrollment(); loadProgress(); }
+    if (courseId) { loadCourse(); loadEnrollment(); loadProgress(); loadQuizzes(); loadRating(); }
   }, [courseId]);
+
+  async function loadQuizzes() {
+    try { setQuizzes(await quizzesApi.forCourse(courseId)); } catch { setQuizzes([]); }
+  }
+  async function loadRating() {
+    try {
+      const r = await reviewsApi.summary();
+      setRating(r[courseId] ?? null);
+    } catch { setRating(null); }
+  }
 
   async function loadCourse() {
     const r = await getCourseById(courseId);
     if (r.success && r.data) {
       setCourse(r.data);
-      // Seleccionar la primera lección al cargar
-      const first = r.data.modules?.[0]?.lessons?.[0];
-      if (first) setSelectedLesson(first);
+      // Lección pedida en el enlace (?leccion=…), por ejemplo desde una notificación
+      const pedida = new URLSearchParams(window.location.search).get("leccion");
+      const todas: Lesson[] = r.data.modules?.flatMap((m: Module) => m.lessons) ?? [];
+      const elegida = (pedida && todas.find((l) => l.id === pedida)) || r.data.modules?.[0]?.lessons?.[0];
+      if (elegida) setSelectedLesson(elegida);
+      if (pedida && window.location.hash === "#preguntas") {
+        setTimeout(() => document.getElementById("preguntas")?.scrollIntoView({ behavior: "smooth", block: "start" }), 700);
+      }
     }
   };
   async function loadEnrollment() {
@@ -86,7 +140,7 @@ export default function CourseDetailPage() {
 
   const handleEnroll = async () => {
     const r = await enrollCourse(courseId);
-    if (r.success) { setEnrolled(true); toast.success("¡Inscrito! Comienza a aprender."); }
+    if (r.success) { setEnrolled(true); loadQuizzes(); toast.success("¡Inscrito! Comienza a aprender."); }
     else toast.error(r.error || "Error al inscribirse");
   };
 
@@ -113,11 +167,45 @@ export default function CourseDetailPage() {
     toast.success(yaEstaba ? "Lección desmarcada" : "✓ Lección marcada como completada");
   };
 
+  // ── Elegir lección o cuestionario ─────────────────────────────────────────
+  const irAlContenido = () => {
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setTimeout(() => contenidoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+    }
+  };
+  const elegirLeccion = (l: Lesson, bajar = true) => {
+    setSelectedQuizId(null);
+    setSelectedLesson(l);
+    if (bajar) irAlContenido();
+  };
+  const elegirQuiz = (id: string) => {
+    setSelectedQuizId(id);
+    irAlContenido();
+  };
+  const quizzesDeLeccion = (lessonId: string) => quizzes.filter((q) => q.lessonId === lessonId);
+  const quizzesDeModulo  = (moduleId: string) => quizzes.filter((q) => q.moduleId === moduleId);
+  const quizActual = quizzes.find((q) => q.id === selectedQuizId) ?? null;
+  const alTerminarQuiz = (id: string, r: ResultadoCuestionario) =>
+    setQuizzes((prev) => prev.map((q) => (q.id === id ? { ...q, bestScore: r.bestScore, attempts: r.attempts, passed: q.passed || r.passed } : q)));
+
   // ── Navegación Anterior / Siguiente ───────────────────────────────────────
   const flatLessons: Lesson[] = course?.modules?.flatMap((m) => m.lessons) ?? [];
   const currentIdx = flatLessons.findIndex((l) => l.id === selectedLesson?.id);
   const prevLesson = currentIdx > 0 ? flatLessons[currentIdx - 1] : null;
   const nextLesson = currentIdx < flatLessons.length - 1 ? flatLessons[currentIdx + 1] : null;
+
+  // Dónde está el cuestionario elegido y qué lección sigue
+  const ctxQuiz = (() => {
+    if (!quizActual || !course) return { texto: "", siguiente: null as Lesson | null };
+    if (quizActual.lessonId) {
+      const i = flatLessons.findIndex((l) => l.id === quizActual.lessonId);
+      return { texto: `Después de la lección: ${flatLessons[i]?.title ?? ""}`, siguiente: flatLessons[i + 1] ?? null };
+    }
+    const m = course.modules.find((x) => x.id === quizActual.moduleId);
+    const ultima = m?.lessons[m.lessons.length - 1];
+    const i = ultima ? flatLessons.findIndex((l) => l.id === ultima.id) : -1;
+    return { texto: m ? `Al final del módulo ${m.orderNumber}: ${m.title}` : "", siguiente: i >= 0 ? flatLessons[i + 1] ?? null : null };
+  })();
 
   // ── Progreso por módulo ───────────────────────────────────────────────────
   const modProgress = (mod: Module) => ({
@@ -128,7 +216,8 @@ export default function CourseDetailPage() {
   // ── Ir a la primera lección incompleta ────────────────────────────────────
   const continuarCurso = () => {
     const primera = flatLessons.find((l) => !completadas.includes(l.id));
-    if (primera) setSelectedLesson(primera);
+    if (primera) elegirLeccion(primera);
+    setActiveTab("modulos");
   };
 
   // ── Loading ───────────────────────────────────────────────────────────────
@@ -151,7 +240,7 @@ export default function CourseDetailPage() {
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
-          <span className="text-white truncate max-w-xs">{course.title}</span>
+          <span className="text-white truncate min-w-0 max-w-xs">{course.title}</span>
         </nav>
 
         {/* ── Card cabecera del curso ─────────────────────────────────────── */}
@@ -178,6 +267,13 @@ export default function CourseDetailPage() {
               {course.title}
             </h1>
             <p className="text-gray-400 text-xs mt-1 line-clamp-1">{course.description}</p>
+            {rating && rating.total > 0 && (
+              <button onClick={() => setActiveTab("resenas")} className="mt-1.5 flex items-center gap-1.5 text-xs" aria-label="Ver reseñas">
+                <span className="font-bold text-[#F5B301]">{rating.promedio.toFixed(1)}</span>
+                <Stars value={rating.promedio} size={13} />
+                <span className="text-gray-500">({rating.total})</span>
+              </button>
+            )}
             {/* Barra de progreso */}
             <div className="flex items-center gap-3 mt-3">
               <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
@@ -215,18 +311,19 @@ export default function CourseDetailPage() {
         </div>
 
         {/* ── Pestañas ───────────────────────────────────────────────────── */}
-        <div className="flex border-b border-gray-800 gap-1">
-          {(["modulos", "acerca", "recursos"] as Tab[]).map((tab) => (
+        <div className="flex border-b border-gray-800 gap-1 overflow-x-auto no-scrollbar -mx-5 px-5 sm:mx-0 sm:px-0">
+          {TABS.map(([tab, texto]) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2.5 text-sm font-semibold transition-colors border-b-2 -mb-px capitalize ${
+              className={`px-4 py-2.5 text-sm font-semibold transition-colors border-b-2 -mb-px whitespace-nowrap shrink-0 ${
                 activeTab === tab
                   ? "border-[#00C0E7] text-[#00C0E7]"
                   : "border-transparent text-gray-500 hover:text-gray-300"
               }`}
             >
-              {tab === "modulos" ? "Módulos" : tab === "acerca" ? "Acerca del curso" : "Recursos"}
+              {texto}
+              {tab === "resenas" && rating && rating.total > 0 && <span className="ml-1.5 text-xs text-gray-500">({rating.total})</span>}
             </button>
           ))}
         </div>
@@ -260,11 +357,11 @@ export default function CourseDetailPage() {
                     <div className="space-y-1">
                       {mod.lessons?.map((lesson, lIdx) => {
                         const done   = estaCompletada(lesson.id);
-                        const active = selectedLesson?.id === lesson.id;
+                        const active = !selectedQuizId && selectedLesson?.id === lesson.id;
                         return (
+                          <div key={lesson.id} className="space-y-1">
                           <button
-                            key={lesson.id}
-                            onClick={() => setSelectedLesson(lesson)}
+                            onClick={() => elegirLeccion(lesson)}
                             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all text-sm ${
                               active
                                 ? "bg-[rgba(0,192,231,0.12)] border border-[#00C0E7]/40"
@@ -278,8 +375,17 @@ export default function CourseDetailPage() {
                               {lesson.title}
                             </span>
                           </button>
+                          {quizzesDeLeccion(lesson.id).map((q) => (
+                            <div key={q.id} className="pl-4">
+                              <QuizItem quiz={q} active={selectedQuizId === q.id} onClick={() => elegirQuiz(q.id)} etiqueta="Cuestionario" />
+                            </div>
+                          ))}
+                          </div>
                         );
                       })}
+                      {quizzesDeModulo(mod.id).map((q) => (
+                        <QuizItem key={q.id} quiz={q} active={selectedQuizId === q.id} onClick={() => elegirQuiz(q.id)} etiqueta="Examen del módulo" />
+                      ))}
                     </div>
                   </div>
                 );
@@ -287,15 +393,33 @@ export default function CourseDetailPage() {
             </div>
 
             {/* Reproductor y contenido de la lección */}
-            <div className="space-y-4">
-              {selectedLesson ? (
+            <div className="space-y-4 scroll-mt-4 min-w-0" ref={contenidoRef}>
+              {selectedQuizId ? (
+                enrolled ? (
+                  <QuizPlayer
+                    key={selectedQuizId}
+                    quizId={selectedQuizId}
+                    contexto={ctxQuiz.texto}
+                    onTerminado={(r) => alTerminarQuiz(selectedQuizId, r)}
+                    onSiguiente={ctxQuiz.siguiente ? () => elegirLeccion(ctxQuiz.siguiente!) : undefined}
+                  />
+                ) : (
+                  <div className="bg-[#111827] border border-[rgba(0,192,231,0.15)] rounded-2xl p-8 text-center">
+                    <p className="text-white font-semibold">{quizActual?.title}</p>
+                    <p className="text-gray-500 text-sm mt-1 mb-4">Inscríbete al curso para resolver este cuestionario.</p>
+                    <button onClick={handleEnroll} disabled={loading} className="btn-red text-sm px-6 py-2 disabled:opacity-60">
+                      {loading ? "Inscribiendo..." : "Inscribirse al curso"}
+                    </button>
+                  </div>
+                )
+              ) : selectedLesson ? (
                 <>
                   {/* Título + navegación */}
                   <div className="flex items-start justify-between gap-4">
                     <h2 className="text-white font-bold text-lg">{selectedLesson.title}</h2>
                     <div className="flex shrink-0 gap-2">
                       <button
-                        onClick={() => prevLesson && setSelectedLesson(prevLesson)}
+                        onClick={() => prevLesson && elegirLeccion(prevLesson, false)}
                         disabled={!prevLesson}
                         className="btn-cyan text-xs px-3 py-1.5 flex items-center gap-1 disabled:opacity-30"
                       >
@@ -305,7 +429,7 @@ export default function CourseDetailPage() {
                         Anterior
                       </button>
                       <button
-                        onClick={() => nextLesson && setSelectedLesson(nextLesson)}
+                        onClick={() => nextLesson && elegirLeccion(nextLesson, false)}
                         disabled={!nextLesson}
                         className="btn-cyan text-xs px-3 py-1.5 flex items-center gap-1 disabled:opacity-30"
                       >
@@ -323,7 +447,7 @@ export default function CourseDetailPage() {
                       key={selectedLesson.id}
                       url={selectedLesson.video.videoUrl}
                       title={selectedLesson.title}
-                      onNext={nextLesson ? () => setSelectedLesson(nextLesson) : undefined}
+                      onNext={nextLesson ? () => elegirLeccion(nextLesson, false) : undefined}
                     />
                   ) : (
                     <div className="bg-[#111827] border border-[rgba(0,192,231,0.15)] rounded-2xl h-48 flex items-center justify-center">
@@ -377,6 +501,33 @@ export default function CourseDetailPage() {
                     </Link>
                   )}
 
+                  {/* Cuestionarios de esta lección y del módulo (si es la última lección) */}
+                  {(() => {
+                    const mod = course.modules.find((m) => m.lessons.some((l) => l.id === selectedLesson.id));
+                    const esUltima = mod && mod.lessons[mod.lessons.length - 1]?.id === selectedLesson.id;
+                    const lista = [
+                      ...quizzesDeLeccion(selectedLesson.id).map((q) => ({ q, t: "Cuestionario de esta lección" })),
+                      ...(esUltima && mod ? quizzesDeModulo(mod.id).map((q) => ({ q, t: `Examen del módulo ${mod.orderNumber}` })) : []),
+                    ];
+                    return lista.map(({ q, t }) => (
+                      <div key={q.id} className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-2xl border border-[rgba(227,30,36,0.3)] bg-[rgba(227,30,36,0.06)] p-4">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[#E31E24] text-[11px] font-bold uppercase tracking-wide">{t}</p>
+                          <p className="text-white font-semibold text-sm">{q.title}</p>
+                          <p className="text-gray-500 text-xs mt-0.5">
+                            {q.questionCount} preguntas · Apruebas con {q.passingScore}%
+                            {q.attempts > 0 && <> · Tu mejor nota: <span className={q.passed ? "text-emerald-400 font-semibold" : ""}>{q.bestScore}%</span></>}
+                          </p>
+                        </div>
+                        <button onClick={() => elegirQuiz(q.id)} className="btn-red text-sm px-5 py-2 shrink-0">
+                          {q.passed ? "Repasar" : q.attempts > 0 ? "Intentar de nuevo" : "Resolver ahora"}
+                        </button>
+                      </div>
+                    ));
+                  })()}
+
+                  <LessonQuestions key={selectedLesson.id} lessonId={selectedLesson.id} enrolled={enrolled} />
+
                   {!enrolled && (
                     <div className="bg-[#111827] border border-[rgba(0,192,231,0.15)] rounded-2xl p-4 text-center">
                       <p className="text-gray-500 text-sm mb-3">Inscríbete para registrar tu avance y desbloquear todas las funciones.</p>
@@ -421,6 +572,11 @@ export default function CourseDetailPage() {
 
         {/* ── Pestaña: Recursos ──────────────────────────────────────────── */}
         {activeTab === "recursos" && <CourseResourcesPanel courseId={courseId} enrolled={enrolled} />}
+
+        {/* ── Pestaña: Reseñas ───────────────────────────────────────────── */}
+        {activeTab === "resenas" && (
+          <CourseReviews courseId={courseId} porcentaje={porcentaje} onCambio={(promedio, total) => setRating(total ? { promedio, total } : null)} />
+        )}
 
       </div>
     </StudentLayout>

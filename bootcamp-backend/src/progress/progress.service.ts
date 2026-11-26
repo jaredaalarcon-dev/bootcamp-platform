@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Progress } from './entities/progress.entity';
 import { Lesson } from '../courses/entities/lesson.entity';
 import { Enrollment } from '../enrollments/entities/enrollment.entity';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class ProgressService {
@@ -15,6 +16,7 @@ export class ProgressService {
     private lessonRepository: Repository<Lesson>,
     @InjectRepository(Enrollment)
     private enrollmentRepository: Repository<Enrollment>,
+    private readonly notifications: NotificationsService,
   ) {}
 
   // Marca o desmarca una lección como vista
@@ -163,6 +165,20 @@ export class ProgressService {
     if (inscripcion.status !== nuevoEstado) {
       inscripcion.status = nuevoEstado;
       await this.enrollmentRepository.save(inscripcion);
+    }
+
+    // Aviso único: la clave evita repetirlo si desmarca y vuelve a marcar
+    if (percentage === 100) {
+      const [curso] = await this.enrollmentRepository.manager.query(
+        `SELECT title FROM courses WHERE id = $1`, [courseId],
+      );
+      await this.notifications.notify(userId, {
+        type: 'constancia',
+        title: '¡Completaste el curso! Tu constancia está lista',
+        message: `Terminaste "${curso?.title ?? 'tu curso'}". Descarga tu constancia gratuita o solicita tu certificado oficial.`,
+        link: `/certificates/${courseId}`,
+        key: `constancia:${courseId}`,
+      });
     }
   }
 }

@@ -7,6 +7,8 @@ import { useCoursesApi } from "@/hooks/useCoursesApi";
 import { useAuth } from "@/hooks/useAuth";
 import { StudentLayout } from "@/components/ui/StudentLayout";
 import Link from "next/link";
+import { Stars } from "@/components/ui/Stars";
+import { reviewsApi } from "@/hooks/useCommunityApi";
 
 interface Course { id: string; title: string; description: string; image: string; category?: { name: string }; }
 
@@ -19,6 +21,7 @@ export default function CoursesPage() {
   const [searchTerm,      setSearchTerm]      = useState("");
   const [selectedCat,     setSelectedCat]     = useState("all");
   const [categories,      setCategories]      = useState<string[]>([]);
+  const [ratings,         setRatings]         = useState<Record<string, { promedio: number; total: number }>>({});
 
   useEffect(() => {
     if (!getToken()) { router.push("/login"); return; }
@@ -29,6 +32,7 @@ export default function CoursesPage() {
         setCategories(Array.from(new Set(r.data.map((c: Course) => c.category?.name).filter(Boolean))) as string[]);
       }
     });
+    reviewsApi.summary().then(setRatings).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -102,7 +106,16 @@ export default function CoursesPage() {
                   <div className="p-4 flex flex-col flex-1">
                     <h3 className="text-white font-semibold text-sm line-clamp-2 min-h-[2.5rem] group-hover:text-[#00C0E7] transition-colors">{course.title}</h3>
                     <p className="text-gray-500 text-xs mt-1 line-clamp-2 min-h-[2rem]">{course.description || "Curso de Soluciones Integrales JB."}</p>
-                    <p className="mt-auto pt-3 text-sm font-semibold text-[#00C0E7]">Ver curso →</p>
+                    <div className="mt-auto pt-3 flex items-center justify-between gap-2">
+                      <p className="text-sm font-semibold text-[#00C0E7]">Ver curso →</p>
+                      {ratings[course.id] && (
+                        <span className="flex items-center gap-1 text-xs" aria-label={`${ratings[course.id].promedio} de 5 estrellas, ${ratings[course.id].total} reseñas`}>
+                          <span className="font-bold text-[#F5B301]">{ratings[course.id].promedio.toFixed(1)}</span>
+                          <Stars value={ratings[course.id].promedio} size={12} />
+                          <span className="text-gray-500">({ratings[course.id].total})</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Link>

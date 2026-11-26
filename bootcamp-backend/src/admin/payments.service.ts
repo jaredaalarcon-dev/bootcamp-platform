@@ -8,6 +8,7 @@ import { DataSource, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Enrollment } from '../enrollments/entities/enrollment.entity';
+import { NotificationsService } from '../notifications/notifications.service';
 
 interface FilaPago {
   id: string;
@@ -32,6 +33,7 @@ export class PaymentsService {
     @InjectDataSource() private db: DataSource,
     @InjectRepository(Enrollment) private enrollmentRepo: Repository<Enrollment>,
     private config: ConfigService,
+    private readonly notifications: NotificationsService,
   ) {
     const url = this.config.get<string>('SUPABASE_URL') ?? '';
     const key =
@@ -122,6 +124,7 @@ export class PaymentsService {
   async setPayment(enrollmentId: string, paid: boolean, note?: string | null) {
     const inscripcion = await this.enrollmentRepo.findOne({ where: { id: enrollmentId } });
     if (!inscripcion) throw new NotFoundException('Inscripción no encontrada');
+    const recienPagado = paid && !inscripcion.paid;
     inscripcion.paid = paid;
     inscripcion.paidAt = paid ? (inscripcion.paidAt ?? new Date()) : null;
     if (note !== undefined) {
@@ -129,6 +132,16 @@ export class PaymentsService {
       inscripcion.paymentNote = limpia || null;
     }
     await this.enrollmentRepo.save(inscripcion);
+    if (recienPagado) {
+      const [curso] = await this.db.query(`SELECT title FROM courses WHERE id = $1`, [inscripcion.courseId]);
+      await this.notifications.notify(inscripcion.userId, {
+        type: 'certificado',
+        title: 'Pago confirmado: tu certificado oficial está habilitado',
+        message: `Ya puedes descargar tu certificado de "${curso?.title ?? 'tu curso'}" cuando completes el 100 % del curso y tus datos de perfil.`,
+        link: `/certificates/${inscripcion.courseId}`,
+        key: `certificado:${inscripcion.id}:${inscripcion.paidAt?.getTime() ?? ''}`,
+      });
+    }
     return {
       enrollmentId: inscripcion.id,
       paid: inscripcion.paid,

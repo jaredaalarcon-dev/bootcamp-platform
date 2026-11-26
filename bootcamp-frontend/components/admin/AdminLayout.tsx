@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { TermsGate } from "@/components/legal/TermsGate";
+import { questionsApi } from "@/hooks/useCommunityApi";
 
 const NAV = [
   {
@@ -57,11 +58,19 @@ const NAV = [
     icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" /></svg>,
   },
   {
+    href: "/admin/community",
+    label: "Preguntas y Reseñas",
+    icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>,
+  },
+  {
     href: "/admin/settings",
     label: "Configuración",
     icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
   },
 ];
+
+// Evento para refrescar el contador de preguntas sin responder
+export const EVENTO_PREGUNTAS = "sijb:preguntas";
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -72,6 +81,17 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   // el HTML del servidor y el del navegador coincidan.
   const [user, setUser] = useState<ReturnType<typeof getUser>>(null);
   useEffect(() => { setUser(getUser()); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Preguntas sin responder (insignia en el menú)
+  const [pendientes, setPendientes] = useState(0);
+  useEffect(() => {
+    if (pathname === "/admin/login") return;
+    const contar = () => questionsApi.pendingCount().then(setPendientes).catch(() => {});
+    contar();
+    const t = setInterval(() => { if (document.visibilityState === "visible") contar(); }, 120_000);
+    window.addEventListener(EVENTO_PREGUNTAS, contar);
+    return () => { clearInterval(t); window.removeEventListener(EVENTO_PREGUNTAS, contar); };
+  }, [pathname]);
 
   const handleLogout = () => { logout(); router.push("/admin/login"); };
 
@@ -97,7 +117,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                   : "text-gray-400 hover:bg-[rgba(255,255,255,0.05)] hover:text-white"
               }`}>
               <span className={active ? "text-[#00C0E7]" : "text-gray-500"}>{item.icon}</span>
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {item.href === "/admin/community" && pendientes > 0 && (
+                <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-[#E31E24] text-white text-[11px] font-bold leading-5 text-center" aria-label={`${pendientes} preguntas sin responder`}>
+                  {pendientes > 99 ? "99+" : pendientes}
+                </span>
+              )}
             </Link>
           );
         })}

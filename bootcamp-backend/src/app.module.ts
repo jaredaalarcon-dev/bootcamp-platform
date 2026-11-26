@@ -32,6 +32,15 @@ import { IssuedCertificate } from './certificates/entities/issued-certificate.en
 import { Complaint } from './complaints/entities/complaint.entity';
 import { ComplaintsModule } from './complaints/complaints.module';
 import { HealthController } from './health/health.controller';
+import { Notification } from './notifications/entities/notification.entity';
+import { NotificationsModule } from './notifications/notifications.module';
+import { LessonQuestion } from './community/entities/lesson-question.entity';
+import { CourseReview } from './community/entities/course-review.entity';
+import { CommunityModule } from './community/community.module';
+import { Quiz } from './quizzes/entities/quiz.entity';
+import { QuizQuestion } from './quizzes/entities/quiz-question.entity';
+import { QuizAttempt } from './quizzes/entities/quiz-attempt.entity';
+import { QuizzesModule } from './quizzes/quizzes.module';
 
 @Module({
   imports: [
@@ -64,6 +73,12 @@ import { HealthController } from './health/health.controller';
           CertificateProfile,
           IssuedCertificate,
           Complaint,
+          Notification,
+          LessonQuestion,
+          CourseReview,
+          Quiz,
+          QuizQuestion,
+          QuizAttempt,
         ],
         synchronize: process.env.NODE_ENV !== 'production',
         logging: false,
@@ -84,6 +99,9 @@ import { HealthController } from './health/health.controller';
     AssistantModule,
     LegalModule,
     ComplaintsModule,
+    NotificationsModule,
+    CommunityModule,
+    QuizzesModule,
   ],
   controllers: [HealthController],
   providers: [],

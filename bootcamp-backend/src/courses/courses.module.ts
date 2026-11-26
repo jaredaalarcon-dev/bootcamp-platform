@@ -14,10 +14,12 @@ import { Category } from './entities/category.entity';
 import { Module as ModuleEntity } from './entities/module.entity';
 import { Lesson } from './entities/lesson.entity';
 import { Video } from './entities/video.entity';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Course, Category, ModuleEntity, Lesson, Video]),
+    NotificationsModule,
   ],
   controllers: [
     CoursesController,

@@ -612,3 +612,22 @@ html.light .rx {
 
 /* Al imprimir (por ejemplo, la hoja de reclamación) no se muestra el asistente */
 @media print { .jb-root { display: none !important; } }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Comunidad: notificaciones, preguntas, reseñas y cuestionarios
+   ══════════════════════════════════════════════════════════════════════════ */
+/* Pestañas con desplazamiento horizontal sin barra visible (celular) */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Modo claro: colores de estado con buen contraste sobre fondo blanco */
+html.light .text-emerald-400:not(.keep-theme, .keep-theme *) { color: #047857; }
+html.light .text-amber-400:not(.keep-theme, .keep-theme *)   { color: #b45309; }
+html.light .bg-emerald-500\/10:not(.keep-theme, .keep-theme *) { background-color: rgba(16,185,129,.12); }
+html.light .border-emerald-500\/30:not(.keep-theme, .keep-theme *),
+html.light .border-emerald-500\/40:not(.keep-theme, .keep-theme *),
+html.light .border-emerald-500\/60:not(.keep-theme, .keep-theme *) { border-color: rgba(5,150,105,.45); }
+html.light .from-\[\#0d0d0d\]:not(.keep-theme, .keep-theme *) { --tw-gradient-from: #f4f7fa; }
+html.light .via-\[\#0d0d0d\]:not(.keep-theme, .keep-theme *) { --tw-gradient-via: #f4f7fa; --tw-gradient-via-stops: var(--tw-gradient-from), #f4f7fa var(--tw-gradient-via-position), var(--tw-gradient-to); }
+html.light .stars-vacia { color: #d5dce6; }
+html.light .ring-\[\#111827\] { --tw-ring-color: #ffffff; }

@@ -8,9 +8,10 @@ import { PaymentsService } from './payments.service';
 import { Course } from '../courses/entities/course.entity';
 import { Enrollment } from '../enrollments/entities/enrollment.entity';
 import { Category } from '../courses/entities/category.entity';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Course, Enrollment, Category])],
+  imports: [TypeOrmModule.forFeature([Course, Enrollment, Category]), NotificationsModule],
   controllers: [AdminController],
   providers: [AdminService, AnalyticsService, PaymentsService],
 })

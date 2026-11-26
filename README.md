@@ -68,6 +68,10 @@ y un Libro de Reclamaciones virtual según la normativa peruana. Todo funcionand
 - Registro e inicio de sesión seguro
 - Catálogo de cursos por categorías y búsqueda
 - Reproductor de lecciones con progreso automático
+- **Cuestionarios** al final de cada módulo o después de una lección, con nota al instante y reintentos
+- **Preguntas en cada lección**: el equipo responde y el alumno recibe un aviso
+- **Calificación con estrellas y reseñas** de cada curso
+- **Notificaciones**: cursos nuevos, respuestas, constancia y certificado listos
 - Recursos del curso: **guías en PDF y kits de práctica en ZIP**
 - **Constancia gratuita** al completar el 100 % del curso
 - **Certificado oficial** con foto y documento (pago por WhatsApp)
@@ -79,6 +83,8 @@ y un Libro de Reclamaciones virtual según la normativa peruana. Todo funcionand
 
 #### 🛠️ Para el administrador
 - Cursos, categorías, módulos y lecciones
+- **Cuestionarios** con editor de preguntas, respuesta correcta, explicación y estadísticas (intentos, nota promedio, aprobados)
+- **Preguntas y reseñas**: responde dudas por lección (con contador de pendientes) y oculta reseñas inapropiadas
 - Usuarios y roles
 - **Pagos y certificados**: confirma pagos y libera el certificado
 - **Panel de JB Assist**: estadísticas, preguntas sin respuesta, FAQ editables, prueba en vivo y la IA activable o desactivable
@@ -213,7 +219,7 @@ bootcamp-platform/
 │   │   ├── assistant/engine/   Motor propio de JB Assist
 │   │   ├── complaints/         Libro de Reclamaciones
 │   │   └── health/             GET /health
-│   ├── database/schema.sql     Base de datos completa (19 tablas + RLS)
+│   ├── database/schema.sql     Base de datos completa (25 tablas + RLS)
 │   └── material-cursos/        Guías PDF y kits ZIP de 7 cursos
 ├── docs/DESPLIEGUE.md          Guía paso a paso (Vercel + Render + Supabase)
 └── render.yaml                 Configuración del backend en Render

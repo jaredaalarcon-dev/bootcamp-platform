@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { useContentApi, CourseModule, Lesson } from "@/hooks/useContentApi";
 import { useCoursesApi } from "@/hooks/useCoursesApi";
 import { AdminResourcesManager } from "@/components/admin/AdminResourcesManager";
+import { AdminQuizzesManager } from "@/components/admin/AdminQuizzesManager";
 
 // ── Valores iniciales ────────────────────────────────────────────────────────
 const LECCION_VACIA = { title: "", description: "", videoUrl: "", duration: "" };
@@ -24,7 +25,7 @@ export default function CourseContentPage() {
     createLesson,   updateLesson,  deleteLesson,
   } = useContentApi();
 
-  const [seccion, setSeccion]           = useState<"contenido" | "recursos">("contenido");
+  const [seccion, setSeccion]           = useState<"contenido" | "cuestionarios" | "recursos">("contenido");
   const [tituloCurso, setTituloCurso]   = useState("");
   const [modulos, setModulos]           = useState<CourseModule[]>([]);
   const [cargando, setCargando]         = useState(true);
@@ -190,7 +191,7 @@ export default function CourseContentPage() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <div className="mx-auto max-w-4xl">
         <Link href="/admin/courses" className="text-sm text-gray-400 hover:text-white">
           ← Volver a cursos
@@ -199,16 +200,20 @@ export default function CourseContentPage() {
         <p className="mt-1 text-gray-400">{tituloCurso}</p>
 
         {/* ── Pestañas: módulos/lecciones y recursos ───────────────────── */}
-        <div className="mt-6 flex gap-1 border-b border-gray-800">
-          {([["contenido", "Módulos y lecciones"], ["recursos", "Recursos"]] as const).map(([k, label]) => (
+        <div className="mt-6 flex gap-1 border-b border-gray-800 overflow-x-auto no-scrollbar">
+          {([["contenido", "Módulos y lecciones"], ["cuestionarios", "Cuestionarios"], ["recursos", "Recursos"]] as const).map(([k, label]) => (
             <button key={k} type="button" onClick={() => setSeccion(k)}
-              className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
+              className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors whitespace-nowrap shrink-0 ${
                 seccion === k ? "border-[#00C0E7] text-[#00C0E7]" : "border-transparent text-gray-400 hover:text-white"
               }`}>
               {label}
             </button>
           ))}
         </div>
+
+        {seccion === "cuestionarios" && (
+          <div className="mt-8"><AdminQuizzesManager courseId={courseId} modulos={modulos} /></div>
+        )}
 
         {seccion === "recursos" && (
           <div className="mt-8"><AdminResourcesManager courseId={courseId} /></div>

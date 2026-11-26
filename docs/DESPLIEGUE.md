@@ -115,6 +115,8 @@ un minuto en volver. Para evitarlo:
 - [ ] `/libro-de-reclamaciones` registra una hoja de prueba y aparece en el panel admin.
 - [ ] `/verificar`, `/terminos`, `/privacidad` y `/sitemap.xml` abren bien.
 - [ ] Una dirección que no existe muestra la página 404 de la marca.
+- [ ] En un curso: preguntar en una lección, resolver un cuestionario y dejar una reseña.
+- [ ] La campana muestra las notificaciones y el admin ve las preguntas en **Preguntas y Reseñas**.
 
 ### Problemas frecuentes
 
@@ -125,6 +127,25 @@ un minuto en volver. Para evitarlo:
 | Render dice "FRONTEND_URL es obligatorio" o "JWT_SECRET es obligatorio" | Falta esa variable en Render → Environment. |
 | El enlace del correo de confirmación lleva a localhost | Falta el paso 3 (Site URL en Supabase). |
 | `/health` dice `"database":"error"` | `DATABASE_URL` incorrecta en Render. |
+| Error al abrir notificaciones, preguntas, reseñas o cuestionarios (`relation "notifications" does not exist`) | Falta ejecutar `database/2026-11-comunidad.sql` en Supabase (ver «Actualizaciones de la base de datos»). |
+
+---
+
+## Actualizaciones de la base de datos
+
+En producción el backend **no crea tablas solo** (así no puede borrar datos por error).
+Cuando una actualización trae tablas nuevas, se agregan una sola vez desde Supabase,
+**antes** de subir el código:
+
+1. Supabase → **SQL Editor** → **New query**.
+2. Copia y pega todo el archivo indicado → **Run**. Debe decir *Success*.
+3. Recién después haz `git push` (Render y Vercel se actualizan solos).
+
+| Fecha | Archivo | Qué agrega |
+|---|---|---|
+| Nov. 2026 | `bootcamp-backend/database/2026-11-comunidad.sql` | Notificaciones, preguntas por lección, reseñas y cuestionarios (6 tablas) |
+
+> Los archivos se pueden ejecutar más de una vez sin problema: no borran ni cambian datos.
 
 ---
 
