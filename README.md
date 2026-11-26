@@ -47,8 +47,6 @@ y un Libro de Reclamaciones virtual según la normativa peruana. Todo funcionand
 
 **SIJB Bootcamp** es la plataforma web con la que *Soluciones Integrales JB* capacita a su personal y a sus alumnos en desarrollo web, apps móviles con IA, automatización, ciencia de datos y ciberseguridad.
 
-Nace como proyecto de tesis: *"Propuesta de una plataforma web para optimizar el aprendizaje continuo del personal de Soluciones Integrales JB S.A.C."*, y hoy está **publicada y en uso**.
-
 <table>
 <tr>
 <td align="center" width="25%"><font size="6">🎬</font><br><b>Cursos en video</b><br><sub>Módulos, lecciones, PDF y kits de práctica</sub></td>
@@ -324,8 +322,7 @@ Guía completa, paso a paso y con capturas: **[`docs/DESPLIEGUE.md`](docs/DESPLI
 <td>
 
 **Jared Alonso Arroyo Alarcón**<br>
-Ingeniería de Software con Inteligencia Artificial · SENATI<br>
-<sub>Tesis: <i>Propuesta de una plataforma web para optimizar el aprendizaje continuo del personal de Soluciones Integrales JB S.A.C.</i></sub>
+Ingeniería de Software con Inteligencia Artificial · SENATI
 
 <a href="https://github.com/jaredaalarcon-dev"><img alt="GitHub jaredaalarcon-dev" src="docs/readme/badges/github.svg" height="26"></a>
 <a href="https://sijb-bootcamp.vercel.app"><img alt="Sitio web" src="docs/readme/badges/sitio.svg" height="26"></a>
