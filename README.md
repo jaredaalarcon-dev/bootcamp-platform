@@ -329,7 +329,7 @@ Guía completa, paso a paso y con capturas: **[`docs/DESPLIEGUE.md`](docs/DESPLI
 <table>
 <tr>
 <td align="center" width="140">
-<img src="bootcamp-frontend/public/brand/icono-sijb.png" width="96" alt="Logo de Soluciones Integrales JB">
+<img src="bootcamp-frontend/public/brand/cubo-sijb.png" width="96" alt="Logo de Soluciones Integrales JB">
 </td>
 <td>
 

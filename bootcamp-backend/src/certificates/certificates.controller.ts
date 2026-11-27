@@ -21,7 +21,7 @@ import { CertificatesService, FOTO_MAX_MB, FOTO_TIPOS } from './certificates.ser
 import type { ArchivoFoto } from './certificates.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminAuthGuard } from '../auth/guards/admin-auth.guard';
-import { SaveCertificateProfileDto } from './dto/certificate-profile.dto';
+import { AdminBorrarDatosDto, SaveCertificateProfileDto } from './dto/certificate-profile.dto';
 
 @ApiTags('Certificates')
 @ApiBearerAuth()
@@ -109,5 +109,17 @@ export class AdminCertificateDataController {
   @ApiOperation({ summary: 'Datos que cada alumno registró para su constancia y certificado' })
   async list() {
     return { success: true, data: await this.certificatesService.adminDatos() };
+  }
+
+  @Delete(':userId/photo')
+  @ApiOperation({ summary: 'Borrar la foto de un alumno (se le avisa para que suba otra)' })
+  async borrarFoto(@Param('userId') userId: string, @Body() dto: AdminBorrarDatosDto) {
+    return { success: true, data: await this.certificatesService.adminBorrarFoto(userId, dto?.motivo) };
+  }
+
+  @Delete(':userId')
+  @ApiOperation({ summary: 'Borrar todos los datos (nombre, documento y foto) de un alumno' })
+  async borrarDatos(@Param('userId') userId: string, @Body() dto: AdminBorrarDatosDto) {
+    return { success: true, data: await this.certificatesService.adminBorrarDatos(userId, dto?.motivo) };
   }
 }

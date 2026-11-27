@@ -1,8 +1,8 @@
 // src/app/blog/page.tsx
 // Blog de Soluciones Integrales JB: últimas publicaciones de las redes de la
 // empresa (Facebook, Instagram, YouTube, TikTok, LinkedIn) que publica el admin.
-// Es público: con sesión se ve dentro del panel del alumno; sin sesión, con
-// la cabecera de la página principal.
+// Es exclusivo para alumnos con cuenta: con sesión se ve dentro del panel del
+// alumno; sin sesión se invita a crear una cuenta o iniciar sesión.
 "use client";
 
 import { SiteFooter } from "@/components/ui/SiteFooter";
@@ -63,7 +63,7 @@ function TarjetaPost({ p }: { p: ItemBlog }) {
         {sinImagen && (
           <div className="absolute inset-0 flex items-center justify-center opacity-80">
             {red ? <SocialIcon red={red.red} color="#ffffff" className="w-14 h-14" />
-                 : <img src="/brand/icono-sijb.png" alt="" className="w-16 h-16 opacity-80" />}
+                 : <img src="/brand/cubo-sijb.png" alt="" className="w-16 h-16 opacity-80" />}
           </div>
         )}
         <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold text-white shadow"
@@ -225,7 +225,7 @@ function ContenidoBlog({ logueado }: { logueado: boolean }) {
             <div className="card-dark p-16 flex justify-center"><div className="spinner-cyan" /></div>
           ) : filtrados.length === 0 ? (
             <div className="card-dark p-10 text-center">
-              <img src="/brand/icono-sijb.png" alt="" className="w-14 h-14 mx-auto mb-3 opacity-80" />
+              <img src="/brand/cubo-sijb.png" alt="" className="w-14 h-14 mx-auto mb-3 opacity-80" />
               <p className="text-white font-semibold">{error ? "No pudimos cargar las publicaciones" : "Muy pronto encontrarás novedades aquí"}</p>
               <p className="text-gray-500 text-sm mt-1">Mientras tanto, síguenos en nuestras redes para no perderte nada.</p>
             </div>
@@ -334,15 +334,26 @@ export default function BlogPage() {
     <div className="min-h-screen bg-[#0d0d0d]">
       <header className="border-b border-[rgba(0,192,231,0.12)] bg-[#111827]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
-          <Link href="/"><BrandLogo width={210} /></Link>
-          <div className="flex items-center gap-3">
+          <Link href="/" className="min-w-0"><BrandLogo width={210} className="hidden sm:flex" /><BrandLogo width={150} className="sm:hidden" /></Link>
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <ThemeToggle />
             <Link href="/login" className="hidden sm:inline text-sm font-semibold text-gray-300 hover:text-[#00C0E7] transition-colors">Iniciar sesión</Link>
-            <Link href="/register" className="btn-red text-sm py-2 px-4">Crear cuenta</Link>
+            <Link href="/register" className="btn-red text-sm py-2 px-4 whitespace-nowrap shrink-0">Crear cuenta</Link>
           </div>
         </div>
       </header>
-      <ContenidoBlog logueado={false} />
+      <main className="mx-auto max-w-xl px-5 py-16 sm:py-24 text-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/cubo-sijb.png" alt="" className="w-20 h-20 sm:w-24 sm:h-24 mx-auto drop-shadow-[0_10px_30px_rgba(0,192,231,0.35)]" />
+        <p className="mt-6 text-[11px] font-bold uppercase tracking-[0.3em] text-[#00C0E7]">Solo para alumnos</p>
+        <h1 className="mt-2 font-brand uppercase text-white text-3xl sm:text-4xl leading-tight">El blog es exclusivo<br />para alumnos registrados</h1>
+        <p className="mt-4 text-gray-400">Crea tu cuenta gratis para ver las novedades, tutoriales y publicaciones de Soluciones Integrales JB.</p>
+        <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+          <Link href="/register" className="btn-red px-7 py-3 text-base">Crear cuenta gratis</Link>
+          <Link href="/login" className="btn-cyan px-7 py-3 text-base">Ya tengo cuenta</Link>
+        </div>
+        <Link href="/" className="inline-block mt-6 text-sm text-gray-500 hover:text-[#00C0E7] transition-colors">← Volver al inicio</Link>
+      </main>
       <SiteFooter />
     </div>
   );

@@ -8,10 +8,12 @@ import { Lesson } from '../courses/entities/lesson.entity';
 import { Progress } from '../progress/entities/progress.entity';
 import { CertificateProfile } from './entities/certificate-profile.entity';
 import { IssuedCertificate } from './entities/issued-certificate.entity';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Enrollment, Lesson, Progress, CertificateProfile, IssuedCertificate]),
+    NotificationsModule,
   ],
   controllers: [CertificatesController, CertificateVerifyController, AdminCertificateDataController],
   providers: [CertificatesService],

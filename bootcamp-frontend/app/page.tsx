@@ -8,27 +8,18 @@ import dynamic from "next/dynamic";
 import { SiteFooter } from "@/components/ui/SiteFooter";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { CarruselCursos, CursoCarrusel } from "@/components/landing/CarruselCursos";
-import { Aparecer, Contador, Inclinar, Rotativas } from "@/components/landing/efectos";
-import { apiClient } from "@/lib/api-client";
-import { reviewsApi } from "@/hooks/useCommunityApi";
+import { Aparecer, Inclinar, Rotativas } from "@/components/landing/efectos";
 
 // three.js solo se descarga en el navegador y después de lo principal
 const Cubo3D = dynamic(() => import("@/components/landing/Cubo3D").then((m) => m.Cubo3D), {
   ssr: false,
-  loading: () => (
-    <div className="absolute inset-0 flex items-center justify-center">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/brand/icono-sijb.png" alt="" className="w-[42%] max-w-[220px] animate-pulse opacity-70" />
-    </div>
-  ),
+  // Mientras carga no se muestra ninguna imagen detrás: solo el halo de fondo
+  loading: () => null,
 });
 
 const NAV = [
-  { href: "#cursos", t: "Cursos" },
   { href: "#como-funciona", t: "Cómo funciona" },
   { href: "#beneficios", t: "Beneficios" },
-  { href: "/blog", t: "Blog" },
 ];
 
 const TEMAS = ["Flutter", "Inteligencia artificial", "Laravel", "n8n", "Python", "React", "Ciberseguridad", "Firebase", "Gemini", "APIs REST", "Data Science", "Automatización"];
@@ -59,7 +50,6 @@ function Icono({ d, className = "w-6 h-6" }: { d: string; className?: string }) 
 
 export default function Home() {
   const router = useRouter();
-  const [cursos, setCursos] = useState<CursoCarrusel[] | null>(null);
   const [menu, setMenu] = useState(false);
   const [scroll, setScroll] = useState(false);
 
@@ -71,12 +61,6 @@ export default function Home() {
   }, [router]);
 
   useEffect(() => {
-    Promise.all([
-      apiClient.get("/courses").then((r) => (r.data?.data ?? r.data ?? []) as (CursoCarrusel & { status?: string })[]),
-      reviewsApi.summary().catch(() => ({} as Record<string, { promedio: number; total: number }>)),
-    ])
-      .then(([lista, notas]) => setCursos(lista.filter((c) => c.status === "published").map((c) => ({ ...c, rating: notas[c.id] ?? null }))))
-      .catch(() => setCursos([]));
     const alScroll = () => setScroll(window.scrollY > 12);
     alScroll();
     window.addEventListener("scroll", alScroll, { passive: true });
@@ -151,21 +135,7 @@ export default function Home() {
             <Aparecer retraso={240}>
               <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <Link href="/register" className="btn-red lp-cta px-7 py-3.5 text-base">Empezar gratis →</Link>
-                <a href="#cursos" className="btn-cyan px-7 py-3.5 text-base">Ver cursos</a>
-              </div>
-            </Aparecer>
-            <Aparecer retraso={320}>
-              <div className="mt-9 grid grid-cols-3 gap-3 max-w-md mx-auto lg:mx-0">
-                {[
-                  { v: <Contador valor={cursos?.length ?? 0} />, t: "Cursos" },
-                  { v: "100%", t: "Online" },
-                  { v: "24/7", t: "Acceso" },
-                ].map((s) => (
-                  <div key={s.t} className="lp-stat rounded-2xl px-3 py-3">
-                    <p className="font-brand text-2xl sm:text-3xl text-[#00C0E7] leading-none">{s.v}</p>
-                    <p className="text-[11px] uppercase tracking-widest lp-texto-suave mt-1">{s.t}</p>
-                  </div>
-                ))}
+                <a href="#como-funciona" className="btn-cyan px-7 py-3.5 text-base">Cómo funciona</a>
               </div>
             </Aparecer>
           </div>
@@ -192,26 +162,6 @@ export default function Home() {
             ))}
           </div>
         </div>
-
-        {/* ── Cursos ──────────────────────────────────────────────────── */}
-        <section id="cursos" className="scroll-mt-20 py-20 sm:py-24">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <Aparecer className="text-center max-w-2xl mx-auto">
-              <p className="lp-eyebrow">Catálogo</p>
-              <h2 className="lp-h2">Cursos para crecer <span className="text-[#00C0E7]">de verdad</span></h2>
-              <p className="lp-texto-suave mt-3">Desliza para explorar. Cada curso incluye videos, material descargable, cuestionarios y constancia.</p>
-            </Aparecer>
-            <div className="mt-12">
-              {cursos === null ? (
-                <div className="flex justify-center py-20"><div className="spinner-cyan" /></div>
-              ) : cursos.length ? (
-                <CarruselCursos cursos={cursos} />
-              ) : (
-                <p className="text-center lp-texto-suave">Muy pronto publicaremos nuevos cursos.</p>
-              )}
-            </div>
-          </div>
-        </section>
 
         {/* ── Cómo funciona ───────────────────────────────────────────── */}
         <section id="como-funciona" className="scroll-mt-20 py-20 sm:py-24 lp-banda">
@@ -258,50 +208,6 @@ export default function Home() {
                 </Aparecer>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* ── Constancia verificable ──────────────────────────────────── */}
-        <section className="py-20 sm:py-24 lp-banda overflow-hidden">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 grid items-center gap-12 lg:grid-cols-2">
-            <Aparecer>
-              <p className="lp-eyebrow">Constancias y certificados</p>
-              <h2 className="lp-h2 text-left">Tu logro, <span className="text-[#00C0E7]">verificable</span> en segundos</h2>
-              <p className="lp-texto-suave mt-4 max-w-lg">
-                Al terminar un curso y aprobar su examen final descargas tu constancia en PDF con tu nombre, tu documento y un
-                código único. Cualquier empresa puede comprobarla en nuestra página de verificación.
-              </p>
-              <div className="mt-7 flex flex-col sm:flex-row gap-3">
-                <Link href="/verificar" className="btn-cyan px-6 py-3 text-center">Verificar un documento</Link>
-                <Link href="/register" className="btn-red px-6 py-3 text-center">Quiero mi constancia</Link>
-              </div>
-            </Aparecer>
-            <Aparecer retraso={120}>
-              <Inclinar fuerza={14} className="mx-auto max-w-[560px]">
-                <div className="lp-doc keep-theme rounded-2xl overflow-hidden shadow-2xl">
-                  <div className="flex">
-                    <div className="w-[30%] bg-gradient-to-b from-[#0d0d0d] to-[#0b2b37] p-4 flex flex-col items-center gap-3">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/brand/icono-sijb.png" alt="" className="w-12 sm:w-16" />
-                      <div className="w-14 sm:w-16 aspect-[3/4] rounded border-2 border-[#00C0E7] bg-white/5" />
-                      <p className="font-mono text-[8px] sm:text-[10px] text-white text-center break-all">SIJB-CO-7F3A91C2D4</p>
-                    </div>
-                    <div className="flex-1 bg-white p-4 sm:p-6 text-[#111]">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/brand/logo-sijb-original-claro.png" alt="Soluciones Integrales JB" className="w-[78%]" />
-                      <p className="font-brand text-2xl sm:text-4xl uppercase tracking-[0.12em] mt-3 sm:mt-5">Constancia</p>
-                      <p className="font-brand text-[9px] sm:text-xs uppercase tracking-[0.35em] text-[#00C0E7]">de culminación</p>
-                      <p className="mt-3 text-[9px] sm:text-xs text-gray-500">hace constar que:</p>
-                      <p className="font-bold text-sm sm:text-xl" style={{ fontFamily: "Georgia, serif" }}>Tu nombre aquí</p>
-                      <div className="h-px bg-[#00C0E7] my-1.5" />
-                      <p className="text-[9px] sm:text-xs text-gray-600">ha culminado satisfactoriamente el curso</p>
-                      <p className="font-brand text-xs sm:text-base uppercase text-[#0093B5]">Desarrollo de apps con IA</p>
-                    </div>
-                  </div>
-                  <div className="flex h-2"><div className="flex-1 bg-[#00C0E7]" /><div className="w-1/4 bg-[#E31E24]" /><div className="w-[8%] bg-[#111]" /></div>
-                </div>
-              </Inclinar>
-            </Aparecer>
           </div>
         </section>
 

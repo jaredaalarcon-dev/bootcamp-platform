@@ -7,7 +7,7 @@ import { useState } from "react";
 import type { CertData } from "@/hooks/useCertificatesApi";
 
 const LOGO = "/brand/logo-sijb-original-claro.png";
-const ICONO = "/brand/icono-sijb.png";
+const ICONO = "/brand/cubo-sijb.png";
 const CIAN = "#00C0E7";
 const ROJO = "#E31E24";
 

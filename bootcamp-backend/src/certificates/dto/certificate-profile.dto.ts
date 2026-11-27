@@ -1,6 +1,6 @@
 // src/certificates/dto/certificate-profile.dto.ts
-import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsString, Length, Matches } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsIn, IsOptional, IsString, Length, Matches, MaxLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { TIPOS_DOCUMENTO } from '../entities/certificate-profile.entity';
 import type { TipoDocumento } from '../entities/certificate-profile.entity';
@@ -26,4 +26,14 @@ export class SaveCertificateProfileDto {
   @Length(6, 20, { message: 'Número de documento no válido' })
   @Matches(/^[A-Z0-9-]+$/, { message: 'El documento solo puede tener letras y números' })
   documentNumber: string;
+}
+
+// El admin borra datos mal puestos: el motivo le llega al alumno en su aviso
+export class AdminBorrarDatosDto {
+  @ApiPropertyOptional({ example: 'La foto no es formal (fondo con otras personas)' })
+  @IsOptional()
+  @Transform(limpiar)
+  @IsString()
+  @MaxLength(200, { message: 'El motivo puede tener hasta 200 caracteres' })
+  motivo?: string;
 }

@@ -146,4 +146,12 @@ export const certificateDataAdminApi = {
     const { data } = await apiClient.get("/admin/certificate-data");
     return data.data;
   },
+  /** Borra solo la foto; al alumno le llega un aviso para subir otra. */
+  async borrarFoto(userId: string, motivo?: string) {
+    await apiClient.delete(`/admin/certificate-data/${userId}/photo`, { data: { motivo: motivo || undefined } });
+  },
+  /** Borra nombre, documento y foto; el alumno debe registrarlos de nuevo. */
+  async borrarDatos(userId: string, motivo?: string) {
+    await apiClient.delete(`/admin/certificate-data/${userId}`, { data: { motivo: motivo || undefined } });
+  },
 };

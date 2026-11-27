@@ -22,9 +22,11 @@ import { CreateBlogPostDto, SubscribeDto, UpdateBlogPostDto } from './dto/blog.d
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
-  // ── Público ────────────────────────────────────────────────────────────
+  // ── Alumnos con cuenta ─────────────────────────────────────────────────
   @Get('feed')
-  @ApiOperation({ summary: 'Publicaciones visibles del blog' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Publicaciones visibles del blog (solo con sesión)' })
   async feed() {
     const data = await this.blogService.feed();
     return { success: true, data };

@@ -161,11 +161,12 @@ export function Cubo3D({ className = "" }: { className?: string }) {
   return (
     // Debe tener posición (absolute o relative) para que el lienzo ocupe todo su tamaño
     <div className={className || "relative h-full w-full"}>
-      <div ref={caja} className="absolute inset-0" />
-      {estado !== "listo" && (
+      <div ref={caja} className={`absolute inset-0 transition-opacity duration-700 ${estado === "listo" ? "opacity-100" : "opacity-0"}`} />
+      {/* Solo si el equipo no puede mostrar 3D: el cubo en imagen (sin nada detrás mientras carga) */}
+      {estado === "sin3d" && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/icono-sijb.png" alt="" className={`w-[42%] max-w-[220px] ${estado === "cargando" ? "animate-pulse opacity-70" : "lp-flota"}`} />
+          <img src="/brand/cubo-sijb.png" alt="" className="w-[42%] max-w-[220px] lp-flota" />
         </div>
       )}
     </div>

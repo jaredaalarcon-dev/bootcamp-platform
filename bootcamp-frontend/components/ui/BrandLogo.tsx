@@ -7,7 +7,7 @@
 
 export const LOGO_SRC = "/brand/logo-sijb-oscuro.png";
 export const LOGO_CLARO_SRC = "/brand/logo-sijb-claro.png";
-export const ICONO_SRC = "/brand/icono-sijb.png";
+export const ICONO_SRC = "/brand/cubo-sijb.png";
 
 interface BrandLogoProps {
   /** Ancho del logo en píxeles */

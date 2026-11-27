@@ -16,7 +16,7 @@ const CATEGORIAS = ["Tecnología", "Cursos", "Consejos", "Eventos", "Noticias", 
 
 function IconoRed({ red }: { red: RedBlog }) {
   const r = REDES.find((x) => x.red === red);
-  if (!r) return <img src="/brand/icono-sijb.png" alt="" className="w-9 h-9 rounded-lg bg-[#0d0d0d] p-1 shrink-0" />;
+  if (!r) return <img src="/brand/cubo-sijb.png" alt="" className="w-9 h-9 rounded-lg bg-[#0d0d0d] p-1 shrink-0" />;
   return <SocialIcon red={r.red} color={r.color} tile className="w-9 h-9" />;
 }
 

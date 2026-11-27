@@ -23,6 +23,7 @@ import { CertificateProfile } from './entities/certificate-profile.entity';
 import { IssuedCertificate } from './entities/issued-certificate.entity';
 import type { TipoEmitido } from './entities/issued-certificate.entity';
 import { SaveCertificateProfileDto } from './dto/certificate-profile.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 export interface ArchivoFoto {
   originalname: string;
@@ -32,6 +33,8 @@ export interface ArchivoFoto {
 }
 
 const BUCKET_FOTOS = 'certificate-photos';
+// ": la foto está borrosa." o "." (para el aviso al alumno)
+const conMotivo = (m?: string) => (m?.trim() ? `: ${m.trim().replace(/[.\s]+$/, '')}.` : '.');
 export const FOTO_MAX_MB = 3;
 export const FOTO_TIPOS = ['image/jpeg', 'image/png', 'image/webp'];
 const EXT: Record<string, string> = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp' };
@@ -54,6 +57,7 @@ export class CertificatesService {
     @InjectRepository(IssuedCertificate)
     private emitidoRepo: Repository<IssuedCertificate>,
     private configService: ConfigService,
+    private notifications: NotificationsService,
   ) {
     const url = this.configService.get<string>('SUPABASE_URL') ?? '';
     const key =
@@ -255,7 +259,7 @@ export class CertificatesService {
         completedAt: fin ?? enrollment.updatedAt ?? new Date(),
       });
       emitido = await this.emitidoRepo.save(emitido);
-    } else if (!emitido.revoked && (emitido.studentName !== nombre || emitido.documentLabel !== documento)) {
+    } else if (!emitido.revoked && perfil?.fullName && (emitido.studentName !== nombre || emitido.documentLabel !== documento)) {
       // El alumno corrigió sus datos: el documento se actualiza con el mismo código
       emitido.studentName = nombre;
       emitido.documentLabel = documento;
@@ -418,6 +422,43 @@ export class CertificatesService {
       conFoto: items.filter((i) => i.complete).length,
       items,
     };
+  }
+
+  /** El admin borra una foto mal subida; el alumno recibe un aviso para subir otra. */
+  async adminBorrarFoto(userId: string, motivo?: string) {
+    const perfil = await this.perfilAdmin(userId);
+    if (!perfil.photoPath) throw new BadRequestException('Este alumno no tiene foto registrada');
+    await this.borrarArchivo(perfil.photoPath);
+    perfil.photoPath = null;
+    await this.perfilRepo.save(perfil);
+    await this.notifications.notify(userId, {
+      type: 'certificado',
+      title: 'Vuelve a subir tu foto para el certificado',
+      message: `Tu foto fue retirada porque no cumple los requisitos${conMotivo(motivo)} Sube una foto formal tipo carné en «Mi perfil».`,
+      link: '/profile',
+    });
+    return { userId, borrado: 'foto' as const };
+  }
+
+  /** El admin borra nombre, documento y foto mal registrados; el alumno debe llenarlos de nuevo. */
+  async adminBorrarDatos(userId: string, motivo?: string) {
+    const perfil = await this.perfilAdmin(userId);
+    if (perfil.photoPath) await this.borrarArchivo(perfil.photoPath);
+    await this.perfilRepo.remove(perfil);
+    await this.notifications.notify(userId, {
+      type: 'certificado',
+      title: 'Vuelve a registrar tus datos para la constancia',
+      message: `Tus datos para la constancia y el certificado fueron borrados porque había un error${conMotivo(motivo)} Escribe otra vez tu nombre completo y tu documento en «Mi perfil».`,
+      link: '/profile',
+    });
+    return { userId, borrado: 'datos' as const };
+  }
+
+  private async perfilAdmin(userId: string) {
+    if (!/^[0-9a-f-]{36}$/i.test(userId ?? '')) throw new BadRequestException('Alumno no válido');
+    const perfil = await this.perfilRepo.findOne({ where: { userId } });
+    if (!perfil) throw new NotFoundException('Este alumno aún no registró sus datos');
+    return perfil;
   }
 
   private async urlFoto(ruta: string) {
